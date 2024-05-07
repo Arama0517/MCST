@@ -1,9 +1,13 @@
 package lib
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 )
+
+var currentTime = time.Now()
 
 // 获取存放数据的目录
 func GetDataDir() string {
@@ -15,17 +19,38 @@ func GetDataDir() string {
 }
 
 func GetConfigsDir() string {
-	return filepath.Join(GetDataDir(), "configs")
+	path := filepath.Join(GetDataDir(), "configs")
+	err := os.MkdirAll(path, 0755)
+	if err != nil {
+		panic(err)
+	}
+	return path
 }
 
 func GetServersDir() string {
-	return filepath.Join(GetDataDir(), "servers")
+	path := filepath.Join(GetDataDir(), "servers")
+	err := os.MkdirAll(path, 0755)
+	if err != nil {
+		panic(err)
+	}
+	return path
 }
 
 func GetAria2cDir() string {
-	return filepath.Join(GetDataDir(), "aria2c")
+	path := filepath.Join(GetDataDir(), "aria2c")
+	err := os.MkdirAll(path, 0755)
+	if err != nil {
+		panic(err)
+	}
+	return path
 }
 
 func GetLogsDir() string {
-	return filepath.Join(GetDataDir(), "logs")
+	year, month, day := currentTime.Date()
+	path := filepath.Join(GetDataDir(), "logs", fmt.Sprintf("%d%02d%02d%02d", year, month, day, currentTime.Hour()))
+	err := os.MkdirAll(path, 0755)
+	if err != nil {
+		panic(err)
+	}
+	return path
 }

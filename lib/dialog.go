@@ -79,7 +79,7 @@ main:
 				currentDir = filepath.Dir(currentDir)
 			}
 		} else if currentDir == "drives" {
-			currentDir = selectedPath
+			currentDir = selectedName
 		} else {
 			// 检查文件名称是否与指定名称一致
 			if selectedName != filename {
@@ -100,4 +100,13 @@ func getDrivePaths() []string {
 		}
 	}
 	return drivePaths
+}
+
+func Input(message string) string {
+	result := ""
+	prompt := &survey.Input{
+		Message: message,
+	}
+	survey.AskOne(prompt, &result)
+	return result
 }

@@ -1,21 +1,29 @@
 package main
 
 import (
+	"encoding/json"
+	"flag"
 	"fmt"
 
 	"github.com/Arama-Vanarana/MCSCS-Go/lib"
-	log "github.com/sirupsen/logrus"
 )
 
-const (
-	Version = "0.0.1"
-)
+var Logger = lib.Logger
 
 func main() {
-	log.SetReportCaller(true)
-	result, err := lib.SelectFile("java")
-	if err != nil {
-		panic(err)
+	version := flag.Bool("version", false, "显示程序版本")
+	flag.Parse()
+	if *version {
+		fmt.Println(lib.VERSION)
+		lib.KillAria2c()
+		return
 	}
-	fmt.Println("Java: ", result)
+	javas := lib.DetectJava()
+	jsonJavas, err := json.Marshal(javas)
+	if err != nil {
+		Logger.Error(err)
+		return
+	}
+	fmt.Println(string(jsonJavas))
+	lib.KillAria2c()
 }
