@@ -1,16 +1,17 @@
-VERSION := @go run main.go
+VERSION := $(shell go run main.go --version)
 NAME := MCSCS
 BUILDS_DIR := builds/$(VERSION)
 
 run:
 	@go run main.go
 
-version: 
-	@go run main.go -v
+test:
+	@go test ./... -v
 
 build: 
 	go build -o $(NAME) main.go
-	mv $(NAME) $(BUILDS_DIR)
+	mkdir -p $(BUILDS_DIR)
+	mv $(NAME) $(BUILDS_DIR)/
 	@echo "构建完成, 程序版本: $(VERSION), 输出目录: $(BUILDS_DIR)"
 
 package:
@@ -24,6 +25,14 @@ package:
 	GOARCH=386 go build -o $(NAME).exe main.go 
 	zip -r $(BUILDS_DIR)/windows-$(VERSION)-64bits.zip MCSCS.exe 
 	rm $(NAME).exe
+
+install: build
+	sudo cp $(BUILDS_DIR)/$(NAME) /usr/local/bin/
+	@echo "安装完成, 程序版本: $(VERSION)"
+
+uninstall:
+	sudo rm /usr/local/bin/$(NAME)
+	@echo "卸载完成"
 
 clean:
 	rm -rf builds/*

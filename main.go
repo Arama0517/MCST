@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 
@@ -18,12 +17,6 @@ func main() {
 		lib.KillAria2c()
 		return
 	}
-	javas := lib.DetectJava()
-	jsonJavas, err := json.Marshal(javas)
-	if err != nil {
-		Logger.Error(err)
-		return
-	}
-	fmt.Println(string(jsonJavas))
+	fmt.Println(lib.Select([]string{"Hello", "World", "Go"}, "aaa"))
 	lib.KillAria2c()
 }

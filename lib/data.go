@@ -9,6 +9,14 @@ import (
 
 var currentTime = time.Now()
 
+func initDataDirs() {
+	Logger.Info("数据根目录: ", GetDataDir())
+	Logger.Info("配置存放目录: ", GetConfigsDir())
+	Logger.Info("服务器存放目录: ", GetServersDir())
+	Logger.Info("Aria2c配置/可执行程序存放目录: ", GetAria2cDir())
+	Logger.Info("日志存放目录: ", GetLogsDir())
+}
+
 // 获取存放数据的目录
 func GetDataDir() string {
 	homePath, err := os.UserHomeDir()

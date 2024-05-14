@@ -60,7 +60,7 @@ main:
 		}
 
 		// 询问用户选择文件或文件夹
-		selectedIndex := Select(options, "请选择一个文件或文件夹")
+		selectedIndex := Select(options, "请选择一个文件: "+filename+", 选择目录可进入; 选择\"..\"可返回上一级目录")
 
 		selectedName := options[selectedIndex]
 		selectedPath := filepath.Join(currentDir, selectedName)
@@ -103,7 +103,7 @@ func getDrivePaths() []string {
 }
 
 func Input(message string) string {
-	result := ""
+	var result string
 	prompt := &survey.Input{
 		Message: message,
 	}

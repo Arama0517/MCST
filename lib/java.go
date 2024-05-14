@@ -15,7 +15,7 @@ var excludedKeywords = []string{"$", "{", "}", "_", "Windows", "AppData"}
 
 func shouldExclude(path string) bool {
 	for _, keyword := range excludedKeywords {
-		if strings.Contains(strings.ToLower(path), keyword) {
+		if strings.Contains(path, keyword) {
 			return true
 		}
 	}
