@@ -62,9 +62,14 @@ func getJavaVersion(javaPath string) (string, error) {
 	return "", fmt.Errorf("regex")
 }
 
+type JavaInfo struct {
+	Path    string
+	Version string
+}
+
 // DetectJava 检测计算机上所有已安装的 Java
-func DetectJava() []map[string]string {
-	javaWithVersion := make([]map[string]string, 0, 10)
+func DetectJava() []JavaInfo {
+	findJavas := []JavaInfo{}
 
 	var wg sync.WaitGroup
 	resultChan := make(chan string, 100)
@@ -88,9 +93,8 @@ func DetectJava() []map[string]string {
 	for java := range resultChan {
 		version, err := getJavaVersion(java)
 		if err == nil {
-			javaWithVersion = append(javaWithVersion, map[string]string{"path": java, "version": version})
+			findJavas = append(findJavas, JavaInfo{Path: java, Version: version})
 		}
 	}
-
-	return javaWithVersion
+	return findJavas
 }

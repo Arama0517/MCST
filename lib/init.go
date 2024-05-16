@@ -4,5 +4,4 @@ package lib
 func init() {
 	initLogs()
 	initDataDirs()
-	initAria2c()
 }

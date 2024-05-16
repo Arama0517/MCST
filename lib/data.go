@@ -9,56 +9,39 @@ import (
 
 var currentTime = time.Now()
 
-func initDataDirs() {
-	Logger.Info("数据根目录: ", GetDataDir())
-	Logger.Info("配置存放目录: ", GetConfigsDir())
-	Logger.Info("服务器存放目录: ", GetServersDir())
-	Logger.Info("Aria2c配置/可执行程序存放目录: ", GetAria2cDir())
-	Logger.Info("日志存放目录: ", GetLogsDir())
-}
+var DataDir string
+var ConfigsDir string
+var ServersDir string
+var DownloadsDir string
+var LogsDir string
 
-// 获取存放数据的目录
-func GetDataDir() string {
+func initDataDirs() {
 	homePath, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
 	}
-	return filepath.Join(homePath, ".config", "MCSCS")
-}
-
-func GetConfigsDir() string {
-	path := filepath.Join(GetDataDir(), "configs")
-	err := os.MkdirAll(path, 0755)
-	if err != nil {
-		panic(err)
-	}
-	return path
-}
-
-func GetServersDir() string {
-	path := filepath.Join(GetDataDir(), "servers")
-	err := os.MkdirAll(path, 0755)
-	if err != nil {
-		panic(err)
-	}
-	return path
-}
-
-func GetAria2cDir() string {
-	path := filepath.Join(GetDataDir(), "aria2c")
-	err := os.MkdirAll(path, 0755)
-	if err != nil {
-		panic(err)
-	}
-	return path
-}
-
-func GetLogsDir() string {
+	DataDir = filepath.Join(homePath, ".config", "MCSCS")
 	year, month, day := currentTime.Date()
-	path := filepath.Join(GetDataDir(), "logs", fmt.Sprintf("%d%02d%02d%02d", year, month, day, currentTime.Hour()))
-	err := os.MkdirAll(path, 0755)
-	if err != nil {
-		panic(err)
+	ConfigsDir = filepath.Join(DataDir, "configs")
+	ServersDir = filepath.Join(DataDir, "servers")
+	DownloadsDir = filepath.Join(DataDir, "downloads")
+	LogsDir = filepath.Join(DataDir, "logs", fmt.Sprintf("%d%02d%02d%02d", year, month, day, currentTime.Hour()))
+	createDirIfNotExist(DataDir)
+	createDirIfNotExist(ConfigsDir)
+	createDirIfNotExist(ServersDir)
+	createDirIfNotExist(DownloadsDir)
+	createDirIfNotExist(LogsDir)
+	Logger.Info("数据根目录: ", DataDir)
+	Logger.Info("配置存放目录: ", ConfigsDir)
+	Logger.Info("服务器存放目录: ", ServersDir)
+	Logger.Info("日志存放目录: ", LogsDir)
+}
+
+func createDirIfNotExist(path string) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		err := os.MkdirAll(path, 0755)
+		if err != nil {
+			panic(err)
+		}
 	}
-	return path
 }

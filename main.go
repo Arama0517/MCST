@@ -14,9 +14,7 @@ func main() {
 	flag.Parse()
 	if *version {
 		fmt.Println(lib.VERSION)
-		lib.KillAria2c()
 		return
 	}
-	fmt.Println(lib.Select([]string{"Hello", "World", "Go"}, "aaa"))
-	lib.KillAria2c()
+	lib.Download("https://dl.google.com/go/go1.14.2.src.tar.gz", "go1.14.2.src.tar.gz")
 }

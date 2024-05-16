@@ -18,7 +18,7 @@ func initLogs() {
 	Logger.SetLevel(logrus.InfoLevel)
 	Logger.SetReportCaller(true)
 	Logger.SetFormatter(&logrus.TextFormatter{})
-	logFile, err := os.OpenFile(filepath.Join(GetLogsDir(), "app.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile(filepath.Join(LogsDir, "app.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		panic(err)
 	}
