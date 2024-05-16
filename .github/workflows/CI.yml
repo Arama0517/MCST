@@ -9,7 +9,7 @@ on:
             - dev
 jobs:
     CI:
-        runs-on: ubuntu-latest]
+        runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
             - name: 设置 Go 版本
