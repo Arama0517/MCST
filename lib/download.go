@@ -21,7 +21,9 @@ func Download(url string, fileName string) (string, error) {
 	}
 	req.Header.Set("User-Agent", "MCSCS-Golang/"+VERSION)
 	resp, err := client.Do(req)
-
+	if err != nil {
+		return "", err
+	}
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("请求%s失败, 状态码: %s", url, resp.Status)
 	}

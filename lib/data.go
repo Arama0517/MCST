@@ -31,10 +31,6 @@ func initDataDirs() {
 	createDirIfNotExist(ServersDir)
 	createDirIfNotExist(DownloadsDir)
 	createDirIfNotExist(LogsDir)
-	Logger.Info("数据根目录: ", DataDir)
-	Logger.Info("配置存放目录: ", ConfigsDir)
-	Logger.Info("服务器存放目录: ", ServersDir)
-	Logger.Info("日志存放目录: ", LogsDir)
 }
 
 func createDirIfNotExist(path string) {
