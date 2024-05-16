@@ -1,0 +1,57 @@
+name: release
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+env:
+    # Setting an environment variable with the value of a configuration variable
+    env_var: ${{ vars.ENV_CONTEXT_VAR }}
+
+jobs:
+    pack:
+        runs-on: ubuntu-latest]
+        env:
+            NAME: "MCSCS"
+        steps:
+            - uses: actions/checkout@v4
+            - name: 设置 Go 版本
+              uses: actions/setup-go@v4
+              with:
+                  go-version: "1.22.3"
+            - name: 获取版本
+              id: version
+              run: echo "VERSION=$(go run ${{ github.workspace }}/main.go --version)" >> $GITHUB_OUTPUT
+            - name: 构建
+              run: |
+                  GOOS=linux GOARCH=amd64 go build -v -o ${{ github.workspace }}/${{ env.NAME }}-amd64 ${{ github.workspace }}/main.go
+                  GOOS=linux GOARCH=386 go build -v -o ${{ github.workspace }}/${{ env.NAME }}-i386 ${{ github.workspace }}/main.go
+                  GOOS=windows GOARCH=amd64 go build -v -o ${{ github.workspace }}/${{ env.NAME }}-amd64.exe ${{ github.workspace }}/main.go
+                  GOOS=windows GOARCH=386 go build -v -o ${{ github.workspace }}/${{ env.NAME }}-i386.exe ${{ github.workspace }}/main.go
+            - name: 测试
+              run: go test -v ${{ github.workspace }}/...
+            - name: 打包
+              env:
+                  VERSION: ${{ steps.version.outputs.VERSION }}
+              run: |
+                  tar -zcvf ${{ env.NAME }}-${{ env.VERSION }}-linux-amd64.tar.gz ${{ github.workspace }}/MCSCS-amd64 
+                  tar -zcvf ${{ env.NAME }}-${{ env.VERSION }}-linux-i386.tar.gz ${{ github.workspace }}/MCSCS-i386 
+                  zip -r ${{ env.NAME }}-${{ env.VERSION }}-windows-amd64.zip ${{ github.workspace }}/MCSCS-amd64.exe 
+                  zip -r ${{ env.NAME }}-${{ env.VERSION }}-windows-i386.zip ${{ github.workspace }}/MCSCS-i386.exe
+            - name: 上传发行版
+              uses: softprops/action-gh-release@v2
+              if: startsWith(github.ref, 'refs/tags/')
+              env:
+                  VERSION: ${{ steps.version.outputs.VERSION }}
+              with:
+                  files: |
+                      ${{ env.NAME }}-${{ env.VERSION }}-linux-amd64.tar.gz
+                      ${{ env.NAME }}-${{ env.VERSION }}-linux-i386.tar.gz
+                      ${{ env.NAME }}-${{ env.VERSION }}-windows-amd64.zip
+                      ${{ env.NAME }}-${{ env.VERSION }}-windows-i386.zip
+                  tag_name: ${{ env.VERSION }}
+                  draft: true
