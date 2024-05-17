@@ -21,32 +21,42 @@ jobs:
                   go-version: "1.22.3"
             - name: 获取版本
               id: version
-              run: echo "VERSION=$(go run ${{ github.workspace }}/main.go --version)" >> $GITHUB_OUTPUT
+              run: echo "VERSION=$(go run ${{ github.workspace }}/main.go --version)" >> $GITHUB_ENV
             - name: 构建
               run: |
-                  GOOS=linux GOARCH=amd64 go build -v -o ${{ github.workspace }}/${{ env.NAME }}-amd64 ${{ github.workspace }}/main.go
-                  GOOS=linux GOARCH=386 go build -v -o ${{ github.workspace }}/${{ env.NAME }}-i386 ${{ github.workspace }}/main.go
                   GOOS=windows GOARCH=amd64 go build -v -o ${{ github.workspace }}/${{ env.NAME }}-amd64.exe ${{ github.workspace }}/main.go
                   GOOS=windows GOARCH=386 go build -v -o ${{ github.workspace }}/${{ env.NAME }}-i386.exe ${{ github.workspace }}/main.go
             - name: 测试
               run: go test -v ${{ github.workspace }}/...
             - name: 打包
               env:
-                  VERSION: ${{ steps.version.outputs.VERSION }}
+                  LINUX_PACK_NAME: ${{ env.NAME }}-${{ VERSION }}-linux
+                  WINDOWS_PACK_NAME: ${{ env.NAME }}-${{ VERSION }}-windows
               run: |
-                  tar -zcvf ${{ env.NAME }}-${{ env.VERSION }}-linux-amd64.tar.gz ${{ github.workspace }}/MCSCS-amd64 
-                  tar -zcvf ${{ env.NAME }}-${{ env.VERSION }}-linux-i386.tar.gz ${{ github.workspace }}/MCSCS-i386 
-                  zip -r ${{ env.NAME }}-${{ env.VERSION }}-windows-amd64.zip ${{ github.workspace }}/MCSCS-amd64.exe 
-                  zip -r ${{ env.NAME }}-${{ env.VERSION }}-windows-i386.zip ${{ github.workspace }}/MCSCS-i386.exe
+                  cd ${{ github.workspace }}
+                  mkdir builds
+                  mv ${{ env.NAME }}-amd64.exe ${{ env.NAME }}.exe
+                  zip ${{ env.WINDOWS_PACK_NAME }}-amd64.zip ${{ env.NAME }}.exe
+                  rm ${{ env.NAME }}.exe
+                  mv ${{ env.NAME }}-i386.exe ${{ env.NAME }}.exe
+                  zip ${{ env.WINDOWS_PACK_NAME }}-i386.zip ${{ env.NAME }}.exe
+                  rm ${{ env.NAME }}.exe
+                  mv ${{ env.WINDOWS_PACK_NAME }}-amd64.zip ${{ env.WINDOWS_PACK_NAME }}-i386.zip builds/
+                  tar -czvf ${{ env.LINUX_PACK_NAME }}.tar.gz --exclude='.git' --exclude='builds' .
+                  tar -cjvf ${{ env.LINUX_PACK_NAME }}.tar.bz2 --exclude='.git' --exclude='builds' .
+                  tar -cJvf ${{ env.LINUX_PACK_NAME }}.tar.xz --exclude='.git' --exclude='builds' .
+                  mv ${{ env.LINUX_PACK_NAME }}.tar.gz ${{ env.LINUX_PACK_NAME }}.tar.bz2 ${{ env.LINUX_PACK_NAME }}.tar.xz builds/
             - name: 上传发行版
               uses: softprops/action-gh-release@v2
               env:
-                  VERSION: ${{ steps.version.outputs.VERSION }}
+                  LINUX_PACK_NAME: ${{ env.NAME }}-${{ VERSION }}-linux
+                  WINDOWS_PACK_NAME: ${{ env.NAME }}-${{ VERSION }}-windows
               with:
                   files: |
-                      ${{ env.NAME }}-${{ env.VERSION }}-linux-amd64.tar.gz
-                      ${{ env.NAME }}-${{ env.VERSION }}-linux-i386.tar.gz
-                      ${{ env.NAME }}-${{ env.VERSION }}-windows-amd64.zip
-                      ${{ env.NAME }}-${{ env.VERSION }}-windows-i386.zip
-                  tag_name: ${{ env.VERSION }}
+                      builds/${{ env.WINDOWS_PACK_NAME }}-amd64.zip
+                      builds/${{ env.WINDOWS_PACK_NAME }}-i386.zip
+                      builds/${{ env.LINUX_PACK_NAME }}.tar.gz
+                      builds/${{ env.LINUX_PACK_NAME }}.tar.bz2
+                      builds/${{ env.LINUX_PACK_NAME }}.tar.xz
+                  tag_name: ${{ VERSION }}
                   draft: true
