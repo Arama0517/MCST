@@ -10,7 +10,7 @@ on:
 
 jobs:
     release:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-latest]
         env:
             NAME: "MCSCS"
         steps:
@@ -34,16 +34,19 @@ jobs:
               env:
                   VERSION: ${{ steps.version.outputs.VERSION }}
               run: |
-                  tar -zcvf ${{ env.NAME }}-linux-amd64.tar.gz ${{ github.workspace }}/MCSCS-amd64 
-                  tar -zcvf ${{ env.NAME }}-linux-i386.tar.gz ${{ github.workspace }}/MCSCS-i386 
-                  zip -r ${{ env.NAME }}-windows-amd64.zip ${{ github.workspace }}/MCSCS-amd64.exe 
-                  zip -r ${{ env.NAME }}-windows-i386.zip ${{ github.workspace }}/MCSCS-i386.exe
+                  tar -zcvf ${{ env.NAME }}-${{ env.VERSION }}-linux-amd64.tar.gz ${{ github.workspace }}/MCSCS-amd64 
+                  tar -zcvf ${{ env.NAME }}-${{ env.VERSION }}-linux-i386.tar.gz ${{ github.workspace }}/MCSCS-i386 
+                  zip -r ${{ env.NAME }}-${{ env.VERSION }}-windows-amd64.zip ${{ github.workspace }}/MCSCS-amd64.exe 
+                  zip -r ${{ env.NAME }}-${{ env.VERSION }}-windows-i386.zip ${{ github.workspace }}/MCSCS-i386.exe
             - name: 上传发行版
               uses: softprops/action-gh-release@v2
+              env:
+                  VERSION: ${{ steps.version.outputs.VERSION }}
               with:
                   files: |
-                      ${{ env.NAME }}-linux-amd64.tar.gz
-                      ${{ env.NAME }}-linux-i386.tar.gz
-                      ${{ env.NAME }}-windows-amd64.zip
-                      ${{ env.NAME }}-windows-i386.zip
+                      ${{ env.NAME }}-${{ env.VERSION }}-linux-amd64.tar.gz
+                      ${{ env.NAME }}-${{ env.VERSION }}-linux-i386.tar.gz
+                      ${{ env.NAME }}-${{ env.VERSION }}-windows-amd64.zip
+                      ${{ env.NAME }}-${{ env.VERSION }}-windows-i386.zip
+                  tag_name: ${{ env.VERSION }}
                   draft: true
