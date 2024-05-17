@@ -7,5 +7,9 @@ import (
 )
 
 func TestDownload(t *testing.T) {
-	lib.Download("https://dl.google.com/go/go1.14.2.src.tar.gz", "go1.14.2.src.tar.gz")
+	filePath, err := lib.Download("https://dl.google.com/go/go1.14.2.src.tar.gz", "go1.14.2.src.tar.gz")
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(filePath)
 }
