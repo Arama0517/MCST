@@ -1,3 +1,21 @@
+/*
+ * MCSCS can be used to easily create, launch, and configure a Minecraft server.
+ * Copyright (C) 2024 Arama
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package apis
 
 import (
@@ -13,19 +31,27 @@ import (
 )
 
 type FastMirrorDatas struct {
-	data []struct {
-		name        string
-		tag         string
-		homepage    string
-		recommanded bool
-		mc_versions []string
-	}
-	code    string
-	suceess bool
-	message string
+	Data []struct {
+		Name        string   `json:"name"`
+		Tag         string   `json:"tag"`
+		Homepage    string   `json:"homepage"`
+		Recommanded bool     `json:"recommanded"`
+		MC_Versions []string `json:"mc_versions"`
+	} `json:"data"`
+	Code    string `json:"code"`
+	Suceess bool   `json:"suceess"`
+	Message string `json:"message"`
 }
 
-func GetFastMirrorDatas() (FastMirrorDatas, error) {
+type ParsedFastMirrorDatas map[string]struct {
+	Name        string   `json:"name"`
+	Tag         string   `json:"tag"`
+	Homepage    string   `json:"homepage"`
+	Recommanded bool     `json:"recommanded"`
+	MC_Versions []string `json:"mc_versions"`
+}
+
+func GetFastMirrorDatas() (ParsedFastMirrorDatas, error) {
 	url := url.URL{
 		Scheme: "https",
 		Host:   "download.fastmirror.net",
@@ -34,41 +60,64 @@ func GetFastMirrorDatas() (FastMirrorDatas, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url.String(), nil)
 	if err != nil {
-		return FastMirrorDatas{}, err
+		return ParsedFastMirrorDatas{}, err
 	}
 	req.Header.Set("User-Agent", "MCSCS-Golang/"+lib.VERSION)
 	resp, err := client.Do(req)
 	if err != nil {
-		return FastMirrorDatas{}, err
+		return ParsedFastMirrorDatas{}, err
 	}
 	defer resp.Body.Close()
 	var data FastMirrorDatas
-	err = json.NewDecoder(resp.Body).Decode(&data)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return FastMirrorDatas{}, err
+		return ParsedFastMirrorDatas{}, err
 	}
-	return data, nil
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		return ParsedFastMirrorDatas{}, err
+	}
+	parsedData := make(ParsedFastMirrorDatas)
+	for i := 0; i < len(data.Data); i++ {
+		data := data.Data[i]
+		parsedData[data.Name] = struct {
+			Name        string   `json:"name"`
+			Tag         string   `json:"tag"`
+			Homepage    string   `json:"homepage"`
+			Recommanded bool     `json:"recommanded"`
+			MC_Versions []string `json:"mc_versions"`
+		}{Name: data.Name, Tag: data.Tag, Homepage: data.Homepage, Recommanded: data.Recommanded, MC_Versions: data.MC_Versions}
+	}
+	return parsedData, nil
 }
 
 type FastMirrorBuildsDatas struct {
-	data struct {
-		builds []struct {
-			name         string
-			mc_version   string
-			core_version string
-			update_time  string
-			sha1         string
-		}
-		offset int
-		limit  int
-		count  int
-	}
-	code    string
-	suceess bool
-	message string
+	Data struct {
+		Builds []struct {
+			Name         string `json:"name"`
+			MC_Version   string `json:"mc_version"`
+			Core_Version string `json:"core_version"`
+			Update_Time  string `json:"update_time"`
+			Sha1         string `json:"sha1"`
+		} `json:"builds"`
+		Offset int `json:"offset"`
+		Limit  int `json:"limit"`
+		Count  int `json:"count"`
+	} `json:"data"`
+	Code    string `json:"code"`
+	Suceess bool   `json:"suceess"`
+	Message string `json:"message"`
 }
 
-func GetFastMirrorBuildsDatas(server_type string, minecraft_version string) (FastMirrorBuildsDatas, error) {
+type ParsedFastMirrorBuildsDatas map[string]struct {
+	Name         string `json:"name"`
+	MC_Version   string `json:"mc_version"`
+	Core_Version string `json:"core_version"`
+	Update_Time  string `json:"update_time"`
+	Sha1         string `json:"sha1"`
+}
+
+func GetFastMirrorBuildsDatas(server_type string, minecraft_version string) (ParsedFastMirrorBuildsDatas, error) {
 	url := url.URL{
 		Scheme:   "https",
 		Host:     "download.fastmirror.net",
@@ -78,20 +127,31 @@ func GetFastMirrorBuildsDatas(server_type string, minecraft_version string) (Fas
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url.String(), nil)
 	if err != nil {
-		return FastMirrorBuildsDatas{}, err
+		return ParsedFastMirrorBuildsDatas{}, err
 	}
 	req.Header.Set("User-Agent", "MCSCS-Golang/"+lib.VERSION)
 	resp, err := client.Do(req)
 	if err != nil {
-		return FastMirrorBuildsDatas{}, err
+		return ParsedFastMirrorBuildsDatas{}, err
 	}
 	defer resp.Body.Close()
 	var data FastMirrorBuildsDatas
 	err = json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {
-		return FastMirrorBuildsDatas{}, err
+		return ParsedFastMirrorBuildsDatas{}, err
 	}
-	return data, nil
+	parseDatas := make(ParsedFastMirrorBuildsDatas)
+	for i := 0; i < len(data.Data.Builds); i++ {
+		data := data.Data.Builds[i]
+		parseDatas[data.Core_Version] = struct {
+			Name         string `json:"name"`
+			MC_Version   string `json:"mc_version"`
+			Core_Version string `json:"core_version"`
+			Update_Time  string `json:"update_time"`
+			Sha1         string `json:"sha1"`
+		}{Name: data.Name, MC_Version: data.MC_Version, Core_Version: data.Core_Version, Update_Time: data.Update_Time, Sha1: data.Sha1}
+	}
+	return parseDatas, nil
 }
 
 func DownloadFastMirrorServers(server_type string, minecraft_version string, build_version string) (string, error) {
@@ -118,7 +178,7 @@ func DownloadFastMirrorServers(server_type string, minecraft_version string, bui
 	if err != nil {
 		return "", err
 	}
-	if string(hash) != FastMirrorBuildsData.data.builds[0].sha1 {
+	if string(hash) != FastMirrorBuildsData[build_version].Sha1 {
 		return "", errors.New("Sha1不匹配")
 	}
 	return path, nil
