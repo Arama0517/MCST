@@ -44,9 +44,11 @@ jobs:
                   rm ${{ env.NAME }}.exe
                   mv ${{ env.WINDOWS_PACK_NAME }}-amd64.zip ${{ env.WINDOWS_PACK_NAME }}-i386.zip builds/
                   tar -czvf ${{ env.LINUX_PACK_NAME }}.tar.gz --exclude='.git' --exclude='builds' .
+                  mv ${{ env.LINUX_PACK_NAME }}.tar.gz builds/
                   tar -cjvf ${{ env.LINUX_PACK_NAME }}.tar.bz2 --exclude='.git' --exclude='builds' .
+                  mv ${{ env.LINUX_PACK_NAME }}.tar.bz2 builds/
                   tar -cJvf ${{ env.LINUX_PACK_NAME }}.tar.xz --exclude='.git' --exclude='builds' .
-                  mv ${{ env.LINUX_PACK_NAME }}.tar.gz ${{ env.LINUX_PACK_NAME }}.tar.bz2 ${{ env.LINUX_PACK_NAME }}.tar.xz builds/
+                  mv ${{ env.LINUX_PACK_NAME }}.tar.xz builds/
             - name: 上传发行版
               uses: softprops/action-gh-release@v2
               env:
