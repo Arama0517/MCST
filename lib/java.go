@@ -1,3 +1,21 @@
+/*
+ * MCSCS can be used to easily create, launch, and configure a Minecraft server.
+ * Copyright (C) 2024 Arama
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package lib
 
 import (
@@ -22,9 +40,16 @@ func shouldExclude(path string) bool {
 	return false
 }
 
-// searchFile 在指定目录下使用多线程搜索指定的文件名
+// 控制并发数量
+var semaphore = make(chan struct{}, 20)
+
+// 搜索指定目录下的文件
 func searchFile(path string, executeName string, resultChan chan<- string, wg *sync.WaitGroup) {
 	defer wg.Done()
+
+	semaphore <- struct{}{}        // 获取信号量
+	defer func() { <-semaphore }() // 释放信号量
+
 	entries, err := os.ReadDir(path)
 	if err != nil {
 		return
@@ -48,26 +73,26 @@ func searchFile(path string, executeName string, resultChan chan<- string, wg *s
 	}
 }
 
-// getJavaVersion 获取 Java 的版本
+// 获取 Java 版本信息
 func getJavaVersion(javaPath string) (string, error) {
 	output, err := exec.Command(javaPath, "-version").CombinedOutput()
 	if err != nil {
 		return "", err
 	}
 	re := regexp.MustCompile(`(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:[._](\d+))?(?:-(.+))?`)
-	matches := re.FindStringSubmatch(string(output))
-	if len(matches) > 0 {
-		return matches[0], nil
+	version := re.FindString(string(output))
+	if version != "" {
+		return version, nil
 	}
-	return "", fmt.Errorf("regex")
+	return "", fmt.Errorf("version not found")
 }
 
 type JavaInfo struct {
-	Path    string
-	Version string
+	Path    string `json:"path"`
+	Version string `json:"version"`
 }
 
-// DetectJava 检测计算机上所有已安装的 Java
+// 检测已安装的 Java
 func DetectJava() []JavaInfo {
 	findJavas := []JavaInfo{}
 

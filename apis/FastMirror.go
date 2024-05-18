@@ -16,12 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// 无极镜像
+
 package apis
 
 import (
 	"crypto/sha1"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -157,7 +160,11 @@ func DownloadFastMirrorServer(server_type string, minecraft_version string, buil
 	if err != nil {
 		return "", err
 	}
-	if string(hash) != FastMirrorBuildsData[build_version].Sha1 {
+	if fmt.Sprintf("%x", hash) != FastMirrorBuildsData[build_version].Sha1 {
+		err := os.Remove(path)
+		if err != nil {
+			return "", err
+		}
 		return "", errors.New("Sha1不匹配")
 	}
 	return path, nil
