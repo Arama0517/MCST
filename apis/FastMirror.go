@@ -33,17 +33,10 @@ import (
 	"github.com/Arama-Vanarana/MCSCS-Go/lib"
 )
 
-type FastMirror struct {
-	Name        string   `json:"name"`
-	Tag         string   `json:"tag"`
-	Homepage    string   `json:"homepage"`
-	Recommanded bool     `json:"recommanded"`
-	MC_Versions []string `json:"mc_versions"`
-}
+var FastMirror = map[string]FastMirrorData{}
 
-type ParsedFastMirror map[string]FastMirror
-
-func GetFastMirrorDatas() (ParsedFastMirror, error) {
+func initFastMirror() {
+	var err error
 	url := url.URL{
 		Scheme: "https",
 		Host:   "download.fastmirror.net",
@@ -52,37 +45,36 @@ func GetFastMirrorDatas() (ParsedFastMirror, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest(http.MethodGet, url.String(), nil)
 	if err != nil {
-		return ParsedFastMirror{}, err
+		panic(err)
 	}
 	req.Header.Set("User-Agent", "MCSCS-Golang/"+lib.VERSION)
 	resp, err := client.Do(req)
 	if err != nil {
-		return ParsedFastMirror{}, err
+		panic(err)
 	}
 	defer resp.Body.Close()
 	var data struct {
-		Data []FastMirror `json:"data"`
+		Data []FastMirrorData `json:"data"`
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return ParsedFastMirror{}, err
+		panic(err)
 	}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		return ParsedFastMirror{}, err
+		panic(err)
 	}
-	parsedData := ParsedFastMirror{}
 	for i := 0; i < len(data.Data); i++ {
-		data := data.Data[i]
-		parsedData[data.Name] = FastMirror{
-			Name:        data.Name,
-			Tag:         data.Tag,
-			Homepage:    data.Homepage,
-			Recommanded: data.Recommanded,
-			MC_Versions: data.MC_Versions,
-		}
+		FastMirror[data.Data[i].Name] = data.Data[i]
 	}
-	return parsedData, nil
+}
+
+type FastMirrorData struct {
+	Name        string   `json:"name"`
+	Tag         string   `json:"tag"`
+	Homepage    string   `json:"homepage"`
+	Recommanded bool     `json:"recommanded"`
+	MC_Versions []string `json:"mc_versions"`
 }
 
 type FastMirrorBuilds struct {
@@ -95,11 +87,11 @@ type FastMirrorBuilds struct {
 
 type ParsedFastMirrorBuilds map[string]FastMirrorBuilds
 
-func GetFastMirrorBuildsDatas(server_type string, minecraft_version string) (ParsedFastMirrorBuilds, error) {
+func GetFastMirrorBuildsDatas(ServerType string, MinecraftVersion string) (ParsedFastMirrorBuilds, error) {
 	url := url.URL{
 		Scheme:   "https",
 		Host:     "download.fastmirror.net",
-		Path:     "/api/v3/" + server_type + "/" + minecraft_version,
+		Path:     "/api/v3/" + ServerType + "/" + MinecraftVersion,
 		RawQuery: "?offset=0&limit=25",
 	}
 	client := &http.Client{}
@@ -125,24 +117,18 @@ func GetFastMirrorBuildsDatas(server_type string, minecraft_version string) (Par
 	parseDatas := ParsedFastMirrorBuilds{}
 	for i := 0; i < len(data.Data.Builds); i++ {
 		data := data.Data.Builds[i]
-		parseDatas[data.Core_Version] = FastMirrorBuilds{
-			Name:         data.Name,
-			MC_Version:   data.MC_Version,
-			Core_Version: data.Core_Version,
-			Update_Time:  data.Update_Time,
-			Sha1:         data.Sha1,
-		}
+		parseDatas[data.Core_Version] = data
 	}
 	return parseDatas, nil
 }
 
-func DownloadFastMirrorServer(server_type string, minecraft_version string, build_version string) (string, error) {
+func DownloadFastMirrorServer(info lib.ServerInfo) (string, error) {
 	url := url.URL{
 		Scheme: "https",
 		Host:   "download.fastmirror.net",
-		Path:   "/download/" + server_type + "/" + minecraft_version + "/" + build_version,
+		Path:   "/download/" + info.ServerType + "/" + info.MinecraftVersion + "/" + info.BuildVersion,
 	}
-	path, err := lib.Download(url.String(), server_type+"-"+minecraft_version+"-"+build_version+".jar")
+	path, err := lib.Download(url.String(), info.ServerType+"-"+info.MinecraftVersion+"-"+info.BuildVersion+".jar")
 	if err != nil {
 		return "", err
 	}
@@ -156,11 +142,11 @@ func DownloadFastMirrorServer(server_type string, minecraft_version string, buil
 		return "", err
 	}
 	hash := hasher.Sum(nil)
-	FastMirrorBuildsData, err := GetFastMirrorBuildsDatas(server_type, minecraft_version)
+	FastMirrorBuildsData, err := GetFastMirrorBuildsDatas(info.ServerType, info.MinecraftVersion)
 	if err != nil {
 		return "", err
 	}
-	if fmt.Sprintf("%x", hash) != FastMirrorBuildsData[build_version].Sha1 {
+	if fmt.Sprintf("%x", hash) != FastMirrorBuildsData[info.BuildVersion].Sha1 {
 		err := os.Remove(path)
 		if err != nil {
 			return "", err

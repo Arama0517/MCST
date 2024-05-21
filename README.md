@@ -1,4 +1,4 @@
-<!-- 
+<!--
 MCSCS can be used to easily create, launch, and configure a Minecraft server.
 Copyright (C) 2024 Arama
 
@@ -13,13 +13,12 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
-
 
 # MCSCS
 
--   Powered by*[Golang](https://go.dev/)**
+-   Powered by\*[Golang](https://go.dev/)\*\*
 
 # 安装
 
@@ -43,7 +42,7 @@ git clone https://github.com/Arama-Vanarana/MCSCS-Go.git
 cd MCSCS-Go
 make install
 cd ..
-rm -rf MCSCS-Go 
+rm -rf MCSCS-Go
 # 运行MCSCS
-mcscs
+MCSCS
 ```

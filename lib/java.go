@@ -74,7 +74,7 @@ func searchFile(path string, executeName string, resultChan chan<- string, wg *s
 }
 
 // 获取 Java 版本信息
-func getJavaVersion(javaPath string) (string, error) {
+func GetJavaVersion(javaPath string) (string, error) {
 	output, err := exec.Command(javaPath, "-version").CombinedOutput()
 	if err != nil {
 		return "", err
@@ -116,7 +116,7 @@ func DetectJava() []JavaInfo {
 	}
 
 	for java := range resultChan {
-		version, err := getJavaVersion(java)
+		version, err := GetJavaVersion(java)
 		if err == nil {
 			findJavas = append(findJavas, JavaInfo{Path: java, Version: version})
 		}

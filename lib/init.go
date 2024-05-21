@@ -1,25 +1,58 @@
-/*
- * MCSCS can be used to easily create, launch, and configure a Minecraft server.
- * Copyright (C) 2024 Arama
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package lib
 
-// 按照顺序初始化
-func init() {
-	initDataDirs()
-	initLogs()
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/sirupsen/logrus"
+)
+
+func InitLib() {
+	// 数据
+	UserHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		panic(err)
+	}
+	DataDir = filepath.Join(UserHomeDir, ".config", "MCSCS")
+	ServersDir = filepath.Join(DataDir, "servers")
+	DownloadsDir = filepath.Join(DataDir, "downloads")
+	year, month, day := currentTime.Date()
+	LogsDir = filepath.Join(DataDir, "logs", fmt.Sprintf("%d%02d%02d%02d", year, month, day, currentTime.Hour()))
+	createDirIfNotExist(DataDir)
+	createDirIfNotExist(ServersDir)
+	createDirIfNotExist(DownloadsDir)
+	createDirIfNotExist(LogsDir)
+	MCSCSConfigsPath = filepath.Join(DataDir, "configs.json")
+	if _, err := os.Stat(MCSCSConfigsPath); os.IsNotExist(err) {
+		jsonData, err := json.MarshalIndent(MCSCSConfig{
+			LogLevel:  "info",
+			API:       0,
+			Downloads: []DownloadInfo{},
+			Javas:     []JavaInfo{},
+			Servers:   map[string]ServerConfig{},
+		}, "", "  ")
+		if err != nil {
+			panic(err)
+		}
+		err = os.WriteFile(MCSCSConfigsPath, jsonData, 0644)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	// Logger
+	Logger.SetLevel(logrus.InfoLevel)
+	Logger.SetReportCaller(true)
+	Logger.SetFormatter(&logrus.TextFormatter{})
+	logFile, err := os.OpenFile(filepath.Join(LogsDir, "app.log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+	Logger.SetOutput(logFile)
+	Logger.Info("Hello world!")
+	Logger.Info("本程序遵循GPLv3协议开源")
+	Logger.Info("作者: Arama 3584075812@qq.com")
+
 }

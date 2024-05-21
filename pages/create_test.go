@@ -16,19 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package lib_test
+package pages_test
 
 import (
-	"fmt"
 	"testing"
 
-	"github.com/Arama-Vanarana/MCSCS-Go/lib"
+	"github.com/Arama-Vanarana/MCSCS-Go/pages"
 )
 
-func TestGetDatasDirs(t *testing.T) {
-	fmt.Println("Data root directory: ", lib.DataDir)
-	fmt.Println("Configs directory: ", lib.ConfigsDir)
-	fmt.Println("Servers directory: ", lib.ServersDir)
-	fmt.Println("Downloads directory: ", lib.DownloadsDir)
-	fmt.Println("Logs directory: ", lib.LogsDir)
+func TestToBytes(t *testing.T) {
+	t.Log(pages.ToBytes("1KiB"))
 }

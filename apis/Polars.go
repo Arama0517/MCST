@@ -30,16 +30,17 @@ import (
 	"github.com/Arama-Vanarana/MCSCS-Go/lib"
 )
 
-type Polars struct {
+
+var Polars = map[string]PolarsData{}
+
+type PolarsData struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Icon        string `json:"icon"`
 }
 
-type ParsedPolars map[string]Polars
-
-func GetPolarsDatas() (ParsedPolars, error) {
+func initPolars() {
 	url := url.URL{
 		Scheme: "https",
 		Host:   "mirror.polars.cc",
@@ -48,34 +49,27 @@ func GetPolarsDatas() (ParsedPolars, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest(http.MethodGet, url.String(), nil)
 	if err != nil {
-		return ParsedPolars{}, err
+		panic(err)
 	}
 	req.Header.Set("User-Agent", "MCSCS-Golang/"+lib.VERSION)
 	resp, err := client.Do(req)
 	if err != nil {
-		return ParsedPolars{}, err
+		panic(err)
 	}
 	defer resp.Body.Close()
-	var data []Polars
+	var data []PolarsData
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return ParsedPolars{}, err
+		panic(err)
 	}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		return ParsedPolars{}, err
+		panic(err)
 	}
-	parsedData := ParsedPolars{}
 	for i := 0; i < len(data); i++ {
 		data := data[i]
-		parsedData[data.Name] = Polars{
-			ID:          data.ID,
-			Name:        data.Name,
-			Description: data.Description,
-			Icon:        data.Icon,
-		}
+		Polars[data.Name] = data
 	}
-	return parsedData, nil
 }
 
 type PolarsCores struct {
@@ -117,12 +111,7 @@ func GetPolarsCoresDatas(ID int) (ParsedPolarsCores, error) {
 	parsedData := ParsedPolarsCores{}
 	for i := 0; i < len(data); i++ {
 		data := data[i]
-		parsedData[data.Name] = PolarsCores{
-			ID:          data.ID,
-			Name:        data.Name,
-			DownloadURL: data.DownloadURL,
-			Type:        data.Type,
-		}
+		parsedData[data.Name] = data
 	}
 	return parsedData, nil
 }

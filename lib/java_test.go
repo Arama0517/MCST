@@ -20,7 +20,6 @@ package lib_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/Arama-Vanarana/MCSCS-Go/lib"
@@ -32,5 +31,5 @@ func TestDetectJava(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(string(jsonJava))
+	t.Log(string(jsonJava))
 }

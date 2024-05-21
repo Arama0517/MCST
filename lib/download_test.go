@@ -19,7 +19,6 @@
 package lib_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/Arama-Vanarana/MCSCS-Go/lib"
@@ -30,5 +29,5 @@ func TestDownload(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fmt.Println(filePath)
+	t.Log(filePath)
 }

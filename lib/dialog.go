@@ -23,10 +23,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"github.com/AlecAivazis/survey/v2"
-	log "github.com/sirupsen/logrus"
 )
 
 func Select(options []string, message string) int {
@@ -42,48 +40,55 @@ func Select(options []string, message string) int {
 	return result
 }
 
+func ClearScreen() {
+	fmt.Print("\033[H\033[2J")
+}
+
 func SelectFile(filename string) (string, error) {
 	// 初始目录为根目录
-	var currentDir string
-	if runtime.GOOS == "linux" {
-		currentDir = "/"
-	} else if runtime.GOOS == "windows" {
-		currentDir = `C:\`
+	currentDir, err := filepath.Abs(".")
+	if err != nil {
+		return "", err
 	}
-
 main:
 	for {
-
-		// 构建选项列表
+		ClearScreen()
 		options := make([]string, 0)
-		// 获取当前目录下的所有文件和文件夹
+		displayOptions := make([]string, 0)
 		var files []fs.DirEntry
 		if currentDir != "drives" {
 			files_read, err := os.ReadDir(currentDir)
 			if err != nil {
-				log.Fatal(err)
+				return "", err
 			}
 			files = files_read
-		}
-		// 如果不是根目录，添加 ".." 返回上一级目录的选项
-		if currentDir != "/" && currentDir != "drives" {
-			options = append(options, "..")
 		}
 		if currentDir == "drives" {
 			options = append(options, getDrivePaths()...)
 		} else {
+			if currentDir != "/" {
+				options = append(options, "..")
+				displayOptions = append(displayOptions, "返回上一级目录")
+			}
 			for _, file := range files {
-				options = append(options, file.Name())
+				name := file.Name()
+				displayName := name
+				if file.IsDir() {
+					displayName = "\033[32m" + name + "/\033[0m"
+				}
+				options = append(options, name)
+				displayOptions = append(displayOptions, displayName)
 			}
 		}
-
-		// 询问用户选择文件或文件夹
-		selectedIndex := Select(options, "请选择一个文件: "+filename+", 选择目录可进入; 选择\"..\"可返回上一级目录")
-
+		var displayCurrentDir string
+		if currentDir == "drives" {
+			displayCurrentDir = "分区选择"
+		} else {
+			displayCurrentDir = currentDir
+		}
+		selectedIndex := Select(displayOptions, "请选择文件: "+filename+", 当前路径: "+displayCurrentDir)
 		selectedName := options[selectedIndex]
 		selectedPath := filepath.Join(currentDir, selectedName)
-
-		// 如果用户选择的是文件夹，则进入该文件夹，否则检查文件名称是否与指定名称一致
 		if fileInfo, err := os.Stat(selectedPath); err == nil && fileInfo.IsDir() {
 			if selectedName != ".." {
 				currentDir = selectedPath
@@ -99,7 +104,6 @@ main:
 		} else if currentDir == "drives" {
 			currentDir = selectedName
 		} else {
-			// 检查文件名称是否与指定名称一致
 			if selectedName != filename {
 				fmt.Println("请选择名为 '", filename, "' 的文件")
 				continue
@@ -123,6 +127,15 @@ func getDrivePaths() []string {
 func Input(message string) string {
 	var result string
 	prompt := &survey.Input{
+		Message: message,
+	}
+	survey.AskOne(prompt, &result)
+	return result
+}
+
+func Confirm(message string) bool {
+	var result bool
+	prompt := &survey.Confirm{
 		Message: message,
 	}
 	survey.AskOne(prompt, &result)
