@@ -35,20 +35,14 @@ import (
 
 var FastMirror = map[string]FastMirrorData{}
 
-func initFastMirror() {
+func InitFastMirror() {
 	var err error
 	url := url.URL{
 		Scheme: "https",
 		Host:   "download.fastmirror.net",
 		Path:   "/api/v3",
 	}
-	client := &http.Client{}
-	req, err := http.NewRequest(http.MethodGet, url.String(), nil)
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("User-Agent", "MCSCS-Golang/"+lib.VERSION)
-	resp, err := client.Do(req)
+	resp, err := lib.Request(url, http.MethodGet, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -88,19 +82,12 @@ type FastMirrorBuilds struct {
 type ParsedFastMirrorBuilds map[string]FastMirrorBuilds
 
 func GetFastMirrorBuildsDatas(ServerType string, MinecraftVersion string) (ParsedFastMirrorBuilds, error) {
-	url := url.URL{
+	resp, err := lib.Request(url.URL{
 		Scheme:   "https",
 		Host:     "download.fastmirror.net",
 		Path:     "/api/v3/" + ServerType + "/" + MinecraftVersion,
 		RawQuery: "?offset=0&limit=25",
-	}
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", url.String(), nil)
-	if err != nil {
-		return ParsedFastMirrorBuilds{}, err
-	}
-	req.Header.Set("User-Agent", "MCSCS-Golang/"+lib.VERSION)
-	resp, err := client.Do(req)
+	}, http.MethodGet, nil)
 	if err != nil {
 		return ParsedFastMirrorBuilds{}, err
 	}
@@ -123,12 +110,11 @@ func GetFastMirrorBuildsDatas(ServerType string, MinecraftVersion string) (Parse
 }
 
 func DownloadFastMirrorServer(info lib.ServerInfo) (string, error) {
-	url := url.URL{
+	path, err := lib.Download(url.URL{
 		Scheme: "https",
 		Host:   "download.fastmirror.net",
 		Path:   "/download/" + info.ServerType + "/" + info.MinecraftVersion + "/" + info.BuildVersion,
-	}
-	path, err := lib.Download(url.String(), info.ServerType+"-"+info.MinecraftVersion+"-"+info.BuildVersion+".jar")
+	}, info.ServerType+"-"+info.MinecraftVersion+"-"+info.BuildVersion+".jar")
 	if err != nil {
 		return "", err
 	}

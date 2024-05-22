@@ -40,7 +40,7 @@ type PolarsData struct {
 	Icon        string `json:"icon"`
 }
 
-func initPolars() {
+func InitPolars() {
 	url := url.URL{
 		Scheme: "https",
 		Host:   "mirror.polars.cc",
@@ -118,7 +118,11 @@ func GetPolarsCoresDatas(ID int) (ParsedPolarsCores, error) {
 
 // DownloadURL 和 Name 参数从 GetPolarsCoresDatas 获取
 func DownloadPolarsServer(DownloadURL string, Name string) (string, error) {
-	path, err := lib.Download(DownloadURL, Name)
+	url, err := url.Parse(DownloadURL)
+	if err != nil {
+		return "", err
+	}
+	path, err := lib.Download(*url, Name)
 	if err != nil {
 		return "", err
 	}

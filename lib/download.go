@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"time"
@@ -31,25 +32,17 @@ import (
 )
 
 // 下载文件, 返回文件路径
-func Download(url string, fileName string) (string, error) {
+func Download(url url.URL, fileName string) (string, error) {
 	filePath := filepath.Join(DownloadsDir, fileName)
 	// 不重复下载
 	if _, err := os.Stat(filePath); err == nil {
 		return filePath, nil
 	}
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", url, nil)
+	resp, err := Request(url, http.MethodGet, nil)
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("User-Agent", "MCSCS-Golang/"+VERSION)
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("请求%s失败, 状态码: %s", url, resp.Status)
-	}
+	defer resp.Body.Close()
 
 	// 进度条
 	ansiStdout := ansi.NewAnsiStdout()
@@ -72,9 +65,7 @@ func Download(url string, fileName string) (string, error) {
 		progressbar.OptionThrottle(65*time.Millisecond),
 		progressbar.OptionOnCompletion(func() {
 			fmt.Fprint(ansiStdout, "\n")
-		}),
-	)
-
+		}))
 	file, err := os.Create(filePath)
 	if err != nil {
 		return "", err

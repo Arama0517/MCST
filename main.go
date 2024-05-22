@@ -22,12 +22,14 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/Arama-Vanarana/MCSCS-Go/apis"
 	"github.com/Arama-Vanarana/MCSCS-Go/lib"
 	"github.com/Arama-Vanarana/MCSCS-Go/pages"
 )
 
-func init()  {
+func init() {
 	lib.InitLib()
+	apis.InitApis()
 }
 
 func main() {
@@ -54,4 +56,5 @@ func main() {
 			lib.Logger.WithError(err).Error("运行失败")
 		}
 	}
+	
 }

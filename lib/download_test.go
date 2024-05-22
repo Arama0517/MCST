@@ -19,15 +19,26 @@
 package lib_test
 
 import (
+	"net/url"
+	"os"
 	"testing"
 
 	"github.com/Arama-Vanarana/MCSCS-Go/lib"
 )
 
+func init() {
+	lib.InitLib()
+}
+
 func TestDownload(t *testing.T) {
-	filePath, err := lib.Download("https://dl.google.com/go/go1.14.2.src.tar.gz", "go1.14.2.src.tar.gz")
+	filePath, err := lib.Download(url.URL{
+		Scheme: "https",
+		Host:   "golang.org",
+		Path:   "/dl/go1.22.3.src.tar.gz",
+	}, "go1.22.3.src.tar.gz")
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(filePath)
+	os.Remove(filePath)
 }

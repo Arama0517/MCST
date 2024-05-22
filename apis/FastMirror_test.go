@@ -28,6 +28,11 @@ import (
 	"github.com/Arama-Vanarana/MCSCS-Go/lib"
 )
 
+func init() {
+	lib.InitLib()
+	apis.InitFastMirror()
+}
+
 func TestGetFastMirrorDatas(t *testing.T) {
 	jsonData, err := json.MarshalIndent(apis.FastMirror, "", "    ")
 	if err != nil {
@@ -37,7 +42,7 @@ func TestGetFastMirrorDatas(t *testing.T) {
 }
 
 func TestGetFastMirrorBuildsDatas(t *testing.T) {
-	data, err := apis.GetFastMirrorBuildsDatas("Mohist", "1.20.1")
+	data, err := apis.GetFastMirrorBuildsDatas("Mohist", apis.FastMirror["Mohist"].MC_Versions[0])
 	if err != nil {
 		t.Fatal(err)
 	}

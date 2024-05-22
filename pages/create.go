@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -48,7 +49,16 @@ func CreatePage() error {
 	if err != nil {
 		return err
 	}
-	var config lib.ServerConfig
+	config := lib.ServerConfig{
+		// 1073741824 = 1GiB
+		Ram: lib.Ram{
+			XMX: 1073741824,
+			XMS: 1073741824,
+		},
+		Encoding:   "UTF-8",
+		JVMArgs:    []string{"-Dlog4j2.formatMsgNoLookups=true"},
+		ServerArgs: []string{"--nogui"},
+	}
 	if _, err := os.Stat(TempConfigsPath); err == nil && lib.Confirm("检测到存在上次已暂存的配置, 是否还原?") {
 		file, err := os.ReadFile(TempConfigsPath)
 		if err != nil {
@@ -59,7 +69,9 @@ func CreatePage() error {
 			return err
 		}
 	}
+main:
 	for {
+		lib.ClearScreen()
 		options := []string{
 			"服务器名称:" + func() string {
 				if config.Name == "" {
@@ -68,43 +80,43 @@ func CreatePage() error {
 				return config.Name
 			}(),
 			"XMS(Java虚拟机初始堆内存): " + func() string {
-				if config.Ram.XMS == 0 {
-					return "未设置"
+				if config.Ram.XMS == 1073741824 {
+					return fmt.Sprintf("默认配置: %dB", JVM_min_ram)
 				}
-				return fmt.Sprintf("%d", config.Ram.XMS)
+				return fmt.Sprintf("%dB", config.Ram.XMS)
 			}(),
 			"XMX(Java虚拟机最大堆内存): " + func() string {
-				if config.Ram.XMX == 0 {
-					return "未设置"
+				if config.Ram.XMX == 1073741824 {
+					return fmt.Sprintf("默认配置: %dB", JVM_min_ram)
 				}
-				return fmt.Sprintf("%d", config.Ram.XMX)
+				return fmt.Sprintf("%dB", config.Ram.XMX)
 			}(),
 			"编码: " + func() string {
 				if config.Encoding == "" {
-					return "未设置"
+					return "默认配置: " + config.Encoding
 				}
 				return config.Encoding
 			}(),
 			"Java虚拟机参数: " + func() string {
-				if config.JVMArgs == nil {
-					return "未设置"
+				if reflect.DeepEqual(config.JVMArgs, []string{"-Dlog4j2.formatMsgNoLookups=true"}) {
+					return "默认配置: " + strings.Join(config.JVMArgs, " ")
 				}
 				return strings.Join(config.JVMArgs, " ")
 			}(),
 			"Java: " + func() string {
-				if config.Java == (lib.JavaInfo{}) {
+				if reflect.DeepEqual(config.Java, lib.JavaInfo{}) {
 					return "未设置"
 				}
 				return config.Java.Version + " (" + config.Java.Path + ")"
 			}(),
 			"服务器参数: " + func() string {
-				if config.ServerArgs == nil {
-					return "未设置"
+				if reflect.DeepEqual(config.ServerArgs, []string{"--nogui"}) {
+					return fmt.Sprintf("默认配置: %s", strings.Join(config.ServerArgs, " "))
 				}
 				return strings.Join(config.ServerArgs, " ")
 			}(),
 			"核心: " + func() string {
-				if config.Info == (lib.ServerInfo{}) {
+				if reflect.DeepEqual(config.Info, lib.ServerInfo{}) {
 					return "未设置"
 				}
 				return fmt.Sprintf("%s-%s-%s.jar", config.Info.ServerType, config.Info.MinecraftVersion, config.Info.BuildVersion)
@@ -154,6 +166,14 @@ func CreatePage() error {
 			}
 			return nil
 		case len(options) - 1:
+			v := reflect.ValueOf(config)
+			for i := 0; i < v.NumField(); i++ {
+				field := v.Field(i)
+				if reflect.DeepEqual(field.Interface(), reflect.Zero(reflect.TypeOf(field.Interface())).Interface()) {
+					fmt.Println("你还有一些配置没有设置!")
+					continue main
+				}
+			}
 			configs[config.Name] = config
 			err = lib.SaveServerConfigs(configs)
 			if err != nil {
@@ -349,9 +369,6 @@ func encoding() string {
 }
 
 func jvmArgs(jvmArgs []string) []string {
-	if len(jvmArgs) == 0 {
-		jvmArgs = append(jvmArgs, "-Dlog4j2.formatMsgNoLookups=true")
-	}
 	for {
 		options := jvmArgs
 		options = append(options, "添加参数", "确认")
@@ -429,9 +446,6 @@ func java() lib.JavaInfo {
 }
 
 func serverArgs(serverArgs []string) []string {
-	if len(serverArgs) == 0 {
-		serverArgs = append(serverArgs, "--nogui")
-	}
 	for {
 		options := serverArgs
 		options = append(options, "添加参数", "确认")

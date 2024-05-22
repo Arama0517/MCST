@@ -27,17 +27,21 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+func init() {
+	lib.InitLib()
+}
+
 func TestLogs(t *testing.T) {
 	logger := lib.Logger
 	logger.ExitFunc = LoggerExitFunc
 	logger.SetOutput(os.Stdout)
 	logger.SetLevel(logrus.TraceLevel)
-	logger.Trace("this is a trace message")
-	logger.Debug("this is a debug message")
-	logger.Info("this is an info message")
-	logger.Warn("this is a warning message")
-	logger.Error("this is an error message")
-	logger.Fatal("this is a fatal message")
+	logger.Trace("跟踪")
+	logger.Debug("调试")
+	logger.Info("信息")
+	logger.Warn("警告")
+	logger.Error("错误")
+	logger.Fatal("致命错误")
 }
 
 func LoggerExitFunc(code int) {

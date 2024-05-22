@@ -25,9 +25,17 @@ import (
 	"testing"
 
 	"github.com/Arama-Vanarana/MCSCS-Go/apis"
+	"github.com/Arama-Vanarana/MCSCS-Go/lib"
 )
 
+func init() {
+	lib.InitLib()
+	apis.InitPolars()
+}
+
 func TestGetPolarsDatas(t *testing.T) {
+	lib.InitLib()
+	apis.InitApis()
 	jsonData, err := json.MarshalIndent(apis.Polars, "", "    ")
 	if err != nil {
 		t.Fatal(err)
@@ -48,6 +56,8 @@ func TestGetPolarsCoresDatas(t *testing.T) {
 }
 
 func TestDownloadPolarsServer(t *testing.T) {
+	lib.InitLib()
+	apis.InitApis()
 	data, err := apis.GetPolarsCoresDatas(2)
 	if err != nil {
 		t.Fatal(err)

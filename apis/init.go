@@ -9,9 +9,9 @@ func InitApis() {
 	}
 	switch configs.API {
 	case 0:
-		initFastMirror()
+		InitFastMirror()
 	case 1:
-		initPolars()
+		InitPolars()
 	default:
 		panic("Invalid API selected")
 	}
