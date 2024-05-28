@@ -15,7 +15,7 @@ jobs:
             matrix:
                 arch:
                   - amd64
-                  - i386
+                  - "386"
         env:
             NAME: "MCSCS"
             GOOS: "windows"
@@ -78,7 +78,7 @@ jobs:
             - name: 下载编译结果 (i386)
               uses: actions/download-artifact@v4
               with: 
-                name: i386
+                name: "386"
                 path: packages
             - name: 下载打包后源码
               uses: actions/download-artifact@v4
@@ -93,8 +93,8 @@ jobs:
                   mv source.tar.gz MCSCS-${{ env.VERSION }}.tar.gz
                   mv source.tar.bz2 MCSCS-${{ env.VERSION }}.tar.bz2
                   mv source.tar.xz MCSCS-${{ env.VERSION }}.tar.xz
-                  mv amd64.zip MCSCS-${{ env.VERSION }}-amd64.zip
-                  mv i386.zip MCSCS-${{ env.VERSION }}-i386.zip
+                  mv amd64.zip MCSCS-${{ env.VERSION }}-x64.zip
+                  mv 386.zip MCSCS-${{ env.VERSION }}-x86.zip
 
             - name: 发布到 GitHub Releases
               uses: softprops/action-gh-release@v2
@@ -103,8 +103,8 @@ jobs:
                       packages/MCSCS-${{ env.VERSION }}.tar.gz
                       packages/MCSCS-${{ env.VERSION }}.tar.bz2
                       packages/MCSCS-${{ env.VERSION }}.tar.xz
-                      packages/MCSCS-${{ env.VERSION }}-amd64.zip
-                      packages/MCSCS-${{ env.VERSION }}-i386.zip
+                      packages/MCSCS-${{ env.VERSION }}-x64.zip
+                      packages/MCSCS-${{ env.VERSION }}-x86.zip
                   tag_name: v${{ env.VERSION }}
                   body: |
                       MCSCS-${{ env.VERSION }} 发布
