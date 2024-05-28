@@ -10,6 +10,7 @@ on:
 
 jobs:
     build:
+        name: 编译程序
         runs-on: windows-latest
         strategy:
             matrix:
@@ -17,13 +18,12 @@ jobs:
                   - amd64
                   - "386"
         env:
-            NAME: "MCSCS"
             GOOS: "windows"
             GOARCH: ${{ matrix.arch }}
         steps:
             - uses: actions/checkout@v4
             - name: 构建
-              run: go build -v -o ${{ github.workspace }}/${{ env.NAME }}.exe ${{ github.workspace }}/main.go
+              run: go build -v -o ${{ github.workspace }}/${{ matrix.arch }}.exe ${{ github.workspace }}/main.go
             - name: 上传
               uses: actions/upload-artifact@v4
               with:
