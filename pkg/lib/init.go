@@ -40,11 +40,12 @@ func Init() {
 	MCSCSConfigsPath = filepath.Join(DataDir, "configs.json")
 	if _, err := os.Stat(MCSCSConfigsPath); os.IsNotExist(err) {
 		jsonData, err := json.MarshalIndent(MCSCSConfig{
-			LogLevel:  "info",
-			API:       0,
-			Downloads: []DownloadInfo{},
-			Javas:     []JavaInfo{},
-			Servers:   map[string]ServerConfig{},
+			LogLevel:    "info",
+			API:         0,
+			Downloads:   []DownloadInfo{},
+			Javas:       []JavaInfo{},
+			Servers:     map[string]ServerConfig{},
+			Concurrency: 8,
 		}, "", "  ")
 		if err != nil {
 			panic(err)

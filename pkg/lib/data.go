@@ -75,13 +75,15 @@ type MCSCSConfig struct {
 	API int `json:"api"`
 
 	// 下载列表, 用`SaveDownloadsLists`函数更改
-	Downloads []DownloadInfo
+	Downloads []DownloadInfo `json:"downloads"`
 
 	// Java列表, 用`SaveJavaLists`函数更改
-	Javas []JavaInfo
+	Javas []JavaInfo `json:"javas"`
 
 	// 服务器列表, 用`SaveServerConfigs`函数更改
-	Servers map[string]ServerConfig
+	Servers map[string]ServerConfig `json:"servers"`
+
+	Concurrency int `json:"concurrency"`
 }
 
 func createDirIfNotExist(path string) {
