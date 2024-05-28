@@ -157,9 +157,7 @@ func downloadPartial(URL url.URL, filename string, rangeStart, rangeEnd, i int, 
 	if rangeStart >= rangeEnd {
 		return
 	}
-	header := http.Header{}
-	header.Set("Range", fmt.Sprintf("bytes=%d-%d", rangeStart, rangeEnd-1))
-	resp, err := Request(URL, http.MethodGet, header)
+	resp, err := Request(URL, http.MethodGet, map[string]string{"Range": fmt.Sprintf("bytes=%d-%d", rangeStart, rangeEnd-1)})
 	if err != nil {
 		log.Fatal(err)
 	}
