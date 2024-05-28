@@ -31,6 +31,9 @@ func init() {
 }
 
 func TestDownload(t *testing.T) {
+	if testing.Short() {
+		t.Skip("跳过下载测试")
+	}
 	filePath, err := lib.Download(url.URL{
 		Scheme: "https",
 		Host:   "golang.org",
