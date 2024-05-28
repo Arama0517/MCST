@@ -30,6 +30,7 @@ import (
 func init() {
 	lib.Init()
 	apis.Init()
+	pages.Init()
 }
 
 func main() {

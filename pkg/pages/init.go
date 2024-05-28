@@ -1,5 +1,5 @@
 package pages
 
-func init() {
+func Init() {
 	InitCreatePage()
 }
