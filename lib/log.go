@@ -19,7 +19,11 @@
 package lib
 
 import (
+	"os"
+
 	"github.com/sirupsen/logrus"
 )
 
-var Logger = logrus.New()
+var LogFilePath string
+var LogFile *os.File
+var Logger *logrus.Logger

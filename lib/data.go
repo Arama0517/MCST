@@ -21,10 +21,7 @@ package lib
 import (
 	"encoding/json"
 	"os"
-	"time"
 )
-
-var currentTime = time.Now()
 
 var DataDir string
 var ConfigsDir string

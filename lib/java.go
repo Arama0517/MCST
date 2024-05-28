@@ -36,7 +36,7 @@ type JavaInfo struct {
 func searchFile(path string, name string) ([]string, error) {
 	var results []string
 	err := fastwalk.Walk(&fastwalk.DefaultConfig, path, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
+		if err != nil && !os.IsPermission(err) {
 			Logger.WithError(err).Error("遍历Java目录失败")
 			return nil
 		}
@@ -44,8 +44,7 @@ func searchFile(path string, name string) ([]string, error) {
 			return err
 		}
 		results = append(results, path)
-		_, err = fmt.Println(path)
-		return err
+		return nil
 	})
 	if err != nil {
 		return nil, err
@@ -53,7 +52,7 @@ func searchFile(path string, name string) ([]string, error) {
 	return results, nil
 }
 
-func DetectJava() []JavaInfo {
+func DetectJava() ([]JavaInfo, error) {
 	var findJavas []JavaInfo
 	var javaPaths []string
 	if runtime.GOOS == "windows" {
@@ -62,16 +61,15 @@ func DetectJava() []JavaInfo {
 			if _, err := os.Stat(root); err == nil {
 				javaPaths, err = searchFile(root, "java.exe")
 				if err != nil {
-					fmt.Println("Error searching java:", err)
 					continue
 				}
 			}
 		}
 	} else {
 		var err error
-		javaPaths, err = searchFile("/usr/lib/jvm", "java")
+		javaPaths, err = searchFile("/usr", "java")
 		if err != nil {
-			fmt.Println("Error searching java:", err)
+			return nil, err
 		}
 	}
 	for _, java := range javaPaths {
@@ -80,5 +78,5 @@ func DetectJava() []JavaInfo {
 			findJavas = append(findJavas, JavaInfo{Path: java, Version: version})
 		}
 	}
-	return findJavas
+	return findJavas, nil
 }

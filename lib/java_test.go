@@ -30,7 +30,10 @@ func init() {
 }
 
 func TestDetectJava(t *testing.T) {
-	java := lib.DetectJava()
+	java, err := lib.DetectJava()
+	if err != nil {
+		t.Fatal(err)
+	}
 	jsonJava, err := json.MarshalIndent(java, "", "    ")
 	if err != nil {
 		t.Fatal(err)
