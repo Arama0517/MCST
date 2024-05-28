@@ -10,7 +10,7 @@ on:
 
 jobs:
     build:
-        runs-on: ubuntu-latest
+        runs-on: windows-latest
         strategy:
             matrix:
                 arch:
@@ -32,16 +32,11 @@ jobs:
               run: go build -v -o ${{ github.workspace }}/${{ env.NAME }}.exe ${{ github.workspace }}/main.go
             - name: 测试
               run: go test -v ${{ github.workspace }}/...
-            - name: 打包
-              run: |
-                  cd ${{ github.workspace }}
-                  mv ${{ env.NAME }}.exe ${{ env.NAME }}.exe
-                  zip ${{ matrix.arch }}.zip ${{ env.NAME }}.exe
             - name: 上传
               uses: actions/upload-artifact@v4
               with:
                   name: ${{ matrix.arch }}
-                  path: ${{ github.workspace }}/${{ matrix.arch }}.zip
+                  path: ${{ github.workspace }}/${{ matrix.arch }}.exe
 
     source:
         name: 打包源码
@@ -87,15 +82,16 @@ jobs:
                 path: packages
             - name: 获取版本号
               run: echo "VERSION=$(go run ${{ github.workspace }}/main.go --version)" >> $GITHUB_ENV
-            - name: 重命名
+            - name: 重命名并打包可执行程序
               run: |
                   cd packages
                   mv source.tar.gz MCSCS-${{ env.VERSION }}.tar.gz
                   mv source.tar.bz2 MCSCS-${{ env.VERSION }}.tar.bz2
                   mv source.tar.xz MCSCS-${{ env.VERSION }}.tar.xz
-                  mv amd64.zip MCSCS-${{ env.VERSION }}-x64.zip
-                  mv 386.zip MCSCS-${{ env.VERSION }}-x86.zip
-
+                  mv amd64.exe MCSCS-${{ env.VERSION }}.exe
+                  zip MCSCS-${{ env.VERSION }}-x64.zip ../LICENSE.txt ../README.md MCSCS.exe
+                  mv 386.exe MCSCS-${{ env.VERSION }}-x86.exe
+                  zip MCSCS-${{ env.VERSION }}-x86.zip ../LICENSE.txt ../README.md MCSCS.exe
             - name: 发布到 GitHub Releases
               uses: softprops/action-gh-release@v2
               with:
