@@ -21,6 +21,7 @@ package apis_test
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/Arama-Vanarana/MCSCS-Go/pkg/apis"
@@ -50,4 +51,33 @@ func TestGetFastMirrorBuildsDatas(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Println(string(jsonData))
+}
+
+func TestDownloadFastMirrorServer(t *testing.T) {
+	if testing.Short() {
+		t.Skip("跳过下载测试")
+	}
+	version := apis.FastMirror["Mohist"].MC_Versions[0]
+	buildsData, err := apis.GetFastMirrorBuildsDatas("Mohist", version)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var build string
+	for _, v := range buildsData {
+		build = v.Core_Version
+		break
+	}
+	path, err := apis.DownloadFastMirrorServer(lib.ServerInfo{
+		ServerType:       "Mohist",
+		MinecraftVersion: version,
+		BuildVersion:     build,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(path)
+	err = os.Remove(path)
+	if err != nil {
+		t.Fatal(err)
+	}
 }

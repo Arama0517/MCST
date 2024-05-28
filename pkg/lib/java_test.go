@@ -8,6 +8,9 @@ import (
 )
 
 func TestDetectJava(t *testing.T) {
+	if testing.Short() {
+		t.Skip("跳过寻找Java测试")
+	}
 	java, err := lib.DetectJava()
 	if err != nil {
 		t.Fatal(err)

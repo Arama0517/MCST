@@ -29,8 +29,8 @@ func GetJavaVersion(javaPath string) (string, error) {
 }
 
 type JavaInfo struct {
-	Path    string
-	Version string
+	Path    string `json:"path"`
+	Version string `json:"version"`
 }
 
 func searchFile(path string, name string) ([]string, error) {
