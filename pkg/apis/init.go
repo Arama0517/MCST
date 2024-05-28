@@ -1,9 +1,9 @@
 package apis
 
-import "github.com/Arama-Vanarana/MCSCS-Go/lib"
+import "github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
 
 func Init() {
-	configs, err :=	lib.LoadConfigs()
+	configs, err := lib.LoadConfigs()
 	if err != nil {
 		panic(err)
 	}

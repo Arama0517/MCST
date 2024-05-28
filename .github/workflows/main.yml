@@ -18,17 +18,17 @@ jobs:
                   - amd64
                   - "386"
         env:
-            GOOS: "windows"
+            GOOS: windows
             GOARCH: ${{ matrix.arch }}
         steps:
             - uses: actions/checkout@v4
             - name: 构建
-              run: go build -v -o ${{ github.workspace }}/${{ matrix.arch }}.exe ${{ github.workspace }}/main.go
+              run: go build -v -o ${{ github.workspace }}\${{ matrix.arch }}.exe ${{ github.workspace }}\cmd\MCSCS\main.go
             - name: 上传
               uses: actions/upload-artifact@v4
               with:
                   name: ${{ matrix.arch }}
-                  path: ${{ github.workspace }}/${{ matrix.arch }}.exe
+                  path: ${{ github.workspace }}\${{ matrix.arch }}.exe
 
     source:
         name: 打包源码
@@ -74,7 +74,7 @@ jobs:
                 name: source
                 path: packages
             - name: 获取版本号
-              run: echo "VERSION=$(go run ${{ github.workspace }}/main.go --version)" >> $GITHUB_ENV
+              run: echo "VERSION=$(go run ${{ github.workspace }}/cmd/version/main.go)" >> $GITHUB_ENV
             - name: 重命名并打包可执行程序
               run: |
                   cd packages

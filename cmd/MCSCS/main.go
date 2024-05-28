@@ -16,27 +16,45 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package lib_test
+package main
 
 import (
-	"encoding/json"
-	"testing"
+	"flag"
+	"fmt"
 
-	"github.com/Arama-Vanarana/MCSCS-Go/lib"
+	"github.com/Arama-Vanarana/MCSCS-Go/pkg/apis"
+	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
+	"github.com/Arama-Vanarana/MCSCS-Go/pkg/pages"
 )
 
 func init() {
 	lib.Init()
+	apis.Init()
 }
 
-func TestDetectJava(t *testing.T) {
-	java, err := lib.DetectJava()
-	if err != nil {
-		t.Fatal(err)
+func main() {
+	version := flag.Bool("version", false, "显示程序版本")
+	flag.Parse()
+	if *version {
+		fmt.Println(lib.VERSION)
+		return
 	}
-	jsonJava, err := json.MarshalIndent(java, "", "    ")
-	if err != nil {
-		t.Fatal(err)
+	options := []string{"创建服务器", "下载核心", "退出"}
+	for {
+		selected := lib.Select(options, "请选择一个选项 ")
+		var err error
+		switch selected {
+		case 0:
+			err = pages.CreatePage()
+		case 1:
+			err = pages.DownloadPage()
+		default:
+			return
+		}
+		lib.ClearScreen()
+		if err != nil {
+			lib.Logger.WithError(err).Error("运行失败")
+		}
 	}
-	t.Log(string(jsonJava))
+
 }

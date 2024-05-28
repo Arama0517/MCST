@@ -16,45 +16,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package main
+package lib_test
 
 import (
-	"flag"
 	"fmt"
+	"os"
+	"testing"
 
-	"github.com/Arama-Vanarana/MCSCS-Go/apis"
-	"github.com/Arama-Vanarana/MCSCS-Go/lib"
-	"github.com/Arama-Vanarana/MCSCS-Go/pages"
+	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
+	"github.com/sirupsen/logrus"
 )
 
 func init() {
 	lib.Init()
-	apis.Init()
 }
 
-func main() {
-	version := flag.Bool("version", false, "显示程序版本")
-	flag.Parse()
-	if *version {
-		fmt.Println(lib.VERSION)
-		return
-	}
-	options := []string{"创建服务器", "下载核心", "退出"}
-	for {
-		selected := lib.Select(options, "请选择一个选项 ")
-		var err error
-		switch selected {
-		case 0:
-			err = pages.CreatePage()
-		case 1:
-			err = pages.DownloadPage()
-		default:
-			return
-		}
-		lib.ClearScreen()
-		if err != nil {
-			lib.Logger.WithError(err).Error("运行失败")
-		}
-	}
-	
+func TestLogs(t *testing.T) {
+	logger := lib.Logger
+	logger.ExitFunc = LoggerExitFunc
+	logger.SetOutput(os.Stdout)
+	logger.SetLevel(logrus.TraceLevel)
+	logger.Trace("跟踪")
+	logger.Debug("调试")
+	logger.Info("信息")
+	logger.Warn("警告")
+	logger.Error("错误")
+	logger.Fatal("致命错误")
+}
+
+func LoggerExitFunc(code int) {
+	fmt.Println("logger.ExitFunc called, with exit code:", code)
 }

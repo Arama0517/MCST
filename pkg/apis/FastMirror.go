@@ -30,7 +30,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/Arama-Vanarana/MCSCS-Go/lib"
+	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
 )
 
 var FastMirror = map[string]FastMirrorData{}

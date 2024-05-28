@@ -19,31 +19,24 @@
 package lib_test
 
 import (
-	"fmt"
-	"os"
+	"encoding/json"
 	"testing"
 
-	"github.com/Arama-Vanarana/MCSCS-Go/lib"
-	"github.com/sirupsen/logrus"
+	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
 )
 
 func init() {
 	lib.Init()
 }
 
-func TestLogs(t *testing.T) {
-	logger := lib.Logger
-	logger.ExitFunc = LoggerExitFunc
-	logger.SetOutput(os.Stdout)
-	logger.SetLevel(logrus.TraceLevel)
-	logger.Trace("跟踪")
-	logger.Debug("调试")
-	logger.Info("信息")
-	logger.Warn("警告")
-	logger.Error("错误")
-	logger.Fatal("致命错误")
-}
-
-func LoggerExitFunc(code int) {
-	fmt.Println("logger.ExitFunc called, with exit code:", code)
+func TestDetectJava(t *testing.T) {
+	java, err := lib.DetectJava()
+	if err != nil {
+		t.Fatal(err)
+	}
+	jsonJava, err := json.MarshalIndent(java, "", "    ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(string(jsonJava))
 }

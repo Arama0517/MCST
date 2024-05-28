@@ -27,7 +27,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Arama-Vanarana/MCSCS-Go/lib"
+	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
 	"github.com/shirou/gopsutil/mem"
 )
 
@@ -49,6 +49,7 @@ func CreatePage() error {
 	if err != nil {
 		return err
 	}
+	// 默认配置
 	config := lib.ServerConfig{
 		// 1073741824 = 1GiB
 		Ram: lib.Ram{
@@ -412,7 +413,10 @@ func java() lib.JavaInfo {
 
 		switch selection {
 		case len(options) - 2:
-			javaLists = lib.DetectJava()
+			javaLists, err = lib.DetectJava()
+			if err != nil {
+				panic(err)
+			}
 			err := lib.SaveJavaLists(javaLists)
 			if err != nil {
 				panic(err)

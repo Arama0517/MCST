@@ -21,26 +21,20 @@ package pages
 import (
 	"fmt"
 
-	"github.com/Arama-Vanarana/MCSCS-Go/apis"
-	"github.com/Arama-Vanarana/MCSCS-Go/lib"
+	"github.com/Arama-Vanarana/MCSCS-Go/pkg/apis"
+	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
 )
 
 func DownloadPage() error {
 	var info lib.ServerInfo
 	var err error
 serverType:
-	info.ServerType, err = serverType()
-	if err != nil {
-		return err
-	}
+	info.ServerType = serverType()
 	if info.ServerType == "" {
 		return nil
 	}
 minecraftVersion:
-	info.MinecraftVersion, err = minecraftVersion(info.ServerType)
-	if err != nil {
-		return err
-	}
+	info.MinecraftVersion = minecraftVersion(info.ServerType)
 	if info.MinecraftVersion == "" {
 		goto serverType
 	}
@@ -67,7 +61,7 @@ minecraftVersion:
 	return nil
 }
 
-func serverType() (string, error) {
+func serverType() string {
 	options := []string{}
 	serverTypes := []string{}
 	for _, v := range apis.FastMirror {
@@ -94,21 +88,21 @@ func serverType() (string, error) {
 	selection := lib.Select(options, "请选择一个使用的服务器类型")
 	switch selection {
 	case len(options):
-		return "", nil
+		return ""
 	default:
-		return serverTypes[selection], nil
+		return serverTypes[selection]
 	}
 }
 
-func minecraftVersion(serverType string) (string, error) {
+func minecraftVersion(serverType string) string {
 	options := apis.FastMirror[serverType].MC_Versions
 	options = append(options, "返回")
 	selection := lib.Select(options, "请选择一个Minecraft版本")
 	switch selection {
 	case len(options):
-		return "", nil
+		return ""
 	default:
-		return options[selection], nil
+		return options[selection]
 	}
 }
 

@@ -24,25 +24,25 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Arama-Vanarana/MCSCS-Go/apis"
-	"github.com/Arama-Vanarana/MCSCS-Go/lib"
+	"github.com/Arama-Vanarana/MCSCS-Go/pkg/apis"
+	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
 )
 
 func init() {
 	lib.Init()
-	apis.InitPolars()
+	apis.InitFastMirror()
 }
 
-func TestGetPolarsDatas(t *testing.T) {
-	jsonData, err := json.MarshalIndent(apis.Polars, "", "    ")
+func TestGetFastMirrorDatas(t *testing.T) {
+	jsonData, err := json.MarshalIndent(apis.FastMirror, "", "    ")
 	if err != nil {
 		t.Fatal(err)
 	}
 	fmt.Println(string(jsonData))
 }
 
-func TestGetPolarsCoresDatas(t *testing.T) {
-	data, err := apis.GetPolarsCoresDatas(2)
+func TestGetFastMirrorBuildsDatas(t *testing.T) {
+	data, err := apis.GetFastMirrorBuildsDatas("Mohist", apis.FastMirror["Mohist"].MC_Versions[0])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,19 +53,22 @@ func TestGetPolarsCoresDatas(t *testing.T) {
 	fmt.Println(string(jsonData))
 }
 
-func TestDownloadPolarsServer(t *testing.T) {
-	data, err := apis.GetPolarsCoresDatas(2)
+func TestDownloadFastMirrorServer(t *testing.T) {
+	version := apis.FastMirror["Mohist"].MC_Versions[0]
+	buildsData, err := apis.GetFastMirrorBuildsDatas("Mohist", version)
 	if err != nil {
 		t.Fatal(err)
 	}
-	var name string
-	var downloadUrl string
-	for _, value := range data {
-		name = value.Name
-		downloadUrl = value.DownloadURL
+	var build string
+	for _, v := range buildsData {
+		build = v.Core_Version
 		break
 	}
-	path, err := apis.DownloadPolarsServer(downloadUrl, name)
+	path, err := apis.DownloadFastMirrorServer(lib.ServerInfo{
+		ServerType:       "Mohist",
+		MinecraftVersion: version,
+		BuildVersion:     build,
+	})
 	if err != nil {
 		t.Fatal(err)
 	}

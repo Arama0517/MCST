@@ -27,9 +27,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/Arama-Vanarana/MCSCS-Go/lib"
+	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
 )
-
 
 var Polars = map[string]PolarsData{}
 
