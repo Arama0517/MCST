@@ -73,6 +73,7 @@ jobs:
               with:
                   name: source
                   path: packages
+            # 忽略`Context access might be invalid: VERSION`警告, 因为这是补全未识别
             - name: 获取版本号
               run: echo "VERSION=$(go run ${{ github.workspace }}/cmd/version/main.go)" >> $GITHUB_ENV
             - name: 重命名并打包可执行程序
