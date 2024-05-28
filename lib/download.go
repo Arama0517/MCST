@@ -1,9 +1,28 @@
+/*
+ * MCSCS can be used to easily create, launch, and configure a Minecraft server.
+ * Copyright (C) 2024 Arama
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package lib
 
 import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"time"
@@ -13,20 +32,17 @@ import (
 )
 
 // 下载文件, 返回文件路径
-func Download(url string, fileName string) (string, error) {
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", url, nil)
+func Download(url url.URL, fileName string) (string, error) {
+	filePath := filepath.Join(DownloadsDir, fileName)
+	// 不重复下载
+	if _, err := os.Stat(filePath); err == nil {
+		return filePath, nil
+	}
+	resp, err := Request(url, http.MethodGet, nil)
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("User-Agent", "MCSCS-Golang/"+VERSION)
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("请求%s失败, 状态码: %s", url, resp.Status)
-	}
+	defer resp.Body.Close()
 
 	// 进度条
 	ansiStdout := ansi.NewAnsiStdout()
@@ -49,10 +65,7 @@ func Download(url string, fileName string) (string, error) {
 		progressbar.OptionThrottle(65*time.Millisecond),
 		progressbar.OptionOnCompletion(func() {
 			fmt.Fprint(ansiStdout, "\n")
-		}),
-	)
-
-	filePath := filepath.Join(DownloadsDir, fileName)
+		}))
 	file, err := os.Create(filePath)
 	if err != nil {
 		return "", err

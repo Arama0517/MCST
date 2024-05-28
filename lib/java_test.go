@@ -19,8 +19,7 @@
 package lib_test
 
 import (
-	"net/url"
-	"os"
+	"encoding/json"
 	"testing"
 
 	"github.com/Arama-Vanarana/MCSCS-Go/lib"
@@ -30,15 +29,11 @@ func init() {
 	lib.Init()
 }
 
-func TestDownload(t *testing.T) {
-	filePath, err := lib.Download(url.URL{
-		Scheme: "https",
-		Host:   "golang.org",
-		Path:   "/dl/go1.22.3.src.tar.gz",
-	}, "go1.22.3.src.tar.gz")
+func TestDetectJava(t *testing.T) {
+	java := lib.DetectJava()
+	jsonJava, err := json.MarshalIndent(java, "", "    ")
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(filePath)
-	os.Remove(filePath)
+	t.Log(string(jsonJava))
 }

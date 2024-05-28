@@ -1,9 +1,30 @@
+/*
+ * MCSCS can be used to easily create, launch, and configure a Minecraft server.
+ * Copyright (C) 2024 Arama
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+// 无极镜像
+
 package apis
 
 import (
 	"crypto/sha1"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -12,95 +33,88 @@ import (
 	"github.com/Arama-Vanarana/MCSCS-Go/lib"
 )
 
-type FastMirrorDatas struct {
-	data []struct {
-		name        string
-		tag         string
-		homepage    string
-		recommanded bool
-		mc_versions []string
-	}
-	code    string
-	suceess bool
-	message string
-}
+var FastMirror = map[string]FastMirrorData{}
 
-func GetFastMirrorDatas() (FastMirrorDatas, error) {
+func InitFastMirror() {
+	var err error
 	url := url.URL{
 		Scheme: "https",
 		Host:   "download.fastmirror.net",
 		Path:   "/api/v3",
 	}
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", url.String(), nil)
+	resp, err := lib.Request(url, http.MethodGet, nil)
 	if err != nil {
-		return FastMirrorDatas{}, err
-	}
-	req.Header.Set("User-Agent", "MCSCS-Golang/"+lib.VERSION)
-	resp, err := client.Do(req)
-	if err != nil {
-		return FastMirrorDatas{}, err
+		panic(err)
 	}
 	defer resp.Body.Close()
-	var data FastMirrorDatas
-	err = json.NewDecoder(resp.Body).Decode(&data)
+	var data struct {
+		Data []FastMirrorData `json:"data"`
+	}
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return FastMirrorDatas{}, err
+		panic(err)
 	}
-	return data, nil
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		panic(err)
+	}
+	for i := 0; i < len(data.Data); i++ {
+		FastMirror[data.Data[i].Name] = data.Data[i]
+	}
 }
 
-type FastMirrorBuildsDatas struct {
-	data struct {
-		builds []struct {
-			name         string
-			mc_version   string
-			core_version string
-			update_time  string
-			sha1         string
-		}
-		offset int
-		limit  int
-		count  int
-	}
-	code    string
-	suceess bool
-	message string
+type FastMirrorData struct {
+	Name        string   `json:"name"`
+	Tag         string   `json:"tag"`
+	Homepage    string   `json:"homepage"`
+	Recommanded bool     `json:"recommanded"`
+	MC_Versions []string `json:"mc_versions"`
 }
 
-func GetFastMirrorBuildsDatas(server_type string, minecraft_version string) (FastMirrorBuildsDatas, error) {
-	url := url.URL{
+type FastMirrorBuilds struct {
+	Name         string `json:"name"`
+	MC_Version   string `json:"mc_version"`
+	Core_Version string `json:"core_version"`
+	Update_Time  string `json:"update_time"`
+	Sha1         string `json:"sha1"`
+}
+
+type ParsedFastMirrorBuilds map[string]FastMirrorBuilds
+
+func GetFastMirrorBuildsDatas(ServerType string, MinecraftVersion string) (ParsedFastMirrorBuilds, error) {
+	resp, err := lib.Request(url.URL{
 		Scheme:   "https",
 		Host:     "download.fastmirror.net",
-		Path:     "/api/v3/" + server_type + "/" + minecraft_version,
+		Path:     "/api/v3/" + ServerType + "/" + MinecraftVersion,
 		RawQuery: "?offset=0&limit=25",
-	}
-	client := &http.Client{}
-	req, err := http.NewRequest("GET", url.String(), nil)
+	}, http.MethodGet, nil)
 	if err != nil {
-		return FastMirrorBuildsDatas{}, err
-	}
-	req.Header.Set("User-Agent", "MCSCS-Golang/"+lib.VERSION)
-	resp, err := client.Do(req)
-	if err != nil {
-		return FastMirrorBuildsDatas{}, err
+		return ParsedFastMirrorBuilds{}, err
 	}
 	defer resp.Body.Close()
-	var data FastMirrorBuildsDatas
+	var data struct {
+		Data struct {
+			Builds []FastMirrorBuilds `json:"builds"`
+		} `json:"data"`
+	}
 	err = json.NewDecoder(resp.Body).Decode(&data)
 	if err != nil {
-		return FastMirrorBuildsDatas{}, err
+		return ParsedFastMirrorBuilds{}, err
 	}
-	return data, nil
+	parseDatas := ParsedFastMirrorBuilds{}
+	for i := 0; i < len(data.Data.Builds); i++ {
+		data := data.Data.Builds[i]
+		parseDatas[data.Core_Version] = data
+	}
+	return parseDatas, nil
 }
 
-func DownloadFastMirrorServers(server_type string, minecraft_version string, build_version string) (string, error) {
-	url := url.URL{
+func DownloadFastMirrorServer(info lib.ServerInfo) (string, error) {
+	path, err := lib.Download(url.URL{
 		Scheme: "https",
 		Host:   "download.fastmirror.net",
-		Path:   "/download/" + server_type + "/" + minecraft_version + "/" + build_version,
-	}
-	path, err := lib.Download(url.String(), server_type+"-"+minecraft_version+"-"+build_version+".jar")
+		Path:   "/download/" + info.ServerType + "/" + info.MinecraftVersion + "/" + info.BuildVersion,
+	}, info.ServerType+"-"+info.MinecraftVersion+"-"+info.BuildVersion+".jar")
 	if err != nil {
 		return "", err
 	}
@@ -114,11 +128,15 @@ func DownloadFastMirrorServers(server_type string, minecraft_version string, bui
 		return "", err
 	}
 	hash := hasher.Sum(nil)
-	FastMirrorBuildsData, err := GetFastMirrorBuildsDatas(server_type, minecraft_version)
+	FastMirrorBuildsData, err := GetFastMirrorBuildsDatas(info.ServerType, info.MinecraftVersion)
 	if err != nil {
 		return "", err
 	}
-	if string(hash) != FastMirrorBuildsData.data.builds[0].sha1 {
+	if fmt.Sprintf("%x", hash) != FastMirrorBuildsData[info.BuildVersion].Sha1 {
+		err := os.Remove(path)
+		if err != nil {
+			return "", err
+		}
 		return "", errors.New("Sha1不匹配")
 	}
 	return path, nil

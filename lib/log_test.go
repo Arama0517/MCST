@@ -19,26 +19,31 @@
 package lib_test
 
 import (
-	"net/url"
+	"fmt"
 	"os"
 	"testing"
 
 	"github.com/Arama-Vanarana/MCSCS-Go/lib"
+	"github.com/sirupsen/logrus"
 )
 
 func init() {
 	lib.Init()
 }
 
-func TestDownload(t *testing.T) {
-	filePath, err := lib.Download(url.URL{
-		Scheme: "https",
-		Host:   "golang.org",
-		Path:   "/dl/go1.22.3.src.tar.gz",
-	}, "go1.22.3.src.tar.gz")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(filePath)
-	os.Remove(filePath)
+func TestLogs(t *testing.T) {
+	logger := lib.Logger
+	logger.ExitFunc = LoggerExitFunc
+	logger.SetOutput(os.Stdout)
+	logger.SetLevel(logrus.TraceLevel)
+	logger.Trace("跟踪")
+	logger.Debug("调试")
+	logger.Info("信息")
+	logger.Warn("警告")
+	logger.Error("错误")
+	logger.Fatal("致命错误")
+}
+
+func LoggerExitFunc(code int) {
+	fmt.Println("logger.ExitFunc called, with exit code:", code)
 }
