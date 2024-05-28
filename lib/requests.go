@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// 请求URL, 返回响应; 运行成功后请添加`defer resp.Body.Close()`到你的代码内
+// Request 请求URL, 返回响应; 运行成功后请添加`defer resp.Body.Close()`到你的代码内
 func Request(URL url.URL, Method string, Headers map[string]string) (*http.Response, error) {
 	client := http.Client{
 		Timeout: 5 * time.Second,

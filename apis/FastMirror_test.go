@@ -29,7 +29,7 @@ import (
 )
 
 func init() {
-	lib.InitLib()
+	lib.Init()
 	apis.InitFastMirror()
 }
 

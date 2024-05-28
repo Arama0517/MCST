@@ -57,11 +57,11 @@ main:
 		displayOptions := make([]string, 0)
 		var files []fs.DirEntry
 		if currentDir != "drives" {
-			files_read, err := os.ReadDir(currentDir)
+			readFiles, err := os.ReadDir(currentDir)
 			if err != nil {
 				return "", err
 			}
-			files = files_read
+			files = readFiles
 		}
 		if currentDir == "drives" {
 			options = append(options, getDrivePaths()...)

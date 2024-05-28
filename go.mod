@@ -20,6 +20,7 @@ go 1.22.3
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
+	github.com/charlievieth/fastwalk v1.0.3
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/schollz/progressbar/v3 v3.14.3
 	github.com/shirou/gopsutil v2.21.11+incompatible

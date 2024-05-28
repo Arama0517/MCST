@@ -25,6 +25,10 @@ import (
 	"github.com/Arama-Vanarana/MCSCS-Go/lib"
 )
 
+func init() {
+	lib.Init()
+}
+
 func TestDetectJava(t *testing.T) {
 	java := lib.DetectJava()
 	jsonJava, err := json.MarshalIndent(java, "", "    ")

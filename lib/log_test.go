@@ -28,7 +28,7 @@ import (
 )
 
 func init() {
-	lib.InitLib()
+	lib.Init()
 }
 
 func TestLogs(t *testing.T) {

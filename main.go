@@ -28,8 +28,8 @@ import (
 )
 
 func init() {
-	lib.InitLib()
-	apis.InitApis()
+	lib.Init()
+	apis.Init()
 }
 
 func main() {

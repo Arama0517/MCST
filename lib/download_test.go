@@ -27,7 +27,7 @@ import (
 )
 
 func init() {
-	lib.InitLib()
+	lib.Init()
 }
 
 func TestDownload(t *testing.T) {

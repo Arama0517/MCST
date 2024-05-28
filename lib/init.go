@@ -9,7 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func InitLib() {
+func Init() {
 	// 数据
 	UserHomeDir, err := os.UserHomeDir()
 	if err != nil {
