@@ -1,20 +1,34 @@
+.PHONY: all build run test deps install uninstall
+
+BINARY_NAME=MCSCS
+BUILD_PATH=cmd/MCSCS/main.go
+INSTALL_PATH=/usr/local/bin
+
 all: run
 
 build:
-	go build main.go
+	go build -o $(BINARY_NAME) $(BUILD_PATH)
 
 run:
-	go run main.go
+	go run $(BUILD_PATH)
 
 test:
-	go test -v ./...
+	go test -v ./pkg/...
 
 deps:
 	go mod tidy
 
 install: build
-	cp main /usr/local/bin/MCSCS
-	rm main
+	@if [ -f "$(INSTALL_PATH)/$(BINARY_NAME)" ]; then \
+		echo "$(BINARY_NAME) 已安装"; \
+	else \
+		cp $(BINARY_NAME) $(INSTALL_PATH)/$(BINARY_NAME); \
+		rm $(BINARY_NAME) -f; \
+	fi
 
 uninstall:
-	rm /usr/local/bin/MCSCS
+	@if [ -f "$(INSTALL_PATH)/$(BINARY_NAME)" ]; then \
+		read -p "你确认要卸载 $(BINARY_NAME) 吗? [y/N] " confirm && [ $$confirm == y ] || [ $$confirm == Y ] && rm $(INSTALL_PATH)/$(BINARY_NAME); \
+	else \
+		echo "$(BINARY_NAME) 还没有安装"; \
+	fi
