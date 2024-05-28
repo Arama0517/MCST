@@ -67,7 +67,7 @@ func DetectJava() ([]JavaInfo, error) {
 		}
 	} else {
 		var err error
-		javaPaths, err = searchFile("/usr", "java")
+		javaPaths, err = searchFile("/usr/lib", "java")
 		if err != nil {
 			return nil, err
 		}

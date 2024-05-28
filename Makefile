@@ -13,7 +13,7 @@ run:
 	go run $(BUILD_PATH)
 
 test:
-	go test -v ./pkg/...
+	go test -short -race -v ./pkg/...
 
 deps:
 	go mod tidy
