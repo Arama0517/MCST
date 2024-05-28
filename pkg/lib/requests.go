@@ -21,8 +21,5 @@ func Request(URL url.URL, Method string, Header map[string]string) (*http.Respon
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf(resp.Status)
-	}
 	return resp, nil
 }

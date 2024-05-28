@@ -33,7 +33,7 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-var concurrency int
+var Concurrency int
 var ansiStdout = ansi.NewAnsiStdout()
 
 func Download(URL url.URL, filename string) (string, error) {
@@ -45,9 +45,11 @@ func Download(URL url.URL, filename string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	concurrency = configs.Concurrency
+	Concurrency = configs.Concurrency
 	path := filepath.Join(DownloadsDir, filename)
-	if resp.Header.Get("Accept-Ranges") == "bytes" && resp.ContentLength > 1024*1024 {
+	if resp.StatusCode != http.StatusOK {
+		return path, fmt.Errorf(resp.Status)
+	} else if resp.Header.Get("Accept-Ranges") == "bytes" && resp.ContentLength > 1024*1024 {
 		return path, MultiDownload(URL, filename, int(resp.ContentLength))
 	}
 	return path, SingleDownload(URL, filename)
@@ -95,7 +97,7 @@ func SingleDownload(URL url.URL, filename string) error {
 }
 
 func MultiDownload(URL url.URL, filename string, contentLen int) error {
-	partSize := contentLen / concurrency
+	partSize := contentLen / Concurrency
 
 	// 创建部分文件的存放目录
 	partDir := getPartDir(filename)
@@ -103,14 +105,14 @@ func MultiDownload(URL url.URL, filename string, contentLen int) error {
 	defer os.RemoveAll(partDir)
 
 	var wg sync.WaitGroup
-	wg.Add(concurrency)
+	wg.Add(Concurrency)
 
 	rangeStart := 0
 	bar := progressbar.NewOptions(
 		contentLen,
 		progressbar.OptionEnableColorCodes(true),
 		progressbar.OptionFullWidth(),
-		progressbar.OptionSetDescription(fmt.Sprintf("[black]%d线程[cyan]同时下载中...[reset]", concurrency)),
+		progressbar.OptionSetDescription(fmt.Sprintf("[black]%d线程[cyan]同时下载中...[reset]", Concurrency)),
 		progressbar.OptionSetRenderBlankState(true),
 		progressbar.OptionSetTheme(progressbar.Theme{
 			BarEnd:        "]",
@@ -127,14 +129,14 @@ func MultiDownload(URL url.URL, filename string, contentLen int) error {
 			fmt.Fprint(ansiStdout, "\n")
 		}))
 
-	for i := 0; i < concurrency; i++ {
+	for i := 0; i < Concurrency; i++ {
 		// 并发请求
 		go func(i, rangeStart int) {
 			defer wg.Done()
 
 			rangeEnd := rangeStart + partSize
 			// 最后一部分，总长度不能超过 ContentLength
-			if i == concurrency-1 {
+			if i == Concurrency-1 {
 				rangeEnd = contentLen
 			}
 
@@ -197,7 +199,7 @@ func merge(filename string) error {
 	}
 	defer destFile.Close()
 
-	for i := 0; i < concurrency; i++ {
+	for i := 0; i < Concurrency; i++ {
 		partFileName := getPartFilename(filename, i)
 		partFile, err := os.Open(partFileName)
 		if err != nil {

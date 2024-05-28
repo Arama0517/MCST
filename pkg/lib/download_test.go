@@ -46,6 +46,7 @@ func TestMultiDownload(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer resp.Body.Close()
+	lib.Concurrency = 8
 	err = lib.MultiDownload(URL, "go1.22.3.src.tar.gz", int(resp.ContentLength))
 	if err != nil {
 		t.Fatal(err)
