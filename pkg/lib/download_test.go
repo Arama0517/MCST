@@ -31,9 +31,6 @@ func init() {
 }
 
 func TestMultiDownload(t *testing.T) {
-	if testing.Short() {
-		t.Skip("跳过下载测试")
-	}
 	path, err := lib.Downloader{
 		URL: url.URL{
 			Scheme: "https",
@@ -51,9 +48,6 @@ func TestMultiDownload(t *testing.T) {
 }
 
 func TestSingleDownload(t *testing.T) {
-	if testing.Short() {
-		t.Skip("跳过下载测试")
-	}
 	path, err := lib.Downloader{
 		URL: url.URL{
 			Scheme: "https",
