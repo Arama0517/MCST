@@ -40,18 +40,11 @@ type PolarsData struct {
 }
 
 func InitPolars() {
-	url := url.URL{
+	resp, err := lib.Request(url.URL{
 		Scheme: "https",
 		Host:   "mirror.polars.cc",
 		Path:   "/api/query/minecraft/core",
-	}
-	client := &http.Client{}
-	req, err := http.NewRequest(http.MethodGet, url.String(), nil)
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("User-Agent", "MCSCS-Golang/"+lib.VERSION)
-	resp, err := client.Do(req)
+	}, http.MethodGet, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -81,19 +74,11 @@ type PolarsCores struct {
 type ParsedPolarsCores map[string]PolarsCores
 
 func GetPolarsCoresDatas(ID int) (ParsedPolarsCores, error) {
-	url := url.URL{
+	resp, err := lib.Request(url.URL{
 		Scheme: "https",
 		Host:   "mirror.polars.cc",
 		Path:   fmt.Sprintf("/api/query/minecraft/core/%d", ID),
-	}
-
-	client := &http.Client{}
-	req, err := http.NewRequest(http.MethodGet, url.String(), nil)
-	if err != nil {
-		return ParsedPolarsCores{}, err
-	}
-	req.Header.Set("User-Agent", "MCSCS-Golang/"+lib.VERSION)
-	resp, err := client.Do(req)
+	}, http.MethodGet, nil)
 	if err != nil {
 		return ParsedPolarsCores{}, err
 	}
@@ -121,7 +106,10 @@ func DownloadPolarsServer(DownloadURL string, Name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	path, err := lib.Download(*url, Name)
+	path, err := lib.Downloader{
+		URL:      *url,
+		FileName: Name,
+	}.Download()
 	if err != nil {
 		return "", err
 	}

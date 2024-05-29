@@ -19,7 +19,6 @@
 package pages
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -28,24 +27,24 @@ import (
 	"strings"
 
 	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
-	"github.com/shirou/gopsutil/mem"
+	"github.com/shirou/gopsutil/v3/mem"
 )
 
-var JVM_min_ram uint64 = 1048576
-var RealMem uint64
-var TempConfigsPath string
+// var JVM_min_ram uint64 = 1048576
+// var RealMem uint64
+// var TempConfigsPath string
 
-func InitCreatePage() {
-	RealMemInfo, err := mem.VirtualMemory()
-	if err != nil {
-		panic(err)
-	}
-	RealMem = RealMemInfo.Total
-	TempConfigsPath = filepath.Join(lib.ConfigsDir, "config_temp.json")
-}
+// func InitCreatePage() {
+// 	RealMemInfo, err := mem.VirtualMemory()
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	RealMem = RealMemInfo.Total
+// 	TempConfigsPath = filepath.Join(lib.ConfigsDir, "config_temp.json")
+// }
 
 func CreatePage() error {
-	configs, err := lib.LoadServerConfigs()
+	configs, err := lib.LoadConfigs()
 	if err != nil {
 		return err
 	}
@@ -60,15 +59,9 @@ func CreatePage() error {
 		JVMArgs:    []string{"-Dlog4j2.formatMsgNoLookups=true"},
 		ServerArgs: []string{"--nogui"},
 	}
-	if _, err := os.Stat(TempConfigsPath); err == nil && lib.Confirm("检测到存在上次已暂存的配置, 是否还原?") {
-		file, err := os.ReadFile(TempConfigsPath)
-		if err != nil {
-			return err
-		}
-		err = json.Unmarshal(file, &config)
-		if err != nil {
-			return err
-		}
+	if value, exists := configs.Servers["temp"]; exists && lib.Confirm("检测到存在上次已暂存的配置, 是否还原?") {
+		config = value
+		delete(configs.Servers, "temp")
 	}
 main:
 	for {
@@ -82,13 +75,13 @@ main:
 			}(),
 			"XMS(Java虚拟机初始堆内存): " + func() string {
 				if config.Ram.XMS == 1073741824 {
-					return fmt.Sprintf("默认配置: %dB", JVM_min_ram)
+					return fmt.Sprintf("默认配置: %dB", 1073741824)
 				}
 				return fmt.Sprintf("%dB", config.Ram.XMS)
 			}(),
 			"XMX(Java虚拟机最大堆内存): " + func() string {
 				if config.Ram.XMX == 1073741824 {
-					return fmt.Sprintf("默认配置: %dB", JVM_min_ram)
+					return fmt.Sprintf("默认配置: %dB", 1073741824)
 				}
 				return fmt.Sprintf("%dB", config.Ram.XMX)
 			}(),
@@ -125,10 +118,10 @@ main:
 			"返回并暂存",
 			"完成并保存",
 		}
-		selection := lib.Select(options, "请选择一个选项")
+		selection := lib.Select("请选择一个选项", options)
 		switch selection {
 		case 0:
-			config.Name = name(configs)
+			config.Name = name(configs.Servers)
 		case 1:
 			config.Ram.XMS = jvmArgsXMS(config.Ram.XMX)
 		case 2:
@@ -142,26 +135,19 @@ main:
 		case 6:
 			config.ServerArgs = serverArgs(config.ServerArgs)
 		case 7:
-			DownloadsInfo, err := lib.LoadDownloadsLists()
-			if err != nil {
-				return err
-			}
 			options := []string{}
-			for _, v := range DownloadsInfo {
+			for _, v := range configs.Downloads {
 				options = append(options, filepath.Base(v.Path))
 			}
 			options = append(options, "返回")
-			selection := lib.Select(options, "请选择一个服务器核心")
+			selection := lib.Select("请选择一个服务器核心", options)
 			if selection == len(options)-1 {
 				continue
 			}
-			config.Info = DownloadsInfo[selection].Info
+			config.Info = configs.Downloads[selection].Info
 		case len(options) - 2:
-			jsonConfigs, err := json.MarshalIndent(configs, "", "  ")
-			if err != nil {
-				return err
-			}
-			err = os.WriteFile(filepath.Join(lib.ConfigsDir, "config_temp.json"), jsonConfigs, 0644)
+			configs.Servers["temp"] = config
+			err = configs.Save()
 			if err != nil {
 				return err
 			}
@@ -175,8 +161,8 @@ main:
 					continue main
 				}
 			}
-			configs[config.Name] = config
-			err = lib.SaveServerConfigs(configs)
+			configs.Servers[config.Name] = config
+			err = configs.Save()
 			if err != nil {
 				return err
 			}
@@ -189,58 +175,61 @@ func name(configs map[string]lib.ServerConfig) string {
 main:
 	for {
 		inputName := lib.Input("请输入此服务器的名称: ")
-		for name := range configs {
-			if inputName == name {
-				fmt.Println("已存在此名称的服务器, 请重新输入")
-				continue main
+		switch inputName {
+		case "temp":
+			fmt.Println("名称不能为temp")
+			continue main
+		case "":
+			fmt.Println("名称不能为空")
+			continue main
+		default:
+			for name := range configs {
+				if inputName == name {
+					fmt.Println("已存在此名称的服务器, 请重新输入")
+					continue main
+				}
 			}
+			return inputName
 		}
-		return inputName
 	}
 }
 
 func ToBytes(byteStr string) (uint64, error) {
-	var numPart, unitPart string
+	var num, unit string
 
 	// 分离数字部分和单位部分
 	for _, char := range byteStr {
 		if char >= '0' && char <= '9' {
-			numPart += string(char)
+			num += string(char)
 		} else if (char >= 'A' && char <= 'Z') || (char >= 'a' && char <= 'z') {
-			unitPart += strings.ToUpper(string(char))
+			unit += strings.ToUpper(string(char))
 		} else {
-			return 0, nil // 如果有除了数字和单位以外的字符, 则返回0
+			return 0, nil
 		}
 	}
-	unitJSON := map[string]uint64{
-		"T":     1024 * 1024 * 1024 * 1024,
-		"TB":    1000 * 1000 * 1000 * 1000,
-		"TIB":   1024 * 1024 * 1024 * 1024,
-		"G":     1024 * 1024 * 1024,
-		"GB":    1000 * 1000 * 1000,
-		"GIB":   1024 * 1024 * 1024,
-		"M":     1024 * 1024,
-		"MB":    1000 * 1000,
-		"MIB":   1024 * 1024,
-		"K":     1024,
-		"KB":    1000,
-		"KIB":   1024,
-		"B":     1,
-		"BYTES": 1,
-		"":      1,
+
+	var multiplier uint64
+	switch unit {
+	case "T", "TB", "TIB":
+		multiplier = 1024 * 1024 * 1024 * 1024
+	case "G", "GB", "GIB":
+		multiplier = 1024 * 1024 * 1024
+	case "M", "MB", "MIB":
+		multiplier = 1024 * 1024
+	case "K", "KB", "KIB":
+		multiplier = 1024
+	case "B", "BYTES", "":
+		multiplier = 1
+	default:
+		return 0, fmt.Errorf(unit)
 	}
 
-	unitMultiplier, ok := unitJSON[unitPart]
-	if !ok {
-		return 0, nil
-	}
-
-	num, err := strconv.ParseUint(numPart, 10, 64)
+	parsedNum, err := strconv.ParseUint(num, 10, 64)
 	if err != nil {
 		return 0, err
 	}
 
-	return num * unitMultiplier, nil
+	return parsedNum * multiplier, nil
 }
 
 func jvmArgsXMS(XMX uint64) uint64 {
@@ -248,7 +237,7 @@ func jvmArgsXMS(XMX uint64) uint64 {
 	var unit string
 	for {
 		options := []string{"大小", "单位", "确认"}
-		selection := lib.Select(options, fmt.Sprintf("请选择一个选项, 当前XMS: %d%s", bytes, unit))
+		selection := lib.Select(fmt.Sprintf("请选择一个选项, 当前XMS: %d%s", bytes, unit), options)
 		switch selection {
 		case 0:
 			input := lib.Input("请输入XMS大小(数字, 不可小于0): ")
@@ -264,7 +253,7 @@ func jvmArgsXMS(XMX uint64) uint64 {
 				"KB: 1024B", "KiB: 1024B",
 				"B: 字节",
 			}
-			selection := lib.Select(options, "请选择一个单位")
+			selection := lib.Select("请选择一个单位", options)
 			switch selection {
 			case 0:
 				unit = "GB"
@@ -290,11 +279,15 @@ func jvmArgsXMS(XMX uint64) uint64 {
 				fmt.Println("XMS不能大于XMX")
 				continue
 			}
-			if XMS <= JVM_min_ram {
+			if XMS <= 1048576 {
 				fmt.Println("XMS不能小于1MiB")
 				continue
 			}
-			if RealMem < XMS {
+			realMemInfo, err := mem.VirtualMemory()
+			if err != nil {
+				panic(err)
+			}
+			if realMemInfo.Total < XMS {
 				fmt.Println("XMS不能大于物理内存")
 				continue
 			}
@@ -308,7 +301,7 @@ func jvmArgsXMX(XMS uint64) uint64 {
 	unit := "GiB"
 	for {
 		options := []string{"大小", "单位", "确认"}
-		selection := lib.Select(options, fmt.Sprintf("请选择一个选项, 当前XMX: %d%s", bytes, unit))
+		selection := lib.Select(fmt.Sprintf("请选择一个选项, 当前XMX: %d%s", bytes, unit), options)
 		switch selection {
 		case 0:
 			input := lib.Input("请输入XMX大小(数字, 不可小于0): ")
@@ -324,7 +317,7 @@ func jvmArgsXMX(XMS uint64) uint64 {
 				"KB: 1024B", "KiB: 1024B",
 				"B: 字节",
 			}
-			selection := lib.Select(options, "请选择一个单位")
+			selection := lib.Select("请选择一个单位", options)
 			switch selection {
 			case 0:
 				unit = "GB"
@@ -350,11 +343,15 @@ func jvmArgsXMX(XMS uint64) uint64 {
 				fmt.Println("XMX不能小于XMS")
 				continue
 			}
-			if XMX <= JVM_min_ram {
+			if XMX <= 1048576 {
 				fmt.Println("XMX不能小于1MiB")
 				continue
 			}
-			if RealMem < XMX {
+			realMemInfo, err := mem.VirtualMemory()
+			if err != nil {
+				panic(err)
+			}
+			if realMemInfo.Total < XMX {
 				fmt.Println("XMX不能大于物理内存")
 				continue
 			}
@@ -365,7 +362,7 @@ func jvmArgsXMX(XMS uint64) uint64 {
 
 func encoding() string {
 	options := []string{"UTF-8", "GBK"}
-	selection := lib.Select(options, "请选择一个编码")
+	selection := lib.Select("请选择一个编码", options)
 	return options[selection]
 }
 
@@ -373,7 +370,7 @@ func jvmArgs(jvmArgs []string) []string {
 	for {
 		options := jvmArgs
 		options = append(options, "添加参数", "确认")
-		selection := lib.Select(options, "请选择一个选项或要更改的Java虚拟机参数")
+		selection := lib.Select("请选择一个选项或要更改的Java虚拟机参数", options)
 		switch selection {
 		case len(options) - 2:
 			input := lib.Input("请输入Java虚拟机参数: ")
@@ -400,24 +397,24 @@ func jvmArgs(jvmArgs []string) []string {
 
 func java() lib.JavaInfo {
 	for {
-		javaLists, err := lib.LoadJavaLists()
+		configs, err := lib.LoadConfigs()
 		if err != nil {
 			panic(err)
 		}
 		options := []string{}
-		for _, v := range javaLists {
+		for _, v := range configs.Javas {
 			options = append(options, fmt.Sprintf("%s(%s)", v.Version, v.Path))
 		}
 		options = append(options, "重新检测Java环境", "手动选择Java可执行程序")
-		selection := lib.Select(options, "请选择一个Java环境或选项")
+		selection := lib.Select("请选择一个Java环境或选项", options)
 
 		switch selection {
 		case len(options) - 2:
-			javaLists, err = lib.DetectJava()
+			configs.Javas, err = lib.DetectJava()
 			if err != nil {
 				panic(err)
 			}
-			err := lib.SaveJavaLists(javaLists)
+			err := configs.Save()
 			if err != nil {
 				panic(err)
 			}
@@ -437,14 +434,14 @@ func java() lib.JavaInfo {
 				Version: java_ver,
 				Path:    input,
 			}
-			javaLists = append(javaLists, javaInfo)
-			err = lib.SaveJavaLists(javaLists)
+			configs.Javas = append(configs.Javas, javaInfo)
+			err = configs.Save()
 			if err != nil {
 				panic(err)
 			}
 			return javaInfo
 		default:
-			return javaLists[selection]
+			return configs.Javas[selection]
 		}
 	}
 }
@@ -453,7 +450,7 @@ func serverArgs(serverArgs []string) []string {
 	for {
 		options := serverArgs
 		options = append(options, "添加参数", "确认")
-		selection := lib.Select(options, "请选择一个选项或要更改的Java虚拟机参数")
+		selection := lib.Select("请选择一个选项或要更改的Java虚拟机参数", options)
 		switch selection {
 		case len(options) - 2:
 			input := lib.Input("请输入Java虚拟机参数: ")

@@ -19,30 +19,21 @@
 package main
 
 import (
-	"flag"
-	"fmt"
-
 	"github.com/Arama-Vanarana/MCSCS-Go/pkg/apis"
 	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
 	"github.com/Arama-Vanarana/MCSCS-Go/pkg/pages"
+	"github.com/rs/zerolog/log"
 )
 
 func init() {
 	lib.Init()
 	apis.Init()
-	pages.Init()
 }
 
 func main() {
-	version := flag.Bool("version", false, "显示程序版本")
-	flag.Parse()
-	if *version {
-		fmt.Println(lib.VERSION)
-		return
-	}
 	options := []string{"创建服务器", "下载核心", "退出"}
 	for {
-		selected := lib.Select(options, "请选择一个选项 ")
+		selected := lib.Select("请选择一个选项", options)
 		var err error
 		switch selected {
 		case 0:
@@ -52,9 +43,8 @@ func main() {
 		default:
 			return
 		}
-		lib.ClearScreen()
 		if err != nil {
-			lib.Logger.WithError(err).Error("运行失败")
+			log.Error().Err(err).Msg("运行错误")
 		}
 	}
 

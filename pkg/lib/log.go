@@ -20,10 +20,32 @@ package lib
 
 import (
 	"os"
+	"path/filepath"
+	"runtime"
+	"time"
 
-	"github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
-var LogFilePath string
-var LogFile *os.File
-var Logger *logrus.Logger
+func InitLogger() {
+	LogFile, err := os.Create(filepath.Join(logsDir, time.Now().Format("2006010215")+".log"))
+	if err != nil {
+		panic(err)
+	}
+	zerolog.TimeFieldFormat = "2006-01-02 15:04:05"
+	log.Logger = zerolog.New(LogFile).Level(zerolog.InfoLevel).With().Timestamp().Logger()
+	log.Info().Msg("Hello world!")
+	log.Info().Msg("本程序遵循GPLv3协议开源")
+	log.Info().Msg("作者: Arama 3584075812@qq.com")
+	log.Info().Msgf("MCSCS-Go 版本: %s", Version)
+	log.Info().Str("GOVERSION", runtime.Version()).Str("GOOS", runtime.GOOS).Str("GOARCH", runtime.GOARCH).Send()
+	configs, err := LoadConfigs()
+	if err != nil {
+		panic(err)
+	}
+	LogLevel, err := zerolog.ParseLevel(configs.LogLevel)
+	if err != nil {
+		zerolog.SetGlobalLevel(LogLevel)
+	}
+}

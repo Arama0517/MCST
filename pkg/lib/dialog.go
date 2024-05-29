@@ -25,18 +25,21 @@ import (
 	"path/filepath"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
-func Select(options []string, message string) int {
+func Select(message string, options []string) int {
 	var result int
 	prompt := &survey.Select{
-		Options: options,
 		Message: message,
+		Options: options,
 	}
 	err := survey.AskOne(prompt, &result)
 	if err != nil {
 		panic(err)
 	}
+	log.Debug().Int("choice", result).Dict("info", zerolog.Dict().Str("message", message).Interface("options", options)).Msg("用户选择")
 	return result
 }
 
@@ -86,7 +89,7 @@ main:
 		} else {
 			displayCurrentDir = currentDir
 		}
-		selectedIndex := Select(displayOptions, "请选择文件: "+filename+", 当前路径: "+displayCurrentDir)
+		selectedIndex := Select(fmt.Sprintf("请选择文件: %s, 当前路径: %s", filename, displayCurrentDir), displayOptions)
 		selectedName := options[selectedIndex]
 		selectedPath := filepath.Join(currentDir, selectedName)
 		if fileInfo, err := os.Stat(selectedPath); err == nil && fileInfo.IsDir() {

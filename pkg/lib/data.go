@@ -21,15 +21,50 @@ package lib
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
+
+	"github.com/rs/zerolog/log"
 )
 
 var DataDir string
-var ConfigsDir string
-var ServersDir string
-var DownloadsDir string
-var LogsDir string
+var serversDir string
+var downloadsDir string
+var logsDir string
 
-var MCSCSConfigsPath string
+var configsPath string
+
+func InitData() {
+	UserHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		panic(err)
+	}
+	DataDir = filepath.Join(UserHomeDir, ".config", "MCSCS")
+	serversDir = filepath.Join(DataDir, "servers")
+	downloadsDir = filepath.Join(DataDir, "downloads")
+	logsDir = filepath.Join(DataDir, "logs")
+	createDirIfNotExist(DataDir)
+	createDirIfNotExist(serversDir)
+	createDirIfNotExist(downloadsDir)
+	createDirIfNotExist(logsDir)
+	configsPath = filepath.Join(DataDir, "configs.json")
+	if _, err := os.Stat(configsPath); os.IsNotExist(err) {
+		jsonData, err := json.MarshalIndent(MCSCSConfig{
+			LogLevel:      "info",
+			API:           0,
+			Downloads:     []DownloadInfo{},
+			Javas:         []JavaInfo{},
+			Servers:       map[string]ServerConfig{},
+			MaxConnetions: 8,
+		}, "", "  ")
+		if err != nil {
+			panic(err)
+		}
+		err = os.WriteFile(configsPath, jsonData, 0644)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
 
 type Ram struct {
 	// Java 虚拟机初始堆内存
@@ -67,23 +102,18 @@ type ServerConfig struct {
 	ServerArgs []string `json:"server_args"`
 }
 
+type DownloadInfo struct {
+	Info ServerInfo `json:"info"`
+	Path string     `json:"path"`
+}
+
 type MCSCSConfig struct {
-	// 日志级别
-	LogLevel string `json:"log_level"`
-
-	// 使用的API, 0: 无极镜像, 1: 极星云镜像
-	API int `json:"api"`
-
-	// 下载列表, 用`SaveDownloadsLists`函数更改
-	Downloads []DownloadInfo `json:"downloads"`
-
-	// Java列表, 用`SaveJavaLists`函数更改
-	Javas []JavaInfo `json:"javas"`
-
-	// 服务器列表, 用`SaveServerConfigs`函数更改
-	Servers map[string]ServerConfig `json:"servers"`
-
-	Concurrency int `json:"concurrency"`
+	LogLevel      string                  `json:"log_level"` // 日志级别
+	API           int                     `json:"api"`       // 使用的API, 0: 无极镜像, 1: 极星云镜像
+	Downloads     []DownloadInfo          `json:"downloads"` // 下载列表
+	Javas         []JavaInfo              `json:"javas"`     // Java列表
+	Servers       map[string]ServerConfig `json:"servers"`   // 服务器列表, 如果服务器名称(key)为temp, CreatePage调用时会视为暂存配置而不是名为temp的服务器
+	MaxConnetions int                     `json:"max_connections"` // 使用 Downloader{}.Download() 多线程下载时的最大连接数
 }
 
 func createDirIfNotExist(path string) {
@@ -96,7 +126,7 @@ func createDirIfNotExist(path string) {
 }
 
 func LoadConfigs() (MCSCSConfig, error) {
-	file, err := os.ReadFile(MCSCSConfigsPath)
+	file, err := os.ReadFile(configsPath)
 	if err != nil {
 		return MCSCSConfig{}, err
 	}
@@ -105,85 +135,19 @@ func LoadConfigs() (MCSCSConfig, error) {
 	if err != nil {
 		return MCSCSConfig{}, err
 	}
+	log.Info().Interface("config", config).Msg("加载配置")
 	return config, nil
 }
 
-func SaveConfigs(config MCSCSConfig) error {
-	jsonConfig, err := json.MarshalIndent(config, "", "  ")
+func (c *MCSCSConfig) Save() error {
+	jsonConfig, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(MCSCSConfigsPath, jsonConfig, 0644)
+	err = os.WriteFile(configsPath, jsonConfig, 0644)
 	if err != nil {
 		return err
 	}
-	return nil
-}
-
-func LoadServerConfigs() (map[string]ServerConfig, error) {
-	configs, err := LoadConfigs()
-	if err != nil {
-		return nil, err
-	}
-	return configs.Servers, nil
-}
-
-func SaveServerConfigs(configs map[string]ServerConfig) error {
-	MCSCSConfigs, err := LoadConfigs()
-	if err != nil {
-		return err
-	}
-	MCSCSConfigs.Servers = configs
-	err = SaveConfigs(MCSCSConfigs)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func LoadJavaLists() ([]JavaInfo, error) {
-	configs, err := LoadConfigs()
-	if err != nil {
-		return nil, err
-	}
-	return configs.Javas, nil
-}
-
-func SaveJavaLists(configs []JavaInfo) error {
-	MCSCSConfigs, err := LoadConfigs()
-	if err != nil {
-		return err
-	}
-	MCSCSConfigs.Javas = configs
-	err = SaveConfigs(MCSCSConfigs)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-type DownloadInfo struct {
-	Path string     `json:"path"`
-	Info ServerInfo `json:"info"`
-}
-
-func LoadDownloadsLists() ([]DownloadInfo, error) {
-	configs, err := LoadConfigs()
-	if err != nil {
-		return nil, err
-	}
-	return configs.Downloads, nil
-}
-
-func SaveDownloadsLists(configs []DownloadInfo) error {
-	MCSCSConfigs, err := LoadConfigs()
-	if err != nil {
-		return err
-	}
-	MCSCSConfigs.Downloads = configs
-	err = SaveConfigs(MCSCSConfigs)
-	if err != nil {
-		return err
-	}
+	log.Info().Interface("config", c).Msg("保存配置")
 	return nil
 }

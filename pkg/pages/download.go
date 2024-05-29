@@ -28,6 +28,10 @@ import (
 func DownloadPage() error {
 	var info lib.ServerInfo
 	var err error
+	configs, err := lib.LoadConfigs()
+	if err != nil {
+		return err
+	}
 serverType:
 	info.ServerType = serverType()
 	if info.ServerType == "" {
@@ -49,15 +53,11 @@ minecraftVersion:
 	if err != nil {
 		return err
 	}
-	DownloadInfo, err := lib.LoadDownloadsLists()
-	if err != nil {
-		return err
-	}
-	DownloadInfo = append(DownloadInfo, lib.DownloadInfo{
+	configs.Downloads = append(configs.Downloads, lib.DownloadInfo{
 		Path: path,
 		Info: info,
 	})
-	lib.SaveDownloadsLists(DownloadInfo)
+	configs.Save()
 	return nil
 }
 
@@ -85,7 +85,7 @@ func serverType() string {
 		serverTypes = append(serverTypes, v.Name)
 	}
 	options = append(options, "返回")
-	selection := lib.Select(options, "请选择一个使用的服务器类型")
+	selection := lib.Select("请选择一个使用的服务器类型", options)
 	switch selection {
 	case len(options):
 		return ""
@@ -97,7 +97,7 @@ func serverType() string {
 func minecraftVersion(serverType string) string {
 	options := apis.FastMirror[serverType].MC_Versions
 	options = append(options, "返回")
-	selection := lib.Select(options, "请选择一个Minecraft版本")
+	selection := lib.Select("请选择一个Minecraft版本", options)
 	switch selection {
 	case len(options):
 		return ""
@@ -118,7 +118,7 @@ func buildVersion(serverType string, minecraftVersion string) (string, error) {
 		buildVersions = append(buildVersions, v.Core_Version)
 	}
 	options = append(options, "返回")
-	selection := lib.Select(options, "请选择一个构建版本版本")
+	selection := lib.Select("请选择一个构建版本版本", options)
 	switch selection {
 	case len(options):
 		return "", nil

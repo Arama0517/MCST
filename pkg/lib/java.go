@@ -10,9 +10,11 @@ import (
 	"runtime"
 
 	"github.com/charlievieth/fastwalk"
+	"github.com/rs/zerolog/log"
 )
 
-var javaVersionRegex = regexp.MustCompile(`(?:\d+)(?:\.\d+)?(?:\.\d+)?(?:[._](\d+))?(?:-(.+))?`) // 预编译正则表达式
+// https://github.com/MCSLTeam/MCSL2/blob/master/MCSL2Lib/ProgramControllers/javaDetector.py 第86行
+var javaVersionRegex = regexp.MustCompile(`(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:[._](\d+))?(?:-(.+))?`)
 
 // GetJavaVersion 获取 Java 的版本
 func GetJavaVersion(javaPath string) (string, error) {
@@ -20,7 +22,6 @@ func GetJavaVersion(javaPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	matches := javaVersionRegex.FindStringSubmatch(string(output))
 	if len(matches) > 0 {
 		return matches[0], nil
@@ -37,7 +38,7 @@ func searchFile(path string, name string) ([]string, error) {
 	var results []string
 	err := fastwalk.Walk(&fastwalk.DefaultConfig, path, func(path string, d fs.DirEntry, err error) error {
 		if err != nil && !os.IsPermission(err) {
-			Logger.WithError(err).Error("遍历Java目录失败")
+			log.Error().Err(err).Msg("遍历Java目录失败")
 			return nil
 		}
 		if ok, err := filepath.Match(name, d.Name()); !ok {
@@ -78,5 +79,6 @@ func DetectJava() ([]JavaInfo, error) {
 			findJavas = append(findJavas, JavaInfo{Path: java, Version: version})
 		}
 	}
+	log.Info().Interface("javas", findJavas).Msg("寻找到的Java环境")
 	return findJavas, nil
 }

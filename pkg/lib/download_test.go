@@ -19,10 +19,8 @@
 package lib_test
 
 import (
-	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
@@ -36,40 +34,38 @@ func TestMultiDownload(t *testing.T) {
 	if testing.Short() {
 		t.Skip("跳过下载测试")
 	}
-	URL := url.URL{
-		Scheme: "https",
-		Host:   "golang.org",
-		Path:   "/dl/go1.22.3.src.tar.gz",
-	}
-	resp, err := lib.Request(URL, http.MethodHead, nil)
+	path, err := lib.Downloader{
+		URL: url.URL{
+			Scheme: "https",
+			Host:   "golang.org",
+			Path:   "/dl/go1.22.3.src.tar.gz",
+		},
+		FileName: "go1.22.3.src.tar.gz",
+		Multi:    2,
+	}.Download()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
-	lib.Concurrency = 8
-	err = lib.MultiDownload(URL, "go1.22.3.src.tar.gz", int(resp.ContentLength))
-	if err != nil {
-		t.Fatal(err)
-	}
-	filePath := filepath.Join(lib.DownloadsDir, "go1.22.3.src.tar.gz")
-	t.Log(filePath)
-	os.Remove(filePath)
+	t.Log(path)
+	os.Remove(path)
 }
 
 func TestSingleDownload(t *testing.T) {
 	if testing.Short() {
 		t.Skip("跳过下载测试")
 	}
-	URL := url.URL{
-		Scheme: "https",
-		Host:   "golang.org",
-		Path:   "/dl/go1.22.3.src.tar.gz",
-	}
-	err := lib.SingleDownload(URL, "go1.22.3.src.tar.gz")
+	path, err := lib.Downloader{
+		URL: url.URL{
+			Scheme: "https",
+			Host:   "golang.org",
+			Path:   "/dl/go1.22.3.src.tar.gz",
+		},
+		FileName: "go1.22.3.src.tar.gz",
+		Multi:    1,
+	}.Download()
 	if err != nil {
 		t.Fatal(err)
 	}
-	filePath := filepath.Join(lib.DownloadsDir, "go1.22.3.src.tar.gz")
-	t.Log(filePath)
-	os.Remove(filePath)
+	t.Log(path)
+	os.Remove(path)
 }

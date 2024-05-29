@@ -31,18 +31,18 @@ import (
 	"os"
 
 	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
+	"github.com/rs/zerolog/log"
 )
 
 var FastMirror = map[string]FastMirrorData{}
 
 func InitFastMirror() {
 	var err error
-	url := url.URL{
+	resp, err := lib.Request(url.URL{
 		Scheme: "https",
 		Host:   "download.fastmirror.net",
 		Path:   "/api/v3",
-	}
-	resp, err := lib.Request(url, http.MethodGet, nil)
+	}, http.MethodGet, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -54,6 +54,7 @@ func InitFastMirror() {
 	if err != nil {
 		panic(err)
 	}
+	log.Info().RawJSON("data", body).Msg("FastMirror")
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		panic(err)
@@ -89,7 +90,7 @@ func GetFastMirrorBuildsDatas(ServerType string, MinecraftVersion string) (Parse
 		RawQuery: "?offset=0&limit=25",
 	}, http.MethodGet, nil)
 	if err != nil {
-		return ParsedFastMirrorBuilds{}, err
+		return nil, err
 	}
 	defer resp.Body.Close()
 	var data struct {
@@ -97,9 +98,14 @@ func GetFastMirrorBuildsDatas(ServerType string, MinecraftVersion string) (Parse
 			Builds []FastMirrorBuilds `json:"builds"`
 		} `json:"data"`
 	}
-	err = json.NewDecoder(resp.Body).Decode(&data)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return ParsedFastMirrorBuilds{}, err
+		return nil, err
+	}
+	log.Info().RawJSON("data", body).Msg("FastMirrorBuilds")
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		return nil, err
 	}
 	parseDatas := ParsedFastMirrorBuilds{}
 	for i := 0; i < len(data.Data.Builds); i++ {
@@ -110,11 +116,14 @@ func GetFastMirrorBuildsDatas(ServerType string, MinecraftVersion string) (Parse
 }
 
 func DownloadFastMirrorServer(info lib.ServerInfo) (string, error) {
-	path, err := lib.Download(url.URL{
-		Scheme: "https",
-		Host:   "download.fastmirror.net",
-		Path:   "/download/" + info.ServerType + "/" + info.MinecraftVersion + "/" + info.BuildVersion,
-	}, info.ServerType+"-"+info.MinecraftVersion+"-"+info.BuildVersion+".jar")
+	path, err := lib.Downloader{
+		URL: url.URL{
+			Scheme: "https",
+			Host:   "download.fastmirror.net",
+			Path:   "/download/" + info.ServerType + "/" + info.MinecraftVersion + "/" + info.BuildVersion,
+		},
+		FileName: fmt.Sprintf("%s-%s-%s.jar", info.ServerType, info.MinecraftVersion, info.BuildVersion),
+	}.Download()
 	if err != nil {
 		return "", err
 	}

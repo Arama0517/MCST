@@ -23,8 +23,8 @@ require (
 	github.com/charlievieth/fastwalk v1.0.3
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/schollz/progressbar/v3 v3.14.3
-	github.com/shirou/gopsutil v2.21.11+incompatible
-	github.com/sirupsen/logrus v1.9.3
+	github.com/shirou/gopsutil/v3 v3.24.4
+    github.com/rs/zerolog v1.33.0
 )
 
 require (
