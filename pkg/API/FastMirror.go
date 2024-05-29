@@ -80,9 +80,8 @@ type FastMirrorBuilds struct {
 	Sha1         string `json:"sha1"`
 }
 
-type ParsedFastMirrorBuilds map[string]FastMirrorBuilds
 
-func GetFastMirrorBuildsDatas(ServerType string, MinecraftVersion string) (ParsedFastMirrorBuilds, error) {
+func GetFastMirrorBuildsDatas(ServerType string, MinecraftVersion string) (map[string]FastMirrorBuilds, error) {
 	resp, err := lib.Request(url.URL{
 		Scheme:   "https",
 		Host:     "download.fastmirror.net",
@@ -107,7 +106,7 @@ func GetFastMirrorBuildsDatas(ServerType string, MinecraftVersion string) (Parse
 	if err != nil {
 		return nil, err
 	}
-	parseDatas := ParsedFastMirrorBuilds{}
+	parseDatas := map[string]FastMirrorBuilds{}
 	for i := 0; i < len(data.Data.Builds); i++ {
 		data := data.Data.Builds[i]
 		parseDatas[data.Core_Version] = data

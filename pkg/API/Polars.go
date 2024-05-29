@@ -71,28 +71,27 @@ type PolarsCores struct {
 	Type        int    `json:"type"`
 }
 
-type ParsedPolarsCores map[string]PolarsCores
 
-func GetPolarsCoresDatas(ID int) (ParsedPolarsCores, error) {
+func GetPolarsCoresDatas(ID int) (map[string]PolarsCores, error) {
 	resp, err := lib.Request(url.URL{
 		Scheme: "https",
 		Host:   "mirror.polars.cc",
 		Path:   fmt.Sprintf("/api/query/minecraft/core/%d", ID),
 	}, http.MethodGet, nil)
 	if err != nil {
-		return ParsedPolarsCores{}, err
+		return nil, err
 	}
 	defer resp.Body.Close()
 	var data []PolarsCores
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return ParsedPolarsCores{}, err
+		return nil, err
 	}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		return ParsedPolarsCores{}, err
+		return nil, err
 	}
-	parsedData := ParsedPolarsCores{}
+	parsedData := map[string]PolarsCores{}
 	for i := 0; i < len(data); i++ {
 		data := data[i]
 		parsedData[data.Name] = data

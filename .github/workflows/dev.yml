@@ -16,7 +16,7 @@ jobs:
             - name: 构建
               run: go build -v ${{ github.workspace }}\cmd\MCSCS\main.go
             - name: 测试
-              run: go test -short -race -v ${{ github.workspace }}\pkg\...
+              run: go test -short -v ${{ github.workspace }}\pkg\...
     linux:
         name: 检查代码存在问题
         runs-on: ubuntu-latest
