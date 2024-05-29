@@ -19,7 +19,7 @@
 package main
 
 import (
-	"github.com/Arama-Vanarana/MCSCS-Go/pkg/apis"
+	api "github.com/Arama-Vanarana/MCSCS-Go/pkg/API"
 	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
 	"github.com/Arama-Vanarana/MCSCS-Go/pkg/pages"
 	"github.com/rs/zerolog/log"
@@ -27,7 +27,7 @@ import (
 
 func init() {
 	lib.Init()
-	apis.Init()
+	api.Init()
 }
 
 func main() {

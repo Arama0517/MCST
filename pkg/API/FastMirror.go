@@ -18,7 +18,7 @@
 
 // 无极镜像
 
-package apis
+package api
 
 import (
 	"crypto/sha1"

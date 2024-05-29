@@ -21,7 +21,7 @@ package pages
 import (
 	"fmt"
 
-	"github.com/Arama-Vanarana/MCSCS-Go/pkg/apis"
+	api "github.com/Arama-Vanarana/MCSCS-Go/pkg/API"
 	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
 )
 
@@ -49,7 +49,7 @@ minecraftVersion:
 	if info.BuildVersion == "" {
 		goto minecraftVersion
 	}
-	path, err := apis.DownloadFastMirrorServer(info)
+	path, err := api.DownloadFastMirrorServer(info)
 	if err != nil {
 		return err
 	}
@@ -64,7 +64,7 @@ minecraftVersion:
 func serverType() string {
 	options := []string{}
 	serverTypes := []string{}
-	for _, v := range apis.FastMirror {
+	for _, v := range api.FastMirror {
 		options = append(options, fmt.Sprintf("%s(标签: %s)", v.Name, func() string {
 			tag := v.Tag
 			switch tag {
@@ -95,7 +95,7 @@ func serverType() string {
 }
 
 func minecraftVersion(serverType string) string {
-	options := apis.FastMirror[serverType].MC_Versions
+	options := api.FastMirror[serverType].MC_Versions
 	options = append(options, "返回")
 	selection := lib.Select("请选择一个Minecraft版本", options)
 	switch selection {
@@ -107,7 +107,7 @@ func minecraftVersion(serverType string) string {
 }
 
 func buildVersion(serverType string, minecraftVersion string) (string, error) {
-	FastMirror, err := apis.GetFastMirrorBuildsDatas(serverType, minecraftVersion)
+	FastMirror, err := api.GetFastMirrorBuildsDatas(serverType, minecraftVersion)
 	if err != nil {
 		return "", err
 	}

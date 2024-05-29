@@ -18,7 +18,7 @@
 
 // 极星云镜像
 
-package apis
+package api
 
 import (
 	"encoding/json"

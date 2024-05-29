@@ -1,4 +1,4 @@
-package apis
+package api
 
 import "github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
 
