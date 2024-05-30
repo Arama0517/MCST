@@ -1,5 +1,5 @@
 /*
- * Minecraft Server Tool(MST) is a command-line utility making Minecraft server creation quick and easy for beginners.
+ * Minecraft Server Tool(MCST) is a command-line utility making Minecraft server creation quick and easy for beginners.
  * Copyright (C) 2024 Arama
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,7 +33,7 @@ func init() {
 
 func main() {
 	app := cli.App{
-		Name:    "MST",
+		Name:    "MCST",
 		Usage:   "Minecraft Server Tool",
 		Version: lib.Version,
 		Authors: []*cli.Author{
@@ -100,6 +100,7 @@ func main() {
 			},
 			{
 				Name:  "download",
+				Aliases: []string{"d"},
 				Usage: "下载核心",
 				Subcommands: []*cli.Command{
 					{
@@ -190,11 +191,13 @@ func main() {
 			},
 			{
 				Name:   "list",
+				Aliases: []string{"l"},
 				Usage:  "列出服务器",
 				Action: pages.ListServers,
 			},
 			{
 				Name:  "start",
+				Aliases: []string{"s"},
 				Usage: "启动服务器",
 				Flags: []cli.Flag{
 					&cli.StringFlag{

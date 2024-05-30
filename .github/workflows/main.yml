@@ -23,7 +23,7 @@ jobs:
         steps:
             - uses: actions/checkout@v4
             - name: 构建
-              run: go build -v -o ${{ github.workspace }}\${{ matrix.arch }}.exe ${{ github.workspace }}\cmd\MCSCS\main.go
+              run: go build -v -o ${{ github.workspace }}\${{ matrix.arch }}.exe ${{ github.workspace }}\cmd\MCST\main.go
             - name: 上传
               uses: actions/upload-artifact@v4
               with:
@@ -80,23 +80,23 @@ jobs:
             - name: 重命名并打包可执行程序
               run: |
                   cd packages
-                  mv source.tar.gz MCSCS-${{ env.VERSION }}.tar.gz
-                  mv source.tar.bz2 MCSCS-${{ env.VERSION }}.tar.bz2
-                  mv source.tar.xz MCSCS-${{ env.VERSION }}.tar.xz
-                  mv amd64.exe MCSCS-${{ env.VERSION }}.exe
-                  zip MCSCS-${{ env.VERSION }}-x64.zip ../LICENSE.txt ../README.md MCSCS.exe
-                  mv 386.exe MCSCS-${{ env.VERSION }}-x86.exe
-                  zip MCSCS-${{ env.VERSION }}-x86.zip ../LICENSE.txt ../README.md MCSCS.exe
+                  mv source.tar.gz MCST-${{ env.VERSION }}.tar.gz
+                  mv source.tar.bz2 MCST-${{ env.VERSION }}.tar.bz2
+                  mv source.tar.xz MCST-${{ env.VERSION }}.tar.xz
+                  mv amd64.exe MCST-${{ env.VERSION }}.exe
+                  zip MCST-${{ env.VERSION }}-x64.zip ../LICENSE.txt ../README.md MCST.exe
+                  mv 386.exe MCST-${{ env.VERSION }}-x86.exe
+                  zip MCST-${{ env.VERSION }}-x86.zip ../LICENSE.txt ../README.md MCST.exe
             - name: 发布到 GitHub Releases
               uses: softprops/action-gh-release@v2
               with:
                   files: |
-                      packages/MCSCS-${{ env.VERSION }}.tar.gz
-                      packages/MCSCS-${{ env.VERSION }}.tar.bz2
-                      packages/MCSCS-${{ env.VERSION }}.tar.xz
-                      packages/MCSCS-${{ env.VERSION }}-x64.zip
-                      packages/MCSCS-${{ env.VERSION }}-x86.zip
+                      packages/MCST-${{ env.VERSION }}.tar.gz
+                      packages/MCST-${{ env.VERSION }}.tar.bz2
+                      packages/MCST-${{ env.VERSION }}.tar.xz
+                      packages/MCST-${{ env.VERSION }}-x64.zip
+                      packages/MCST-${{ env.VERSION }}-x86.zip
                   tag_name: v${{ env.VERSION }}
                   body: |
-                      MCSCS-${{ env.VERSION }} 发布
+                      MCST-${{ env.VERSION }} 发布
                   draft: true

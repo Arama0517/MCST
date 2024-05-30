@@ -88,7 +88,7 @@ func Create(c *cli.Context) error {
 		data := fmt.Sprintf(`# Create By Minecraft Server Tool
 # By changing the setting below to TRUE you are indicating your agreement to Minecraft EULA(<https://aka.ms/MinecraftEULA/>).
 # %s
-eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
+eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MCST 2006"))
 		file.WriteString(data)
 	} else {
 		return errors.New("你必须同意EULA协议<https://aka.ms/MinecraftEULA/>才能创建服务器")

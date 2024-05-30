@@ -1,5 +1,5 @@
 <!--
-MCSCS can be used to easily create, launch, and configure a Minecraft server.
+Minecraft Server Tool(MCST) is a command-line utility making Minecraft server creation quick and easy for beginners.
 Copyright (C) 2024 Arama
 
 This program is free software: you can redistribute it and/or modify
