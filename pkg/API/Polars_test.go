@@ -19,11 +19,12 @@
 package api_test
 
 import (
-    "encoding/json"
-    "testing"
+	"encoding/json"
+	"fmt"
+	"testing"
 
-    api "github.com/Arama-Vanarana/MCServerTool/pkg/API"
-    "github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	api "github.com/Arama-Vanarana/MCServerTool/pkg/API"
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
 func init() {
@@ -64,6 +65,7 @@ func TestPolarsCoreDownload(t *testing.T) {
         info = v
         break
     }
+	fmt.Println(info)
     path, err := api.DownloadPolarsServer(info.DownloadURL)
     if err != nil {
         t.Fatal(err)

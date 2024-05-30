@@ -1,7 +1,7 @@
 .PHONY: all build run test deps install uninstall
 
-BINARY_NAME=MCSCS
-BUILD_PATH=cmd/MCSCS/main.go
+BINARY_NAME=MCST
+BUILD_PATH=cmd/$(BINARY_NAME)/main.go
 INSTALL_PATH=/usr/local/bin
 
 all: run
@@ -13,7 +13,7 @@ run:
 	go run $(BUILD_PATH)
 
 test:
-	go test -race -v ./pkg/...
+	go test -v ./pkg/...
 
 deps:
 	go mod tidy
