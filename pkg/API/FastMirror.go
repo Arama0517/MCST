@@ -1,5 +1,5 @@
 /*
- * MCSCS can be used to easily create, launch, and configure a Minecraft server.
+ * Minecraft Server Tool(MST) is a command-line utility making Minecraft server creation quick and easy for beginners.
  * Copyright (C) 2024 Arama
  *
  * This program is free software: you can redistribute it and/or modify
@@ -21,131 +21,125 @@
 package api
 
 import (
-	"crypto/sha1"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-	"os"
+    "crypto/sha1"
+    "encoding/json"
+    "errors"
+    "fmt"
+    "io"
+    "net/http"
+    "net/url"
+    "os"
 
-	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
-	"github.com/rs/zerolog/log"
+    "github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
-var FastMirror = map[string]FastMirrorData{}
+func GetFastMirrorDatas() (map[string]FastMirrorData, error)  {
+    var err error
+    resp, err := lib.Request(url.URL{
+        Scheme: "https",
+        Host:   "download.fastmirror.net",
+        Path:   "/api/v3",
+    }, http.MethodGet, nil)
+    if err != nil {
+        return nil, err
+    }
+    defer resp.Body.Close()
+    var data struct {
+        Data []FastMirrorData `json:"data"`
+    }
+    body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return nil, err
+    }
+    if err := json.Unmarshal(body, &data); err != nil {
+        return nil, err
+    }
+    result := map[string]FastMirrorData{}
+    for i := 0; i < len(data.Data); i++ {
+        result[data.Data[i].Name] = data.Data[i]
+    }
+    return result, nil
+}
 
-func InitFastMirror() {
-	var err error
-	resp, err := lib.Request(url.URL{
-		Scheme: "https",
-		Host:   "download.fastmirror.net",
-		Path:   "/api/v3",
-	}, http.MethodGet, nil)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	var data struct {
-		Data []FastMirrorData `json:"data"`
-	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-	log.Info().RawJSON("data", body).Msg("FastMirror")
-	err = json.Unmarshal(body, &data)
-	if err != nil {
-		panic(err)
-	}
-	for i := 0; i < len(data.Data); i++ {
-		FastMirror[data.Data[i].Name] = data.Data[i]
-	}
+func GetFastMirrorBuildsDatas(ServerType string, MinecraftVersion string) (map[string]FastMirrorBuilds, error) {
+    resp, err := lib.Request(url.URL{
+        Scheme:   "https",
+        Host:     "download.fastmirror.net",
+        Path:     "/api/v3/" + ServerType + "/" + MinecraftVersion,
+        RawQuery: "?offset=0&limit=25",
+    }, http.MethodGet, nil)
+    if err != nil {
+        return nil, err
+    }
+    defer resp.Body.Close()
+    var data struct {
+        Data struct {
+            Builds []FastMirrorBuilds `json:"builds"`
+        } `json:"data"`
+    }
+    body, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return nil, err
+    }
+    err = json.Unmarshal(body, &data)
+    if err != nil {
+        return nil, err
+    }
+    parseDatas := map[string]FastMirrorBuilds{}
+    for i := 0; i < len(data.Data.Builds); i++ {
+        data := data.Data.Builds[i]
+        parseDatas[data.Core_Version] = data
+    }
+    return parseDatas, nil
+}
+
+func DownloadFastMirrorServer(Core, MinecraftVersion, BuildVersion string) (string, error) {
+    path, err := (&lib.Downloader{
+        URL: url.URL{
+            Scheme: "https",
+            Host:   "download.fastmirror.net",
+            Path:   "/download/" + Core + "/" + MinecraftVersion + "/" + BuildVersion,
+        },
+    }).Download()
+    if err != nil {
+        return "", err
+    }
+    file, err := os.Open(path)
+    if err != nil {
+        return "", err
+    }
+    defer file.Close()
+    hasher := sha1.New()
+    if _, err := io.Copy(hasher, file); err != nil {
+        return "", err
+    }
+    hash := hasher.Sum(nil)
+    FastMirrorBuildsData, err := GetFastMirrorBuildsDatas(Core, MinecraftVersion)
+    if err != nil {
+        return "", err
+    }
+    if fmt.Sprintf("%x", hash) != FastMirrorBuildsData[BuildVersion].Sha1 {
+        err := os.Remove(path)
+        if err != nil {
+            return "", err
+        }
+        return "", errors.New("Sha1不匹配")
+    }
+    return path, nil
 }
 
 type FastMirrorData struct {
-	Name        string   `json:"name"`
-	Tag         string   `json:"tag"`
-	Homepage    string   `json:"homepage"`
-	Recommanded bool     `json:"recommanded"`
-	MC_Versions []string `json:"mc_versions"`
+    Name        string   `json:"name"`
+    Tag         string   `json:"tag"`
+    Homepage    string   `json:"homepage"`
+    Recommanded bool     `json:"recommanded"`
+    MC_Versions []string `json:"mc_versions"`
 }
 
 type FastMirrorBuilds struct {
-	Name         string `json:"name"`
-	MC_Version   string `json:"mc_version"`
-	Core_Version string `json:"core_version"`
-	Update_Time  string `json:"update_time"`
-	Sha1         string `json:"sha1"`
-}
-
-
-func GetFastMirrorBuildsDatas(ServerType string, MinecraftVersion string) (map[string]FastMirrorBuilds, error) {
-	resp, err := lib.Request(url.URL{
-		Scheme:   "https",
-		Host:     "download.fastmirror.net",
-		Path:     "/api/v3/" + ServerType + "/" + MinecraftVersion,
-		RawQuery: "?offset=0&limit=25",
-	}, http.MethodGet, nil)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	var data struct {
-		Data struct {
-			Builds []FastMirrorBuilds `json:"builds"`
-		} `json:"data"`
-	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	log.Info().RawJSON("data", body).Msg("FastMirrorBuilds")
-	err = json.Unmarshal(body, &data)
-	if err != nil {
-		return nil, err
-	}
-	parseDatas := map[string]FastMirrorBuilds{}
-	for i := 0; i < len(data.Data.Builds); i++ {
-		data := data.Data.Builds[i]
-		parseDatas[data.Core_Version] = data
-	}
-	return parseDatas, nil
-}
-
-func DownloadFastMirrorServer(info lib.ServerInfo) (string, error) {
-	path, err := lib.Downloader{
-		URL: url.URL{
-			Scheme: "https",
-			Host:   "download.fastmirror.net",
-			Path:   "/download/" + info.ServerType + "/" + info.MinecraftVersion + "/" + info.BuildVersion,
-		},
-		FileName: fmt.Sprintf("%s-%s-%s.jar", info.ServerType, info.MinecraftVersion, info.BuildVersion),
-	}.Download()
-	if err != nil {
-		return "", err
-	}
-	file, err := os.Open(path)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
-	hasher := sha1.New()
-	if _, err := io.Copy(hasher, file); err != nil {
-		return "", err
-	}
-	hash := hasher.Sum(nil)
-	FastMirrorBuildsData, err := GetFastMirrorBuildsDatas(info.ServerType, info.MinecraftVersion)
-	if err != nil {
-		return "", err
-	}
-	if fmt.Sprintf("%x", hash) != FastMirrorBuildsData[info.BuildVersion].Sha1 {
-		err := os.Remove(path)
-		if err != nil {
-			return "", err
-		}
-		return "", errors.New("Sha1不匹配")
-	}
-	return path, nil
+    Name         string `json:"name"`
+    MC_Version   string `json:"mc_version"`
+    Core_Version string `json:"core_version"`
+    Update_Time  string `json:"update_time"`
+    Sha1         string `json:"sha1"`
 }

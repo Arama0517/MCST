@@ -1,5 +1,5 @@
 /*
- * MCSCS can be used to easily create, launch, and configure a Minecraft server.
+ * Minecraft Server Tool(MST) is a command-line utility making Minecraft server creation quick and easy for beginners.
  * Copyright (C) 2024 Arama
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,23 +19,27 @@
 package lib_test
 
 import (
-	"encoding/json"
-	"testing"
+    "encoding/json"
+    "testing"
 
-	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
+    "github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
+func init() {
+    lib.Init()
+}
+
 func TestDetectJava(t *testing.T) {
-	if testing.Short() {
-		t.Skip("跳过寻找Java测试")
-	}
-	java, err := lib.DetectJava()
-	if err != nil {
-		t.Fatal(err)
-	}
-	jsonJava, err := json.MarshalIndent(java, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(string(jsonJava))
+    if testing.Short() {
+        t.Skip("跳过寻找Java测试")
+    }
+    java, err := lib.DetectJava()
+    if err != nil {
+        t.Fatal(err)
+    }
+    jsonJava, err := json.MarshalIndent(java, "", "  ")
+    if err != nil {
+        t.Fatal(err)
+    }
+    t.Log(string(jsonJava))
 }

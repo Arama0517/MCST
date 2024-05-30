@@ -18,7 +18,10 @@
 
 package lib
 
-func Init() {
-    // 数据
-    InitData()
-}
+import "errors"
+
+var ErrJavaVersionNotFound = errors.New("Java版本未找到")
+
+var ErrNoServers = errors.New("未创建服务器")
+
+var ErrRequestFailed = errors.New("请求失败")

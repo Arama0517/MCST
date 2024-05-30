@@ -1,57 +1,82 @@
+/*
+ * Minecraft Server Tool(MST) is a command-line utility making Minecraft server creation quick and easy for beginners.
+ * Copyright (C) 2024 Arama
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package api_test
 
 import (
-	"encoding/json"
-	"testing"
+    "encoding/json"
+    "testing"
 
-	api "github.com/Arama-Vanarana/MCSCS-Go/pkg/API"
-	"github.com/Arama-Vanarana/MCSCS-Go/pkg/lib"
+    api "github.com/Arama-Vanarana/MCServerTool/pkg/API"
+    "github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
 func init() {
-	lib.Init()
-	api.InitFastMirror()
+    lib.Init()
 }
 
 func TestFastMirror(t *testing.T) {
-	jsonData, err := json.MarshalIndent(api.FastMirror, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(string(jsonData))
+    data, err := api.GetFastMirrorDatas()
+    if err != nil {
+        t.Fatal(err)
+    }
+    jsonData, err := json.MarshalIndent(data, "", "  ")
+    if err != nil {
+        t.Fatal(err)
+    }
+    t.Log(string(jsonData))
 }
 
 func TestFastMirrorBuilds(t *testing.T) {
-	MC_Version := api.FastMirror["Mohist"].MC_Versions[0]
-	builds, err := api.GetFastMirrorBuildsDatas("Mohist", MC_Version)
-	if err != nil {
-		t.Fatal(err)
-	}
-	jsonData, err := json.MarshalIndent(builds, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(string(jsonData))
+    data, err := api.GetFastMirrorDatas()
+    if err != nil {
+        t.Fatal(err)
+    }
+    MC_Version := data["Mohist"].MC_Versions[0]
+    builds, err := api.GetFastMirrorBuildsDatas("Mohist", MC_Version)
+    if err != nil {
+        t.Fatal(err)
+    }
+    jsonData, err := json.MarshalIndent(builds, "", "  ")
+    if err != nil {
+        t.Fatal(err)
+    }
+    t.Log(string(jsonData))
 }
 
 func TestFastMirrorBuildsDownload(t *testing.T) {
-	MC_Version := api.FastMirror["Mohist"].MC_Versions[0]
-	builds, err := api.GetFastMirrorBuildsDatas("Mohist", MC_Version)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var build string
-	for k := range builds {
-		build = k
-		break
-	}
-	path, err := api.DownloadFastMirrorServer(lib.ServerInfo{
-		ServerType:       "Mohist",
-		MinecraftVersion: MC_Version,
-		BuildVersion:     build,
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(path)
+    data, err := api.GetFastMirrorDatas()
+    if err != nil {
+        t.Fatal(err)
+    }
+    MC_Version := data["Mohist"].MC_Versions[0]
+    builds, err := api.GetFastMirrorBuildsDatas("Mohist", MC_Version)
+    if err != nil {
+        t.Fatal(err)
+    }
+    var build string
+    for k := range builds {
+        build = k
+        break
+    }
+    path, err := api.DownloadFastMirrorServer("Mohist", MC_Version, build)
+    if err != nil {
+        t.Fatal(err)
+    }
+    t.Log(path)
 }
