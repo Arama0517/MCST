@@ -2,13 +2,34 @@ name: 打包并发布
 
 on:
     push:
-        branches:
-            - main
-    pull_request:
-        branches:
-            - main
+        tags:
+            - v*
+    workflow_dispatch:
+        inputs:
+            version:
+                description: "版本号"
+                required: true
 
 jobs:
+    version:
+        name: 获取版本号
+        runs-on: ubuntu-latest
+        outputs:
+            VERSION: ${{ steps.version.outputs.VERSION }}
+        steps:
+            - name: 获取版本号
+              id: version
+              run: |
+                  if [ "${{ github.event_name }}" == "push" ]; then
+                    FULL_TAG="${GITHUB_REF#refs/tags/}"  
+                    VERSION="${FULL_TAG#v}"
+                  else
+                  # 如果是手动触发，从输入参数中获取标签名称
+                    VERSION="${{ github.event.inputs.version }}"
+                  fi
+                  echo "VERSON=$VERSION" >> $GITHUB_OUTPUT
+            - name: 输出版本号
+              run: "echo ${{ steps.version.outputs.VERSION }}"
     build:
         name: 编译程序
         runs-on: windows-latest
@@ -56,6 +77,9 @@ jobs:
         needs:
             - build
             - source
+            - version
+        env:
+            VERSION: ${{ needs.version.outputs.VERSION }}
         steps:
             - uses: actions/checkout@v4
             - name: 下载编译结果 (amd64)
@@ -74,29 +98,23 @@ jobs:
                   name: source
                   path: packages
             # 忽略`Context access might be invalid: VERSION`警告, 因为这是补全未识别
-            - name: 获取版本号
-              id: version
-              run: echo "VERSION=$(go run ${{ github.workspace }}/cmd/version/main.go)" >> $GITHUB_ENV
             - name: 重命名并打包可执行程序
               run: |
                   cd packages
-                  mv source.tar.gz MCST-${{ env.VERSION }}.tar.gz
-                  mv source.tar.bz2 MCST-${{ env.VERSION }}.tar.bz2
-                  mv source.tar.xz MCST-${{ env.VERSION }}.tar.xz
-                  mv amd64.exe MCST-${{ env.VERSION }}.exe
-                  zip MCST-${{ env.VERSION }}-x64.zip ../LICENSE.txt ../README.md MCST.exe
-                  mv 386.exe MCST-${{ env.VERSION }}-x86.exe
-                  zip MCST-${{ env.VERSION }}-x86.zip ../LICENSE.txt ../README.md MCST.exe
+                  mv source.tar.gz MCST.tar.gz
+                  mv source.tar.bz2 MCST.tar.bz2
+                  mv source.tar.xz MCST.tar.xz
+                  mv amd64.exe MCST.exe
+                  zip MCST-x64.zip ../LICENSE.txt ../README.md MCST.exe
+                  mv 386.exe MCST.exe
+                  zip MCST-x86.zip ../LICENSE.txt ../README.md MCST.exe
             - name: 发布到 GitHub Releases
               uses: softprops/action-gh-release@v2
               with:
                   files: |
-                      packages/MCST-${{ env.VERSION }}.tar.gz
-                      packages/MCST-${{ env.VERSION }}.tar.bz2
-                      packages/MCST-${{ env.VERSION }}.tar.xz
-                      packages/MCST-${{ env.VERSION }}-x64.zip
-                      packages/MCST-${{ env.VERSION }}-x86.zip
-                  tag_name: v${{ env.VERSION }}
-                  body: |
-                      MCST-${{ env.VERSION }} 发布
+                      packages/MCST.tar.gz
+                      packages/MCST.tar.bz2
+                      packages/MCST.tar.xz
+                      packages/MCST-x64.zip
+                      packages/MCST-x86.zip
                   draft: true

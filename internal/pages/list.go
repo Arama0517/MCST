@@ -30,6 +30,7 @@ func ListServers(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
+	fmt.Println("已创建的服务器:")
 	for _, config := range configs.Servers {
 		fmt.Println(config.Name)
 	}

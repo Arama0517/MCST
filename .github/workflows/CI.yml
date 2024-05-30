@@ -1,0 +1,29 @@
+name: CI
+
+on:
+    push:
+        branches:
+            - main
+            - dev
+    pull_request:
+        branches:
+            - main
+            - dev
+
+jobs:
+    check:
+        name: 检查代码问题
+        strategy:
+            matrix:
+                os:
+                    - windows-latest
+                    - ubuntu-latest
+        runs-on: ${{ matrix.os }}
+        steps:
+            - uses: actions/checkout@v2
+            - name: 构建
+              run: |   
+                go build ${{ github.workspace }}/cmd/MCServerTool/main.go
+            - name: 测试
+              run: |   
+                go test ${{ github.workspace }}/pkg/... -v --short
