@@ -7,10 +7,15 @@ on:
                 description: "版本号"
                 required: true
                 type: string
-            body:
-                description: "发布说明"
-                required: true
-                type: string
+            prerelease:
+                description: "是否是预发布版本"
+                required: false
+                type: boolean
+
+env:
+    GOPROXY: goproxy.io,direct
+    VERSION: ${{ github.event.inputs.version }}
+    PRERELEASE: ${{ github.event.inputs.prerelease }}
 
 jobs:
     build:
@@ -60,8 +65,6 @@ jobs:
         needs:
             - build
             - source
-        env:
-            VERSION: ${{ github.event.inputs.version }}
         steps:
             - uses: actions/checkout@v4
             - name: 下载编译结果 (amd64)
@@ -99,6 +102,6 @@ jobs:
                       packages/MCST-${{ env.VERSION }}-x64.zip
                       packages/MCST-${{ env.VERSION }}-x86.zip
                   tag_name: v${{ env.VERSION }}
-                  name: MCST v${{ env.VERSION }}
-                  body: ${{ github.event.inputs.body }}
+                  name: Minecraft Server Tool v${{ env.VERSION }}
+                  prerelease: ${{ env.PRERELEASE }}
                   draft: true
