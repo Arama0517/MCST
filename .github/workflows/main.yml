@@ -1,0 +1,102 @@
+name: 打包并发布
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
+
+jobs:
+    build:
+        name: 编译程序
+        runs-on: windows-latest
+        strategy:
+            matrix:
+                arch:
+                    - amd64
+                    - "386"
+        env:
+            GOOS: windows
+            GOARCH: ${{ matrix.arch }}
+        steps:
+            - uses: actions/checkout@v4
+            - name: 构建
+              run: go build -v -o ${{ github.workspace }}\${{ matrix.arch }}.exe ${{ github.workspace }}\cmd\MCSCS\main.go
+            - name: 上传
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ${{ matrix.arch }}
+                  path: ${{ github.workspace }}\${{ matrix.arch }}.exe
+
+    source:
+        name: 打包源码
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: 打包
+              run: |
+                  cd ${{ github.workspace }}
+                  tar -czvf source.tar.gz LICENSE.txt README.md --exclude=.git  --exclude=*.tar* .
+                  tar -cjvf source.tar.bz2 LICENSE.txt README.md --exclude=.git  --exclude=*.tar* .
+                  tar -cJvf source.tar.xz LICENSE.txt README.md --exclude=.git  --exclude=*.tar* .
+            - name: 上传
+              uses: actions/upload-artifact@v4
+              with:
+                  name: source
+                  path: |
+                      ${{ github.workspace }}/source.tar.gz
+                      ${{ github.workspace }}/source.tar.bz2
+                      ${{ github.workspace }}/source.tar.xz
+
+    publish:
+        name: 发布
+        runs-on: ubuntu-latest
+        needs:
+            - build
+            - source
+        steps:
+            - uses: actions/checkout@v4
+            - name: 下载编译结果 (amd64)
+              uses: actions/download-artifact@v4
+              with:
+                  name: amd64
+                  path: packages
+            - name: 下载编译结果 (i386)
+              uses: actions/download-artifact@v4
+              with:
+                  name: "386"
+                  path: packages
+            - name: 下载打包后源码
+              uses: actions/download-artifact@v4
+              with:
+                  name: source
+                  path: packages
+            # 忽略`Context access might be invalid: VERSION`警告, 因为这是补全未识别
+            - name: 获取版本号
+              id: version
+              run: echo "VERSION=$(go run ${{ github.workspace }}/cmd/version/main.go)" >> $GITHUB_ENV
+            - name: 重命名并打包可执行程序
+              run: |
+                  cd packages
+                  mv source.tar.gz MCSCS-${{ env.VERSION }}.tar.gz
+                  mv source.tar.bz2 MCSCS-${{ env.VERSION }}.tar.bz2
+                  mv source.tar.xz MCSCS-${{ env.VERSION }}.tar.xz
+                  mv amd64.exe MCSCS-${{ env.VERSION }}.exe
+                  zip MCSCS-${{ env.VERSION }}-x64.zip ../LICENSE.txt ../README.md MCSCS.exe
+                  mv 386.exe MCSCS-${{ env.VERSION }}-x86.exe
+                  zip MCSCS-${{ env.VERSION }}-x86.zip ../LICENSE.txt ../README.md MCSCS.exe
+            - name: 发布到 GitHub Releases
+              uses: softprops/action-gh-release@v2
+              with:
+                  files: |
+                      packages/MCSCS-${{ env.VERSION }}.tar.gz
+                      packages/MCSCS-${{ env.VERSION }}.tar.bz2
+                      packages/MCSCS-${{ env.VERSION }}.tar.xz
+                      packages/MCSCS-${{ env.VERSION }}-x64.zip
+                      packages/MCSCS-${{ env.VERSION }}-x86.zip
+                  tag_name: v${{ env.VERSION }}
+                  body: |
+                      MCSCS-${{ env.VERSION }} 发布
+                  draft: true
