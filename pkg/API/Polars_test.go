@@ -27,6 +27,11 @@ import (
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
+func init() {
+	lib.InitData()
+	lib.InitAria2c()
+}
+
 func TestPolars(t *testing.T) {
 	lib.InitData()
 	data, err := api.GetPolarsData()
@@ -53,8 +58,6 @@ func TestPolarsCore(t *testing.T) {
 }
 
 func TestPolarsCoreDownload(t *testing.T) {
-	lib.InitData()
-	lib.InitAria2c()
 	data, err := api.GetPolarsCoresDatas(16)
 	if err != nil {
 		t.Fatal(err)

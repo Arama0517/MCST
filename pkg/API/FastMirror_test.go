@@ -26,6 +26,11 @@ import (
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
+func init() {
+	lib.InitData()
+	lib.InitAria2c()
+}
+
 func TestFastMirror(t *testing.T) {
 	lib.InitData()
 	data, err := api.GetFastMirrorDatas()
@@ -58,8 +63,6 @@ func TestFastMirrorBuilds(t *testing.T) {
 }
 
 func TestFastMirrorBuildsDownload(t *testing.T) {
-	lib.InitData()
-	lib.InitAria2c()
 	data, err := api.GetFastMirrorDatas()
 	if err != nil {
 		t.Fatal(err)
