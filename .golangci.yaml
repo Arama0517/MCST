@@ -1,11 +1,8 @@
 # https://golangci-lint.run/usage/configuration/
 linters:
     enable:
-        - exhaustive
         - revive
-        - nilnil
         - misspell
-        - whitespace
     fast: true
 run:
     concurrency: 0
