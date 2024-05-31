@@ -6,3 +6,6 @@ linters:
         - misspell
         - gofmt
     fast: true
+run:
+    concurrency: 0
+    timeout: 10m

@@ -212,8 +212,8 @@ func (d *Downloader) merge() error {
 			return err
 		}
 		if _, err := io.Copy(destFile, partFile); err != nil {
-            return err
-        }
+			return err
+		}
 		partFile.Close()
 		os.Remove(partFileName)
 	}

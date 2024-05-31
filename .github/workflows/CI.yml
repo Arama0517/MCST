@@ -10,6 +10,14 @@ on:
             - main
             - dev
 
+permissions:
+    # Required: allow read access to the content for analysis.
+    contents: read
+    # Optional: allow read access to pull request. Use with `only-new-issues` option.
+    pull-requests: read
+    # Optional: allow write access to checks to allow the action to annotate code in the PR.
+    checks: write
+
 jobs:
     check:
         strategy:
@@ -20,10 +28,12 @@ jobs:
         runs-on: ${{ matrix.os }}
         steps:
             - uses: actions/checkout@v4
-            - uses: actions/setup-go@v5
+            - name: 初始化 Go
+              uses: actions/setup-go@v5
               with:
                   go-version: ${{ matrix.go }}
             - name: golangci-lint
               uses: golangci/golangci-lint-action@v6
               with:
                   version: latest
+                  args: --tests -j 4

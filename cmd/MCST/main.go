@@ -33,9 +33,9 @@ func init() {
 
 func main() {
 	app := cli.App{
-		Name:      "MCST",
-		Usage:     "Minecraft Server Tool",
-		Version:   lib.Version,
+		Name:    "MCST",
+		Usage:   "Minecraft Server Tool",
+		Version: lib.Version,
 		Commands: []*cli.Command{
 			&pages.Create,
 			&pages.Download,
