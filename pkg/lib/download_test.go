@@ -8,10 +8,10 @@ import (
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
-var URL = url.URL{ // https://ash-speed.hetzner.com/1GB.bin
+var URL = url.URL{ // https://ash-speed.hetzner.com/100MB.bin
 	Scheme: "https",
 	Host:   "ash-speed.hetzner.com",
-	Path:   "/1GB.bin",
+	Path:   "/100MB.bin",
 }
 
 func init() {
