@@ -42,6 +42,40 @@ import (
 var EnableAria2c bool
 var aria2cPath string
 
+func InitAria2c() {
+	var aria2cName string
+	if runtime.GOOS == "windows" {
+		aria2cName = "aria2c.exe"
+	} else {
+		aria2cName = "aria2c"
+	}
+	var err error
+	aria2cPath, err = which("aria2c")
+	if err != nil && os.IsNotExist(err) {
+		if _, err := os.Stat(filepath.Join(aria2cDir, aria2cName)); os.IsNotExist(err) && runtime.GOOS == "windows" {
+			aria2cPath = filepath.Join(aria2cDir, aria2cName)
+		}
+		if runtime.GOOS == "windows" {
+			confirm, err := Confirm("aria2c 未安装, 是否下载(推荐)?")
+			if err != nil {
+				panic(err)
+			}
+			if confirm {
+				err = downloadAria2c()
+				if err != nil {
+					panic(err)
+				}
+				EnableAria2c = true
+				return
+			}
+		}
+		EnableAria2c = false
+	} else if err == nil {
+		EnableAria2c = true
+	}
+	panic(err)
+}
+
 func NewDownloader(url url.URL) *Downloader {
 	return &Downloader{URL: url}
 }
@@ -172,36 +206,6 @@ func (d *Downloader) getFileName(header http.Header, url url.URL) {
 
 	// 如果没有 Content-Disposition 头部，则从 URL 中获取文件名
 	d.fileName = filepath.Base(url.Path)
-}
-
-func InitAria2c() {
-	var aria2cName string
-	if runtime.GOOS == "windows" {
-		aria2cName = "aria2c.exe"
-	} else {
-		aria2cName = "aria2c"
-	}
-	var err error
-	aria2cPath, err = which("aria2c")
-	if err != nil && os.IsNotExist(err) {
-		if _, err := os.Stat(filepath.Join(aria2cDir, aria2cName)); os.IsNotExist(err) && runtime.GOOS == "windows" {
-			aria2cPath = filepath.Join(aria2cDir, aria2cName)
-		}
-		if runtime.GOOS == "windows" {
-			confirm, err := Confirm("aria2c 未安装, 是否下载(推荐)?")
-			if err != nil {
-				panic(err)
-			}
-			if confirm {
-				err = downloadAria2c()
-				if err != nil {
-					panic(err)
-				}
-				return
-			}
-		}
-		EnableAria2c = false
-	}
 }
 
 func Confirm(description string) (bool, error) {
