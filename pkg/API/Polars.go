@@ -57,7 +57,6 @@ func GetPolarsData() (map[string]PolarsData, error) {
     return result, nil
 }
 
-
 func GetPolarsCoresDatas(ID int) (map[int]PolarsCores, error) {
     resp, err := lib.Request(url.URL{
         Scheme: "https",
@@ -92,7 +91,7 @@ func DownloadPolarsServer(DownloadURL string) (string, error) {
         return "", err
     }
     path, err := (&lib.Downloader{
-        URL:      *url,
+        URL: *url,
     }).Download()
     if err != nil {
         return "", err
@@ -113,4 +112,3 @@ type PolarsCores struct {
     DownloadURL string `json:"downloadUrl"`
     Type        int    `json:"type"`
 }
-

@@ -33,7 +33,7 @@ import (
     "github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
-func GetFastMirrorDatas() (map[string]FastMirrorData, error)  {
+func GetFastMirrorDatas() (map[string]FastMirrorData, error) {
     var err error
     resp, err := lib.Request(url.URL{
         Scheme: "https",

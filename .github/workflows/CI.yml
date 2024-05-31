@@ -11,19 +11,19 @@ on:
             - dev
 
 jobs:
-    check:
-        name: 检查代码问题
+    golangci:
         strategy:
             matrix:
-                os:
-                    - windows-latest
-                    - ubuntu-latest
+                go: [stable]
+                os: [ubuntu-latest, macos-latest, windows-latest]
+        name: lint
         runs-on: ${{ matrix.os }}
         steps:
-            - uses: actions/checkout@v2
-            - name: 构建
-              run: |   
-                go build ${{ github.workspace }}/cmd/MCST/main.go
-            - name: 测试
-              run: |   
-                go test ${{ github.workspace }}/pkg/... -v --short
+            - uses: actions/checkout@v4
+            - uses: actions/setup-go@v5
+              with:
+                  go-version: ${{ matrix.go }}
+            - name: golangci-lint
+              uses: golangci/golangci-lint-action@v6
+              with:
+                  version: v1.58

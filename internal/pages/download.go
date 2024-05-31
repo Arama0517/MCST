@@ -11,88 +11,173 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func ListCores(c *cli.Context) error {
-	configs, err := lib.LoadConfigs()
-	if err != nil {
-		return err
-	}
-	for i, Core := range configs.Cores {
-		fmt.Printf("%s(%d): %s\n", Core.FileName, i, Core.FilePath)
-	}
-	return nil
+var Download = cli.Command{
+	Name:  "download",
+	Usage: "下载核心",
+	Subcommands: []*cli.Command{
+		{
+			Name:  "list",
+            Aliases: []string{"l"},
+			Usage: "查看已下载的核心",
+			Action: func(_ *cli.Context) error {
+				configs, err := lib.LoadConfigs()
+				if err != nil {
+					return err
+				}
+				for i, Core := range configs.Cores {
+					fmt.Printf("%s(%d): %s\n", Core.FileName, i, Core.FilePath)
+				}
+				return nil
+			},
+		},
+		{
+			Name:    "local",
+			Usage:   "使用本地核心",
+			Flags: []cli.Flag{
+				&cli.PathFlag{
+					Name:     "path",
+					Aliases:  []string{"p"},
+					Usage:    "本地核心路径",
+					Required: true,
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				configs, err := lib.LoadConfigs()
+				if err != nil {
+					return err
+				}
+				configs.Cores = append(configs.Cores, lib.Core{
+					FileName: ctx.Path("path"),
+				})
+				if err := configs.Save(); err != nil {
+					return err
+				}
+				return nil
+			},
+		},
+		{
+			Name:    "remote",
+			Aliases: []string{"r"},
+			Usage:   "从指定的URL下载核心",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:     "url",
+					Aliases:  []string{"u"},
+					Usage:    "下载核心的URL",
+					Required: true,
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				configs, err := lib.LoadConfigs()
+				if err != nil {
+					return err
+				}
+				url, err := url.Parse(ctx.String("url"))
+				if err != nil {
+					return err
+				}
+				path, err := (&lib.Downloader{
+					URL: *url,
+				}).Download()
+				if err != nil {
+					return err
+				}
+				configs.Cores = append(configs.Cores, lib.Core{
+					URL:      *url,
+					FileName: filepath.Base(path),
+					FilePath: path,
+				})
+				if err := configs.Save(); err != nil {
+					return err
+				}
+				return nil
+			},
+		},
+		{
+			Name:    "FastMirror",
+			Aliases: []string{"fm"},
+			Usage:   "从无极镜像(https://www.fastmirror.net)下载核心, 如果不使用 '-l' 或 '--list' 参数就会下载指定的版本(必须含有 '-c' , '-m' 和 '-b' 参数)",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "core",
+					Aliases: []string{"c"},
+					Usage:   "服务器核心, 例如: Mohist",
+				},
+				&cli.StringFlag{
+					Name:    "mc_version",
+					Aliases: []string{"m"},
+					Usage:   "Minecraft版本, 例如: 1.20.1",
+				},
+				&cli.StringFlag{
+					Name:    "build_version",
+					Aliases: []string{"b"},
+					Usage:   "构建版本, 例如: build524",
+				},
+				&cli.BoolFlag{
+					Name:    "list",
+					Aliases: []string{"l"},
+					Usage:   "列出无极镜像可用版本, 例如 '-c Mohist -l' 参数就会输出Mohist的可用版本, 使用 '-c Mohist -m 1.20.1 -l' 参数就会返回Mohist 1.20.1的可用构建版本",
+				},
+			},
+			Action: fastMirror,
+		},
+		{
+			Name:    "Polars",
+			Aliases: []string{"pl"},
+			Usage:   "从极星云镜像(https://mirror.polars.cc)下载核心, 如果不使用 '-l' 或 '--list' 参数就会下载指定的版本(必须含有 '--id' 参数) 不推荐使用(因为核心更新时间较落后)",
+			Flags: []cli.Flag{
+				&cli.IntFlag{
+					Name:    "type_id",
+					Aliases: []string{"ti"},
+					Usage:   "服务器类型ID, 例如: 1",
+				},
+				&cli.IntFlag{
+					Name:    "core_id",
+					Aliases: []string{"ci"},
+					Usage:   "服务器核心ID, 例如: 1",
+				},
+				&cli.BoolFlag{
+					Name:    "list",
+					Aliases: []string{"l"},
+					Usage:   "列出极星云镜像可用版本, 例如不带任何参数就会输出所有可用的核心和他的ID, 使用 '--id' 参数就会输出指定核心的可用版本",
+				},
+			},
+			Action: polars,
+		},
+	},
 }
 
-func Local(c *cli.Context) error {
-	configs, err := lib.LoadConfigs()
-	if err != nil {
-		return err
-	}
-	configs.Cores = append(configs.Cores, lib.Core{
-		FileName: c.Path("path"),
-	})
-	if err := configs.Save(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func Remote(c *cli.Context) error {
-	configs, err := lib.LoadConfigs()
-	if err != nil {
-		return err
-	}
-	url, err := url.Parse(c.String("URL"))
-	if err != nil {
-		return err
-	}
-	path, err := (&lib.Downloader{
-		URL: *url,
-	}).Download()
-	if err != nil {
-		return err
-	}
-	configs.Cores = append(configs.Cores, lib.Core{
-		URL:      *url,
-		FileName: filepath.Base(path),
-		FilePath: path,
-	})
-	if err := configs.Save(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func FastMirror(c *cli.Context) error {
-	Core := c.String("Core")
-	MinecraftVersion := c.String("MinecraftVersion")
-	BuildVersion := c.String("BuildVersion")
-	list := c.Bool("list")
+func fastMirror(ctx *cli.Context) error {
+	core := ctx.String("core")
+	minecraftVersion := ctx.String("mc_version")
+	buildVersion := ctx.String("build_version")
+	list := ctx.Bool("list")
 	fastMirror, err := api.GetFastMirrorDatas()
 	if err != nil {
 		return err
 	}
 	if list {
 		switch {
-		case Core != "" && MinecraftVersion != "":
-			fastMirrorBuilds, err := api.GetFastMirrorBuildsDatas(Core, MinecraftVersion)
+		case core != "" && minecraftVersion != "":
+			fastMirrorBuilds, err := api.GetFastMirrorBuildsDatas(core, minecraftVersion)
 			if err != nil {
 				return err
 			}
 			for _, data := range fastMirrorBuilds {
 				fmt.Printf("%s: 更新时间: %s, SHA1: %s\n", data.Core_Version, data.Update_Time, data.Sha1)
 			}
-		case Core != "":
-			for _, data := range fastMirror[Core].MC_Versions {
+		case core != "":
+			for _, data := range fastMirror[core].MC_Versions {
 				fmt.Println(data)
 			}
 		default:
 			return errors.New("没有这个用法")
 		}
 	} else {
-		if Core == "" || MinecraftVersion == "" || BuildVersion == "" {
+		if core == "" || minecraftVersion == "" || buildVersion == "" {
 			return errors.New("缺少必要参数")
 		} else {
-			path, err := api.DownloadFastMirrorServer(Core, MinecraftVersion, BuildVersion)
+			path, err := api.DownloadFastMirrorServer(core, minecraftVersion, buildVersion)
 			if err != nil {
 				return err
 			}
@@ -104,9 +189,9 @@ func FastMirror(c *cli.Context) error {
 				FileName: filepath.Base(path),
 				FilePath: path,
 				ExtrasData: map[string]string{
-					"core":          Core,
-					"mc_version":    MinecraftVersion,
-					"build_version": BuildVersion,
+					"core":          core,
+					"mc_version":    minecraftVersion,
+					"build_version": buildVersion,
 				},
 			})
 			if err := configs.Save(); err != nil {
@@ -117,22 +202,22 @@ func FastMirror(c *cli.Context) error {
 	return nil
 }
 
-func Polars(c *cli.Context) error {
-	TypeID := c.Int("TypeID")
-	CoreID := c.Int("CoreID")
-	list := c.Bool("list")
+func polars(ctx *cli.Context) error {
+	type_id := ctx.Int("type_id")
+	core_id := ctx.Int("core_id")
+	list := ctx.Bool("list")
 	polars, err := api.GetPolarsData()
 	if err != nil {
 		return err
 	}
 	if list {
 		switch {
-		case TypeID == 0 && CoreID == 0:
+		case type_id == 0 && core_id == 0:
 			for _, data := range polars {
 				fmt.Printf("%s(%d): %s\n", data.Name, data.ID, data.Description)
 			}
-		case TypeID != 0 && CoreID == 0:
-			data, err := api.GetPolarsCoresDatas(TypeID)
+		case type_id != 0 && core_id == 0:
+			data, err := api.GetPolarsCoresDatas(type_id)
 			if err != nil {
 				return err
 			}
@@ -143,14 +228,14 @@ func Polars(c *cli.Context) error {
 			return errors.New("没有这个用法")
 		}
 	} else {
-		if TypeID == 0 || CoreID == 0 {
+		if type_id == 0 || core_id == 0 {
 			return errors.New("缺少必要参数")
 		} else {
-			data, err := api.GetPolarsCoresDatas(TypeID)
+			data, err := api.GetPolarsCoresDatas(type_id)
 			if err != nil {
 				return err
 			}
-			path, err := api.DownloadPolarsServer(data[CoreID].DownloadURL)
+			path, err := api.DownloadPolarsServer(data[core_id].DownloadURL)
 			if err != nil {
 				return err
 			}
@@ -158,7 +243,7 @@ func Polars(c *cli.Context) error {
 			if err != nil {
 				return err
 			}
-			url, err := url.Parse(data[CoreID].DownloadURL)
+			url, err := url.Parse(data[core_id].DownloadURL)
 			if err != nil {
 				return err
 			}
@@ -166,6 +251,10 @@ func Polars(c *cli.Context) error {
 				URL:      *url,
 				FileName: filepath.Base(path),
 				FilePath: path,
+				ExtrasData: map[string]int{
+					"type_id": type_id,
+					"core_id": core_id,
+				},
 			})
 			if err := configs.Save(); err != nil {
 				return err

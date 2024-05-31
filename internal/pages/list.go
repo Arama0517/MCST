@@ -25,14 +25,18 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func ListServers(c *cli.Context) error {
-	configs, err := lib.LoadConfigs()
-	if err != nil {
-		return err
-	}
-	fmt.Println("已创建的服务器:")
-	for _, config := range configs.Servers {
-		fmt.Println(config.Name)
-	}
-	return nil
+var List = cli.Command{
+	Name:  "list",
+	Usage: "列出已创建的服务器",
+	Action: func(_ *cli.Context) error {
+		configs, err := lib.LoadConfigs()
+		if err != nil {
+			return err
+		}
+		fmt.Println("已创建的服务器:")
+		for _, config := range configs.Servers {
+			fmt.Println(config.Name)
+		}
+		return nil
+	},
 }

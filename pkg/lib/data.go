@@ -45,10 +45,10 @@ func InitData() {
     configsPath = filepath.Join(DataDir, "configs.json")
     if _, err := os.Stat(configsPath); os.IsNotExist(err) {
         jsonData, err := json.MarshalIndent(MCSCSConfig{
-            LogLevel:      "info",
-            API:           0,
-            Cores:         []Core{},
-            Servers:       map[string]ServerConfig{},
+            LogLevel:       "info",
+            API:            0,
+            Cores:          []Core{},
+            Servers:        map[string]ServerConfig{},
             MaxConnections: 8,
         }, "", "  ")
         if err != nil {
@@ -87,10 +87,10 @@ type ServerConfig struct {
 }
 
 type MCSCSConfig struct {
-    LogLevel      string                  `json:"log_level"`       // 日志级别
-    API           int                     `json:"api"`             // 使用的API, 0: 无极镜像, 1: 极星云镜像
-    Cores         []Core                  `json:"cores"`           // 核心列表
-    Servers       map[string]ServerConfig `json:"servers"`         // 服务器列表, 如果服务器名称(key)为temp, CreatePage调用时会视为暂存配置而不是名为temp的服务器
+    LogLevel       string                  `json:"log_level"`       // 日志级别
+    API            int                     `json:"api"`             // 使用的API, 0: 无极镜像, 1: 极星云镜像
+    Cores          []Core                  `json:"cores"`           // 核心列表
+    Servers        map[string]ServerConfig `json:"servers"`         // 服务器列表, 如果服务器名称(key)为temp, CreatePage调用时会视为暂存配置而不是名为temp的服务器
     MaxConnections int                     `json:"max_connections"` // 使用 Downloader{}.Download() 多线程下载时的最大连接数
 }
 
