@@ -1,11 +1,11 @@
 # https://golangci-lint.run/usage/configuration/
 linters:
     enable:
-        - staticcheck
+        - exhaustive
         - revive
+        - nilnil
         - misspell
-        - gofmt
+        - whitespace
     fast: true
 run:
     concurrency: 0
-    timeout: 10m

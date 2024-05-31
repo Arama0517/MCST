@@ -27,7 +27,7 @@ import (
 )
 
 func TestFastMirror(t *testing.T) {
-	lib.Init()
+	lib.InitData()
 	data, err := api.GetFastMirrorDatas()
 	if err != nil {
 		t.Fatal(err)
@@ -40,7 +40,7 @@ func TestFastMirror(t *testing.T) {
 }
 
 func TestFastMirrorBuilds(t *testing.T) {
-	lib.Init()
+	lib.InitData()
 	data, err := api.GetFastMirrorDatas()
 	if err != nil {
 		t.Fatal(err)

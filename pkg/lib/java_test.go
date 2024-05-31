@@ -26,7 +26,7 @@ import (
 )
 
 func init() {
-	lib.Init()
+	lib.InitData()
 }
 
 func TestDetectJava(t *testing.T) {

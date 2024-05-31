@@ -31,6 +31,10 @@ jobs:
             GOARCH: ${{ matrix.arch }}
         steps:
             - uses: actions/checkout@v4
+            - name: 初始化 Go
+              uses: actions/setup-go@v5
+              with:
+                  go-version: stable
             - name: 构建
               run: go build -v -o ${{ github.workspace }}\${{ matrix.arch }}.exe ${{ github.workspace }}\cmd\MCST\main.go
             - name: 上传

@@ -18,6 +18,9 @@ permissions:
     # Optional: allow write access to checks to allow the action to annotate code in the PR.
     checks: write
 
+env:
+    GOPROXY: goproxy.io,direct
+
 jobs:
     check:
         strategy:
@@ -32,8 +35,10 @@ jobs:
               uses: actions/setup-go@v5
               with:
                   go-version: ${{ matrix.go }}
-            - name: golangci-lint
+            - name: 检查代码质量
               uses: golangci/golangci-lint-action@v6
               with:
                   version: latest
-                  args: --tests --concurrency=4 --verbose
+                  args: --concurrency=4 --verbose
+            - name: 测试
+              run: go test -v ./...

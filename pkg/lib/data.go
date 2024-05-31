@@ -28,6 +28,7 @@ import (
 var DataDir string
 var ServersDir string
 var DownloadsDir string
+var aria2cDir string
 
 var configsPath string
 
@@ -39,18 +40,23 @@ func InitData() {
 	DataDir = filepath.Join(UserHomeDir, ".config", "MCST")
 	ServersDir = filepath.Join(DataDir, "servers")
 	DownloadsDir = filepath.Join(DataDir, "downloads")
+	aria2cDir = filepath.Join(DataDir, "aria2c")
 	createDirIfNotExist(DataDir)
 	createDirIfNotExist(ServersDir)
 	createDirIfNotExist(DownloadsDir)
+	createDirIfNotExist(aria2cDir)
 	configsPath = filepath.Join(DataDir, "configs.json")
 	if _, err := os.Stat(configsPath); os.IsNotExist(err) {
 		jsonData, err := json.MarshalIndent(MCSCSConfig{
-			LogLevel:       "info",
-			API:            0,
 			Cores:          []Core{},
-			Servers:        map[string]ServerConfig{},
-			MaxConnections: 8,
-		}, "", "  ")
+			Servers:        map[string]Server{},
+			Aria2c:         Aria2c{
+				RetryWait:        2,
+				Split:            10,
+				MaxConnectionPerServer: 16,
+				MinSplitSize:     "5M",
+			},
+			}, "", "    ")
 		if err != nil {
 			panic(err)
 		}
@@ -62,36 +68,36 @@ func InitData() {
 }
 
 type Core struct {
-	URL        url.URL     `json:"url"`
-	FileName   string      `json:"file_name"`
-	FilePath   string      `json:"file_path"`
-	ExtrasData interface{} `json:"extras_data"`
+	URL        url.URL     `json:"url"`         // 下载地址(如果不是本地的话)
+	FileName   string      `json:"file_name"`   // 文件名
+	FilePath   string      `json:"file_path"`   // 文件路径
+	ExtrasData interface{} `json:"extras_data"` // 其他数据
 }
 
 type Java struct {
-	Path     string   `json:"path"`
-	Args     []string `json:"args"`
-	Xmx      uint64   `json:"Xmx"`
-	Xms      uint64   `json:"Xms"`
-	Encoding string   `json:"encoding"`
+	Path     string   `json:"path"`     // Java路径
+	Args     []string `json:"args"`     // Java虚拟机参数
+	Xmx      uint64   `json:"Xmx"`      // Java虚拟机最大堆内存
+	Xms      uint64   `json:"Xms"`      // Java虚拟机初始堆内存
+	Encoding string   `json:"encoding"` // 编码
 }
-type ServerConfig struct {
-	// 服务器名称
-	Name string `json:"name"`
+type Server struct {
+	Name       string   `json:"name"`        // 服务器名称
+	Java       Java     `json:"java"`        // Java
+	ServerArgs []string `json:"server_args"` // Minecraft服务器参数
+}
 
-	// Java
-	Java Java `json:"java"`
-
-	// Minecraft服务器参数
-	ServerArgs []string `json:"server_args"`
+type Aria2c struct {
+	RetryWait int `json:"retry_wait"` // 重试等待时间(秒)
+	Split int `json:"split"` // 分块大小(M)
+	MaxConnectionPerServer int `json:"max_connection_per_server"` // 单服务器最大连接数
+	MinSplitSize string `json:"min_split_size"` // 最小分块大小
 }
 
 type MCSCSConfig struct {
-	LogLevel       string                  `json:"log_level"`       // 日志级别
-	API            int                     `json:"api"`             // 使用的API, 0: 无极镜像, 1: 极星云镜像
-	Cores          []Core                  `json:"cores"`           // 核心列表
-	Servers        map[string]ServerConfig `json:"servers"`         // 服务器列表, 如果服务器名称(key)为temp, CreatePage调用时会视为暂存配置而不是名为temp的服务器
-	MaxConnections int                     `json:"max_connections"` // 使用 Downloader{}.Download() 多线程下载时的最大连接数
+	Cores          []Core            `json:"cores"`           // 核心列表
+	Servers        map[string]Server `json:"servers"`         // 服务器列表, 如果服务器名称(key)为temp, CreatePage调用时会视为暂存配置而不是名为temp的服务器
+	Aria2c         Aria2c            `json:"aria2c"`          // aria2c配置
 }
 
 func createDirIfNotExist(path string) {

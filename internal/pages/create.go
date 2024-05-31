@@ -1,7 +1,6 @@
 package pages
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"io"
@@ -78,7 +77,7 @@ func create(ctx *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	var config lib.ServerConfig
+	var config lib.Server
 	config.Name = ctx.String("name")
 	for name := range configs.Servers {
 		if name == config.Name {
@@ -123,7 +122,7 @@ func create(ctx *cli.Context) error {
 	if err := os.MkdirAll(serverPath, 0755); err != nil {
 		return err
 	}
-	choice, err := confirm("你是否同意EULA协议<https://aka.ms/MinecraftEULA/>?")
+	choice, err := lib.Confirm("你是否同意EULA协议<https://aka.ms/MinecraftEULA/>?")
 	if err != nil {
 		return err
 	}
@@ -164,27 +163,6 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MCST 2006"))
 		return err
 	}
 	return nil
-}
-
-func confirm(description string) (bool, error) {
-	fmt.Printf("%s (y/n): ", description)
-	reader := bufio.NewReader(os.Stdin)
-	choice, err := reader.ReadString('\n')
-	if err != nil {
-		fmt.Println("Error reading input:", err)
-		return false, err
-	}
-	choice = strings.TrimSpace(strings.ToLower(choice))
-	for {
-		switch choice {
-		case "y", "yes":
-			return true, nil
-		case "n", "no":
-			return false, nil
-		default:
-			continue
-		}
-	}
 }
 
 var ErrorNotAUnit = errors.New("这不是一个有效的单位")

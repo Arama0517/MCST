@@ -258,7 +258,6 @@ func polars(ctx *cli.Context) error {
 		if err := configs.Save(); err != nil {
 			return err
 		}
-
 	}
 	return nil
 }

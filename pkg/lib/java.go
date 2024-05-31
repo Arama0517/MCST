@@ -69,19 +69,23 @@ func searchFile(path string, name string) ([]string, error) {
 	return results, nil
 }
 
+func detectJavaWindows(javaPaths *[]string) {
+	for drive := 'A'; drive <= 'Z'; drive++ {
+		root := string(drive) + ":\\"
+		if _, err := os.Stat(root); err == nil {
+			*javaPaths, err = searchFile(root, "java.exe")
+			if err != nil {
+				continue
+			}
+		}
+	}
+}
+
 func DetectJava() ([]JavaInfo, error) {
 	var findJavas []JavaInfo
 	var javaPaths []string
 	if runtime.GOOS == "windows" {
-		for drive := 'A'; drive <= 'Z'; drive++ {
-			root := string(drive) + ":\\"
-			if _, err := os.Stat(root); err == nil {
-				javaPaths, err = searchFile(root, "java.exe")
-				if err != nil {
-					continue
-				}
-			}
-		}
+		detectJavaWindows(&javaPaths)
 	} else {
 		var err error
 		javaPaths, err = searchFile("/usr/lib", "java")

@@ -28,7 +28,8 @@ import (
 )
 
 func init() {
-	lib.Init()
+	lib.InitData()
+	lib.InitAria2c()
 }
 
 func main() {

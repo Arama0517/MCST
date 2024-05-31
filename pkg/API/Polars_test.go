@@ -28,7 +28,7 @@ import (
 )
 
 func TestPolars(t *testing.T) {
-	lib.Init()
+	lib.InitData()
 	data, err := api.GetPolarsData()
 	if err != nil {
 		t.Fatal(err)
