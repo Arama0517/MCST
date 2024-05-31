@@ -58,6 +58,8 @@ func TestFastMirrorBuilds(t *testing.T) {
 }
 
 func TestFastMirrorBuildsDownload(t *testing.T) {
+	lib.InitData()
+	lib.InitAria2c()
 	data, err := api.GetFastMirrorDatas()
 	if err != nil {
 		t.Fatal(err)

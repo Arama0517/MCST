@@ -53,6 +53,8 @@ func TestPolarsCore(t *testing.T) {
 }
 
 func TestPolarsCoreDownload(t *testing.T) {
+	lib.InitData()
+	lib.InitAria2c()
 	data, err := api.GetPolarsCoresDatas(16)
 	if err != nil {
 		t.Fatal(err)

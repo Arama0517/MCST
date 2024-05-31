@@ -20,11 +20,11 @@ permissions:
 
 jobs:
     check:
+        name: 检查代码
         strategy:
             matrix:
                 go: [stable]
                 os: [ubuntu-latest, windows-latest]
-        name: lint
         runs-on: ${{ matrix.os }}
         steps:
             - uses: actions/checkout@v4
