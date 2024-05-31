@@ -2,6 +2,7 @@ package lib_test
 
 import (
 	"net/url"
+	"os"
 	"testing"
 
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
@@ -25,6 +26,9 @@ func TestDownload(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(path)
+	if err := os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestAria2Downlaod(t *testing.T) {
@@ -34,4 +38,7 @@ func TestAria2Downlaod(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(path)
+	if err := os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
 }
