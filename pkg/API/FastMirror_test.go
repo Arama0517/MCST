@@ -19,64 +19,62 @@
 package api_test
 
 import (
-    "encoding/json"
-    "testing"
+	"encoding/json"
+	"testing"
 
-    api "github.com/Arama-Vanarana/MCServerTool/pkg/API"
-    "github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	api "github.com/Arama-Vanarana/MCServerTool/pkg/API"
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
-func init() {
-    lib.Init()
-}
-
 func TestFastMirror(t *testing.T) {
-    data, err := api.GetFastMirrorDatas()
-    if err != nil {
-        t.Fatal(err)
-    }
-    jsonData, err := json.MarshalIndent(data, "", "  ")
-    if err != nil {
-        t.Fatal(err)
-    }
-    t.Log(string(jsonData))
+	lib.Init()
+	data, err := api.GetFastMirrorDatas()
+	if err != nil {
+		t.Fatal(err)
+	}
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(string(jsonData))
 }
 
 func TestFastMirrorBuilds(t *testing.T) {
-    data, err := api.GetFastMirrorDatas()
-    if err != nil {
-        t.Fatal(err)
-    }
-    MC_Version := data["Mohist"].MC_Versions[0]
-    builds, err := api.GetFastMirrorBuildsDatas("Mohist", MC_Version)
-    if err != nil {
-        t.Fatal(err)
-    }
-    jsonData, err := json.MarshalIndent(builds, "", "  ")
-    if err != nil {
-        t.Fatal(err)
-    }
-    t.Log(string(jsonData))
+	lib.Init()
+	data, err := api.GetFastMirrorDatas()
+	if err != nil {
+		t.Fatal(err)
+	}
+	MinecraftVersion := data["Mohist"].MinecraftVersions[0]
+	builds, err := api.GetFastMirrorBuildsDatas("Mohist", MinecraftVersion)
+	if err != nil {
+		t.Fatal(err)
+	}
+	jsonData, err := json.MarshalIndent(builds, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(string(jsonData))
 }
 
 func TestFastMirrorBuildsDownload(t *testing.T) {
-    data, err := api.GetFastMirrorDatas()
-    if err != nil {
-        t.Fatal(err)
-    }
-    MC_Version := data["Mohist"].MC_Versions[0]
-    builds, err := api.GetFastMirrorBuildsDatas("Mohist", MC_Version)
-    if err != nil {
-        t.Fatal(err)
-    }
-    var build string
-    for k := range builds {
-        build = k
-        break
-    }
-    path, err := api.DownloadFastMirrorServer("Mohist", MC_Version, build)
-    if err != nil {
-        t.Fatal(err)
-    }
-    t.Log(path)
+	data, err := api.GetFastMirrorDatas()
+	if err != nil {
+		t.Fatal(err)
+	}
+	MinecraftVersion := data["Mohist"].MinecraftVersions[0]
+	builds, err := api.GetFastMirrorBuildsDatas("Mohist", MinecraftVersion)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var build string
+	for k := range builds {
+		build = k
+		break
+	}
+	path, err := api.DownloadFastMirrorServer("Mohist", MinecraftVersion, build)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(path)
 }

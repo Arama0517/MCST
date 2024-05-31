@@ -13,7 +13,7 @@ var Completion = cli.Command{
 		{
 			Name:  "bash",
 			Usage: "生成Bash自动补全脚本",
-			Action: func(ctx *cli.Context) error {
+			Action: func(_ *cli.Context) error {
 				fmt.Println(`#! /bin/bash
 
 : ${PROG:="MCST"}
@@ -55,7 +55,7 @@ unset PROG`)
 		{
 			Name:  "zsh",
 			Usage: "生成ZShell自动补全脚本",
-			Action: func(ctx *cli.Context) error {
+			Action: func(_ *cli.Context) error {
 				fmt.Println(`#compdef MCST
 
 _cli_zsh_autocomplete() {
@@ -82,7 +82,7 @@ compdef _cli_zsh_autocomplete MCST`)
 		{
 			Name:  "powershell",
 			Usage: "生成PowerShell自动补全脚本",
-			Action: func(ctx *cli.Context) error {
+			Action: func(_ *cli.Context) error {
 				fmt.Println(`$name = "MCST"
 Register-ArgumentCompleter -Native -CommandName $name -ScriptBlock {
     param($commandName, $wordToComplete, $cursorPosition)

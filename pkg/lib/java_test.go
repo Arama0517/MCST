@@ -19,27 +19,27 @@
 package lib_test
 
 import (
-    "encoding/json"
-    "testing"
+	"encoding/json"
+	"testing"
 
-    "github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
 func init() {
-    lib.Init()
+	lib.Init()
 }
 
 func TestDetectJava(t *testing.T) {
-    if testing.Short() {
-        t.Skip("跳过寻找Java测试")
-    }
-    java, err := lib.DetectJava()
-    if err != nil {
-        t.Fatal(err)
-    }
-    jsonJava, err := json.MarshalIndent(java, "", "  ")
-    if err != nil {
-        t.Fatal(err)
-    }
-    t.Log(string(jsonJava))
+	if testing.Short() {
+		t.Skip("跳过寻找Java测试")
+	}
+	java, err := lib.DetectJava()
+	if err != nil {
+		t.Fatal(err)
+	}
+	jsonJava, err := json.MarshalIndent(java, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(string(jsonJava))
 }

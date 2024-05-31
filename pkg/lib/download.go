@@ -88,14 +88,13 @@ func (d *Downloader) Download() (string, error) {
 		if resp.Header.Get("Accept-Ranges") != "bytes" {
 			return path, d.singleDownload()
 		}
-		d.multiDownload()
+		return path, d.multiDownload()
 	default:
 		if resp.Header.Get("Accept-Ranges") == "bytes" && resp.ContentLength > 1024*1024 {
 			return path, d.multiDownload()
 		}
 		return path, d.singleDownload()
 	}
-	return path, nil
 }
 
 func (d *Downloader) singleDownload() error {
@@ -116,7 +115,10 @@ func (d *Downloader) singleDownload() error {
 	if err != nil {
 		return err
 	}
-	d.bar.Finish()
+	err = d.bar.Finish()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -129,7 +131,9 @@ func (d *Downloader) multiDownload() error {
 
 	// 创建部分文件的存放目录
 	partDir := d.getPartDir()
-	os.Mkdir(partDir, 0777)
+	if err := os.Mkdir(partDir, 0777); err != nil {
+		return err
+	}
 	defer os.RemoveAll(partDir)
 
 	var wg sync.WaitGroup
@@ -151,13 +155,16 @@ func (d *Downloader) multiDownload() error {
 
 		}(connectionNum, rangeStart)
 	}
-	os.Open(filepath.Join(DownloadsDir, d.fileName))
 	wg.Wait()
 
 	// 合并文件
-	d.merge()
+	if err := d.merge(); err != nil {
+		return err
+	}
 
-	d.bar.Finish()
+	if err := d.bar.Finish(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -204,7 +211,9 @@ func (d *Downloader) merge() error {
 		if err != nil {
 			return err
 		}
-		io.Copy(destFile, partFile)
+		if _, err := io.Copy(destFile, partFile); err != nil {
+            return err
+        }
 		partFile.Close()
 		os.Remove(partFileName)
 	}

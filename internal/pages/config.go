@@ -34,9 +34,9 @@ var Config = cli.Command{
 			Usage:   "Xmx, Java虚拟机最大堆内存(可用单位: B, KB, KiB, MB, MiB, GB, GiB, TB, TiB)",
 		},
 		&cli.StringFlag{
-			Name:  "encoding",
-            Aliases: []string{"e"},
-			Usage: "使用的编码格式, 常见的编码格式: UTF-8, GBK, ASCII",
+			Name:    "encoding",
+			Aliases: []string{"e"},
+			Usage:   "使用的编码格式, 常见的编码格式: UTF-8, GBK, ASCII",
 		},
 		&cli.PathFlag{
 			Name:    "java",
@@ -97,13 +97,13 @@ var Config = cli.Command{
 		if java != "" {
 			server.Java.Path = java
 		}
-		jvm_args := ctx.StringSlice("jvm_args")
-		if len(jvm_args) > 0 {
-			server.Java.Args = jvm_args
+		jvmArgs := ctx.StringSlice("jvm_args")
+		if len(jvmArgs) > 0 {
+			server.Java.Args = jvmArgs
 		}
-		server_args := ctx.StringSlice("server_args")
-		if len(server_args) > 0 {
-			server.ServerArgs = server_args
+		serverArgs := ctx.StringSlice("server_args")
+		if len(serverArgs) > 0 {
+			server.ServerArgs = serverArgs
 		}
 		return nil
 	},

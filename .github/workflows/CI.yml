@@ -11,11 +11,11 @@ on:
             - dev
 
 jobs:
-    golangci:
+    check:
         strategy:
             matrix:
                 go: [stable]
-                os: [ubuntu-latest, macos-latest, windows-latest]
+                os: [ubuntu-latest, windows-latest]
         name: lint
         runs-on: ${{ matrix.os }}
         steps:
@@ -26,4 +26,4 @@ jobs:
             - name: golangci-lint
               uses: golangci/golangci-lint-action@v6
               with:
-                  version: v1.58
+                  version: latest

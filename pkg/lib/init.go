@@ -19,6 +19,6 @@
 package lib
 
 func Init() {
-    // 数据
-    InitData()
+	// 数据
+	InitData()
 }

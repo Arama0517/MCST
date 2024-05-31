@@ -1,4 +1,4 @@
-name: 打包并发布
+name: CD
 
 on:
     workflow_dispatch:

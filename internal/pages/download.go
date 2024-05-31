@@ -16,9 +16,9 @@ var Download = cli.Command{
 	Usage: "下载核心",
 	Subcommands: []*cli.Command{
 		{
-			Name:  "list",
-            Aliases: []string{"l"},
-			Usage: "查看已下载的核心",
+			Name:    "list",
+			Aliases: []string{"l"},
+			Usage:   "查看已下载的核心",
 			Action: func(_ *cli.Context) error {
 				configs, err := lib.LoadConfigs()
 				if err != nil {
@@ -31,8 +31,8 @@ var Download = cli.Command{
 			},
 		},
 		{
-			Name:    "local",
-			Usage:   "使用本地核心",
+			Name:  "local",
+			Usage: "使用本地核心",
 			Flags: []cli.Flag{
 				&cli.PathFlag{
 					Name:     "path",
@@ -164,10 +164,10 @@ func fastMirror(ctx *cli.Context) error {
 				return err
 			}
 			for _, data := range fastMirrorBuilds {
-				fmt.Printf("%s: 更新时间: %s, SHA1: %s\n", data.Core_Version, data.Update_Time, data.Sha1)
+				fmt.Printf("%s: 更新时间: %s, SHA1: %s\n", data.CoreVersion, data.UpdateTime, data.Sha1)
 			}
 		case core != "":
-			for _, data := range fastMirror[core].MC_Versions {
+			for _, data := range fastMirror[core].MinecraftVersions {
 				fmt.Println(data)
 			}
 		default:
@@ -176,35 +176,34 @@ func fastMirror(ctx *cli.Context) error {
 	} else {
 		if core == "" || minecraftVersion == "" || buildVersion == "" {
 			return errors.New("缺少必要参数")
-		} else {
-			path, err := api.DownloadFastMirrorServer(core, minecraftVersion, buildVersion)
-			if err != nil {
-				return err
-			}
-			configs, err := lib.LoadConfigs()
-			if err != nil {
-				return err
-			}
-			configs.Cores = append(configs.Cores, lib.Core{
-				FileName: filepath.Base(path),
-				FilePath: path,
-				ExtrasData: map[string]string{
-					"core":          core,
-					"mc_version":    minecraftVersion,
-					"build_version": buildVersion,
-				},
-			})
-			if err := configs.Save(); err != nil {
-				return err
-			}
+		}
+		path, err := api.DownloadFastMirrorServer(core, minecraftVersion, buildVersion)
+		if err != nil {
+			return err
+		}
+		configs, err := lib.LoadConfigs()
+		if err != nil {
+			return err
+		}
+		configs.Cores = append(configs.Cores, lib.Core{
+			FileName: filepath.Base(path),
+			FilePath: path,
+			ExtrasData: map[string]string{
+				"core":          core,
+				"mc_version":    minecraftVersion,
+				"build_version": buildVersion,
+			},
+		})
+		if err := configs.Save(); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
 func polars(ctx *cli.Context) error {
-	type_id := ctx.Int("type_id")
-	core_id := ctx.Int("core_id")
+	typeID := ctx.Int("type_id")
+	coreID := ctx.Int("core_id")
 	list := ctx.Bool("list")
 	polars, err := api.GetPolarsData()
 	if err != nil {
@@ -212,12 +211,12 @@ func polars(ctx *cli.Context) error {
 	}
 	if list {
 		switch {
-		case type_id == 0 && core_id == 0:
+		case typeID == 0 && coreID == 0:
 			for _, data := range polars {
 				fmt.Printf("%s(%d): %s\n", data.Name, data.ID, data.Description)
 			}
-		case type_id != 0 && core_id == 0:
-			data, err := api.GetPolarsCoresDatas(type_id)
+		case typeID != 0 && coreID == 0:
+			data, err := api.GetPolarsCoresDatas(typeID)
 			if err != nil {
 				return err
 			}
@@ -228,38 +227,38 @@ func polars(ctx *cli.Context) error {
 			return errors.New("没有这个用法")
 		}
 	} else {
-		if type_id == 0 || core_id == 0 {
+		if typeID == 0 || coreID == 0 {
 			return errors.New("缺少必要参数")
-		} else {
-			data, err := api.GetPolarsCoresDatas(type_id)
-			if err != nil {
-				return err
-			}
-			path, err := api.DownloadPolarsServer(data[core_id].DownloadURL)
-			if err != nil {
-				return err
-			}
-			configs, err := lib.LoadConfigs()
-			if err != nil {
-				return err
-			}
-			url, err := url.Parse(data[core_id].DownloadURL)
-			if err != nil {
-				return err
-			}
-			configs.Cores = append(configs.Cores, lib.Core{
-				URL:      *url,
-				FileName: filepath.Base(path),
-				FilePath: path,
-				ExtrasData: map[string]int{
-					"type_id": type_id,
-					"core_id": core_id,
-				},
-			})
-			if err := configs.Save(); err != nil {
-				return err
-			}
 		}
+		data, err := api.GetPolarsCoresDatas(typeID)
+		if err != nil {
+			return err
+		}
+		path, err := api.DownloadPolarsServer(data[coreID].DownloadURL)
+		if err != nil {
+			return err
+		}
+		configs, err := lib.LoadConfigs()
+		if err != nil {
+			return err
+		}
+		url, err := url.Parse(data[coreID].DownloadURL)
+		if err != nil {
+			return err
+		}
+		configs.Cores = append(configs.Cores, lib.Core{
+			URL:      *url,
+			FileName: filepath.Base(path),
+			FilePath: path,
+			ExtrasData: map[string]int{
+				"type_id": typeID,
+				"core_id": coreID,
+			},
+		})
+		if err := configs.Save(); err != nil {
+			return err
+		}
+
 	}
 	return nil
 }
