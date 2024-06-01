@@ -8,14 +8,14 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - name: 初始化 Go
-              uses: actions/setup-go@v5
-              with:
-                  go-version: stable
-            - name: 创建发行版
-              uses: goreleaser/goreleaser-action@v5
-              with:
-                version: latest
-                args: release --clean --timeout=90m
+    steps:
+      - uses: actions/checkout@v4
+      - name: 初始化 Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: 创建发行版
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          version: latest
+          args: release --clean --timeout=90m
