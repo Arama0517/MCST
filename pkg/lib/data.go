@@ -25,46 +25,47 @@ import (
 	"path/filepath"
 )
 
-var DataDir string
-var ServersDir string
-var DownloadsDir string
-var aria2cDir string
+var (
+	DataDir      string
+	ServersDir   string
+	DownloadsDir string
+	PluginsDir   string
+	configsPath string
+)
 
-var configsPath string
-
-func InitData() {
+func initData() error {
 	UserHomeDir, err := os.UserHomeDir()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	DataDir = filepath.Join(UserHomeDir, ".config", "MCST")
 	ServersDir = filepath.Join(DataDir, "servers")
 	DownloadsDir = filepath.Join(DataDir, "downloads")
-	aria2cDir = filepath.Join(DataDir, "aria2c")
+	PluginsDir = filepath.Join(DataDir, "plugins")
 	createDirIfNotExist(DataDir)
 	createDirIfNotExist(ServersDir)
 	createDirIfNotExist(DownloadsDir)
-	createDirIfNotExist(aria2cDir)
+	createDirIfNotExist(PluginsDir)
 	configsPath = filepath.Join(DataDir, "configs.json")
 	if _, err := os.Stat(configsPath); os.IsNotExist(err) {
 		jsonData, err := json.MarshalIndent(MCSCSConfig{
-			Cores:          []Core{},
-			Servers:        map[string]Server{},
-			Aria2c:         Aria2c{
-				RetryWait:        2,
-				Split:            10,
+			Cores:   []Core{},
+			Servers: map[string]Server{},
+			Aria2c: Aria2c{
+				RetryWait:              2,
+				Split:                  10,
 				MaxConnectionPerServer: 16,
-				MinSplitSize:     "5M",
+				MinSplitSize:           "5M",
 			},
-			}, "", "    ")
+		}, "", "    ")
 		if err != nil {
-			panic(err)
+			return err
 		}
-		err = os.WriteFile(configsPath, jsonData, 0644)
-		if err != nil {
-			panic(err)
+		if err := os.WriteFile(configsPath, jsonData, 0644); err != nil {
+			return err
 		}
 	}
+	return nil
 }
 
 type Core struct {
@@ -88,16 +89,17 @@ type Server struct {
 }
 
 type Aria2c struct {
-	RetryWait int `json:"retry_wait"` // 重试等待时间(秒)
-	Split int `json:"split"` // 分块大小(M)
-	MaxConnectionPerServer int `json:"max_connection_per_server"` // 单服务器最大连接数
-	MinSplitSize string `json:"min_split_size"` // 最小分块大小
+	RetryWait              int    `json:"retry_wait"`                // 重试等待时间(秒)
+	Split                  int    `json:"split"`                     // 分块大小(M)
+	MaxConnectionPerServer int    `json:"max_connection_per_server"` // 单服务器最大连接数
+	MinSplitSize           string `json:"min_split_size"`            // 最小分块大小
 }
 
 type MCSCSConfig struct {
-	Cores          []Core            `json:"cores"`           // 核心列表
-	Servers        map[string]Server `json:"servers"`         // 服务器列表, 如果服务器名称(key)为temp, CreatePage调用时会视为暂存配置而不是名为temp的服务器
-	Aria2c         Aria2c            `json:"aria2c"`          // aria2c配置
+	Cores         []Core            `json:"cores"`           // 核心列表
+	Servers       map[string]Server `json:"servers"`         // 服务器列表, 如果服务器名称(key)为temp, CreatePage调用时会视为暂存配置而不是名为temp的服务器
+	Aria2c        Aria2c            `json:"aria2c"`          // aria2c配置
+	AutoAgreeEULA bool              `json:"auto_agree_eula"` // 是否自动同意EULA
 }
 
 func createDirIfNotExist(path string) {

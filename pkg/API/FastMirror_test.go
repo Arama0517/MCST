@@ -27,12 +27,12 @@ import (
 )
 
 func init() {
-	lib.InitData()
-	lib.InitAria2c()
+	if err := lib.InitAll(); err!= nil {
+		panic(err)
+	}
 }
 
 func TestFastMirror(t *testing.T) {
-	lib.InitData()
 	data, err := api.GetFastMirrorDatas()
 	if err != nil {
 		t.Fatal(err)
@@ -45,7 +45,6 @@ func TestFastMirror(t *testing.T) {
 }
 
 func TestFastMirrorBuilds(t *testing.T) {
-	lib.InitData()
 	data, err := api.GetFastMirrorDatas()
 	if err != nil {
 		t.Fatal(err)

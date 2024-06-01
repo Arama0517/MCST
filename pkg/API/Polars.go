@@ -35,7 +35,7 @@ func GetPolarsData() (map[string]PolarsData, error) {
 		Scheme: "https",
 		Host:   "mirror.polars.cc",
 		Path:   "/api/query/minecraft/core",
-	}, http.MethodGet, nil)
+	}, http.MethodGet, nil, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -62,7 +62,7 @@ func GetPolarsCoresDatas(ID int) (map[int]PolarsCores, error) {
 		Scheme: "https",
 		Host:   "mirror.polars.cc",
 		Path:   fmt.Sprintf("/api/query/minecraft/core/%d", ID),
-	}, http.MethodGet, nil)
+	}, http.MethodGet, nil, nil)
 	if err != nil {
 		return nil, err
 	}

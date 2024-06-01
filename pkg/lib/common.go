@@ -18,4 +18,40 @@
 
 package lib
 
+import (
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+)
+
 const Version = "0.0.2"
+
+// 一键全部初始化(按顺序)
+func InitAll() error {
+	if err := initData(); err != nil {
+		return err
+	}
+	if err := initDownloader(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Request 请求URL, 返回响应; 运行成功后请添加`defer resp.Body.Close()`到你的代码内
+func Request(URL url.URL, Method string, Header map[string]string, Body io.Reader) (*http.Response, error) {
+	client := http.Client{}
+	req, err := http.NewRequest(Method, URL.String(), Body)
+	req.Header.Set("User-Agent", fmt.Sprintf("MCSCS-Go/%s", Version))
+	for k, v := range Header {
+		req.Header.Set(k, v)
+	}
+	if err != nil {
+		return nil, err
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}

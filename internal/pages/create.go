@@ -1,6 +1,7 @@
 package pages
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"io"
@@ -122,7 +123,7 @@ func create(ctx *cli.Context) error {
 	if err := os.MkdirAll(serverPath, 0755); err != nil {
 		return err
 	}
-	choice, err := lib.Confirm("你是否同意EULA协议<https://aka.ms/MinecraftEULA/>?")
+	choice, err := confirm("你是否同意EULA协议<https://aka.ms/MinecraftEULA/>?")
 	if err != nil {
 		return err
 	}
@@ -203,4 +204,24 @@ func toBytes(byteStr string) (uint64, error) {
 	}
 
 	return parsedNum * multiplier, nil
+}
+
+func confirm(description string) (bool, error) {
+	fmt.Printf("%s (y/n): ", description)
+	reader := bufio.NewReader(os.Stdin)
+	choice, err := reader.ReadString('\n')
+	if err != nil {
+		return false, err
+	}
+	choice = strings.TrimSpace(strings.ToLower(choice))
+	for {
+		switch choice {
+		case "y", "yes":
+			return true, nil
+		case "n", "no":
+			return false, nil
+		default:
+			continue
+		}
+	}
 }

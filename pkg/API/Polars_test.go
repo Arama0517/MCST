@@ -28,12 +28,12 @@ import (
 )
 
 func init() {
-	lib.InitData()
-	lib.InitAria2c()
+	if err := lib.InitAll(); err != nil {
+		panic(err)
+	}
 }
 
 func TestPolars(t *testing.T) {
-	lib.InitData()
 	data, err := api.GetPolarsData()
 	if err != nil {
 		t.Fatal(err)

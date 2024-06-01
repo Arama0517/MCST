@@ -1,0 +1,12 @@
+{
+    "Init library": {
+        "scope": "go",
+        "prefix": "init library",
+        "body": [
+            "if err := lib.InitAll(); err != nil {",
+            "\t${1:panic(err)}",
+            "}"
+        ],
+        "description": "初始化库"
+    }
+}

@@ -27,12 +27,10 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func init() {
-	lib.InitData()
-	lib.InitAria2c()
-}
-
 func main() {
+	if err := lib.InitAll(); err != nil {
+		panic(err)
+	}
 	app := cli.App{
 		Name:    "MCST",
 		Usage:   "Minecraft Server Tool",
@@ -47,8 +45,7 @@ func main() {
 		},
 		EnableBashCompletion: true,
 	}
-	err := app.Run(os.Args)
-	if err != nil {
+	if err := app.Run(os.Args); err != nil {
 		fmt.Println(err)
 	}
 }

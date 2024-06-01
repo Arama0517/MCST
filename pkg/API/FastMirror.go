@@ -39,7 +39,7 @@ func GetFastMirrorDatas() (map[string]FastMirrorData, error) {
 		Scheme: "https",
 		Host:   "download.fastmirror.net",
 		Path:   "/api/v3",
-	}, http.MethodGet, nil)
+	}, http.MethodGet, nil, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func GetFastMirrorBuildsDatas(Core string, MinecraftVersion string) (map[string]
 		Host:     "download.fastmirror.net",
 		Path:     "/api/v3/" + Core + "/" + MinecraftVersion,
 		RawQuery: "offset=0&limit=25",
-	}, http.MethodGet, nil)
+	}, http.MethodGet, nil, nil)
 	if err != nil {
 		return nil, err
 	}
