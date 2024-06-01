@@ -1,6 +1,6 @@
 /*
  * Minecraft Server Tool(MCST) is a command-line utility making Minecraft server creation quick and easy for beginners.
- * Copyright (C) 2024 Arama
+ * Copyright (c) 2024-2024 Arama.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -122,9 +122,9 @@ type Aria2c struct {
 }
 
 type MCSCSConfig struct {
-	Cores         []Core            `json:"cores"`           // 核心列表
-	Servers       map[string]Server `json:"servers"`         // 服务器列表, 如果服务器名称(key)为temp, CreatePage调用时会视为暂存配置而不是名为temp的服务器
-	Aria2c        Aria2c            `json:"aria2c"`          // aria2c配置
+	Cores          []Core            `json:"cores"`            // 核心列表
+	Servers        map[string]Server `json:"servers"`          // 服务器列表, 如果服务器名称(key)为temp, CreatePage调用时会视为暂存配置而不是名为temp的服务器
+	Aria2c         Aria2c            `json:"aria2c"`           // aria2c配置
 	AutoAcceptEULA bool              `json:"auto_accept_eula"` // 是否自动同意EULA
 }
 

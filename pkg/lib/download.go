@@ -1,6 +1,6 @@
 /*
  * Minecraft Server Tool(MCST) is a command-line utility making Minecraft server creation quick and easy for beginners.
- * Copyright (C) 2024 Arama
+ * Copyright (c) 2024-2024 Arama.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 package lib
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"mime"
@@ -51,10 +52,10 @@ func initDownloader() error {
 			aria2cName = "aria2c.exe"
 		}
 		aria2cPath, err = exec.LookPath(aria2cName)
-		switch err {
-		case nil:
+		switch {
+		case err == nil:
 			EnableAria2c = true
-		case os.ErrNotExist:
+		case errors.Is(err, os.ErrNotExist):
 			EnableAria2c = false
 		default:
 			return err
@@ -107,21 +108,23 @@ func (d *Downloader) Download() (string, error) {
 		progressbar.OptionSpinnerType(14),
 		progressbar.OptionThrottle(65*time.Millisecond),
 		progressbar.OptionOnCompletion(func() {
-			fmt.Fprint(ansiStderr, "\n")
+			_, err := fmt.Fprint(ansiStderr, "\n")
+			if err != nil {
+				return
+			}
 		}))
 	file, err := os.Create(filepath.Join(DownloadsDir, d.fileName))
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
-
 	bar.Describe("[cyan]下载中...[reset]")
-	_, err = io.Copy(io.MultiWriter(file, bar), resp.Body)
-	if err != nil {
+	if _, err := io.Copy(io.MultiWriter(file, bar), resp.Body); err != nil {
 		return "", err
 	}
-	err = bar.Finish()
-	if err != nil {
+	if err := bar.Finish(); err != nil {
+		return "", err
+	}
+	if err := file.Close(); err != nil {
 		return "", err
 	}
 	return path, nil
@@ -137,17 +140,23 @@ func (d *Downloader) aria2cDownload() error {
 	if err != nil {
 		return err
 	}
-	f.WriteString(d.URL.String() + "\n")
-	if d.URL.Host != "sourceforge.net" {
-		f.WriteString(fmt.Sprintf("\treferer=%s://%s%s\n", d.URL.Scheme, d.URL.Host, filepath.Dir(d.URL.Path)))
-	}
-	f.WriteString(fmt.Sprintf("\tdir=%s\n", DownloadsDir))
-	f.WriteString(fmt.Sprintf("\tout=%s\n", d.fileName))
-	err = f.Close()
-	if err != nil {
+	if _, err := f.WriteString(d.URL.String() + "\n"); err != nil {
 		return err
 	}
-	defer os.Remove(inputFilePath)
+	if d.URL.Host != "sourceforge.net" {
+		if _, err := f.WriteString(fmt.Sprintf("\treferer=%s://%s%s\n", d.URL.Scheme, d.URL.Host, filepath.Dir(d.URL.Path))); err != nil {
+			return err
+		}
+	}
+	if _, err := f.WriteString(fmt.Sprintf("\tdir=%s\n", DownloadsDir)); err != nil {
+		return err
+	}
+	if _, err := f.WriteString(fmt.Sprintf("\tout=%s\n", d.fileName)); err != nil {
+		return err
+	}
+	if err = f.Close(); err != nil {
+		return err
+	}
 	cmd := exec.Command(aria2cPath)
 	cmd.Args = append(cmd.Args,
 		fmt.Sprintf("--input-file=%s", inputFilePath),
@@ -159,6 +168,12 @@ func (d *Downloader) aria2cDownload() error {
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 	if err := cmd.Run(); err != nil {
+		if err := os.Remove(inputFilePath); err != nil {
+			return err
+		}
+		return err
+	}
+	if err := os.Remove(inputFilePath); err != nil {
 		return err
 	}
 	return nil

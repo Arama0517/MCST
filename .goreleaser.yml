@@ -1,0 +1,45 @@
+---
+project_name: MCST
+
+builds:
+  - binary: MCST
+    main: ./cmd/MCST/
+    ldflags:
+      - "-s"
+      - "-w"
+      - "-X main.version={{ .Version }}"
+    goos:
+      - windows
+      - linux
+    goarch:
+      - amd64
+      - "386"
+      - arm64
+      - arm
+    goarm:
+      - "6"
+      - "7"
+
+archives:
+  - format: tar.gz
+    wrap_in_directory: true
+    format_overrides:
+      - goos: windows
+        format: zip
+    name_template: '{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    files:
+      - LICENSE.txt
+      - README.md
+
+checksum:
+  name_template: '{{ .ProjectName }}-{{ .Version }}-checksums.txt'
+
+release:
+  github:
+    owner: Arama-Vanarana
+    name: MCServerTool
+  draft: true
+
+source:
+  enabled: true
+  name_template: '{{ .ProjectName }}-{{ .Version }}-source'

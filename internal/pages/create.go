@@ -1,3 +1,21 @@
+/*
+ * Minecraft Server Tool(MCST) is a command-line utility making Minecraft server creation quick and easy for beginners.
+ * Copyright (c) 2024-2024 Arama.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package pages
 
 import (
@@ -132,12 +150,20 @@ func create(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		defer file.Close()
+		defer func(file *os.File) {
+			err := file.Close()
+			if err != nil {
+				panic(err)
+			}
+		}(file)
 		data := fmt.Sprintf(`# Create By Minecraft Server Tool
 # By changing the setting below to TRUE you are indicating your agreement to Minecraft EULA(<https://aka.ms/MinecraftEULA/>).
 # %s
 eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MCST 2006"))
-		file.WriteString(data)
+		_, err = file.WriteString(data)
+		if err != nil {
+			return err
+		}
 	} else {
 		return errors.New("你必须同意EULA协议<https://aka.ms/MinecraftEULA/>才能创建服务器")
 	}
@@ -150,17 +176,20 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MCST 2006"))
 	if err != nil {
 		return err
 	}
-	defer srcFile.Close()
 	dstFile, err := os.Create(filepath.Join(serverPath, "server.jar"))
 	if err != nil {
 		return err
 	}
-	defer dstFile.Close()
 	if _, err = io.Copy(dstFile, srcFile); err != nil {
 		return err
 	}
-
 	if err := os.Chmod(filepath.Join(serverPath, "server.jar"), 0755); err != nil {
+		return err
+	}
+	if err := srcFile.Close(); err != nil {
+		return err
+	}
+	if err := dstFile.Close(); err != nil {
 		return err
 	}
 	return nil

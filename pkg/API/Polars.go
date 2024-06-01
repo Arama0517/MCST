@@ -1,6 +1,6 @@
 /*
  * Minecraft Server Tool(MCST) is a command-line utility making Minecraft server creation quick and easy for beginners.
- * Copyright (C) 2024 Arama
+ * Copyright (c) 2024-2024 Arama.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public Licenses
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
@@ -39,7 +39,6 @@ func GetPolarsData() (map[string]PolarsData, error) {
 	if err != nil {
 		panic(err)
 	}
-	defer resp.Body.Close()
 	var data []PolarsData
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -54,6 +53,9 @@ func GetPolarsData() (map[string]PolarsData, error) {
 		data := data[i]
 		result[data.Name] = data
 	}
+	if err := resp.Body.Close(); err != nil {
+		return nil, err
+	}
 	return result, nil
 }
 
@@ -66,7 +68,6 @@ func GetPolarsCoresDatas(ID int) (map[int]PolarsCores, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 	var data []PolarsCores
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -81,10 +82,13 @@ func GetPolarsCoresDatas(ID int) (map[int]PolarsCores, error) {
 		data := data[i]
 		parsedData[data.ID] = data
 	}
+	if err := resp.Body.Close(); err != nil {
+		return nil, err
+	}
 	return parsedData, nil
 }
 
-// DownloadURL 和 Name 参数从 GetPolarsCoresDatas 获取
+// DownloadPolarsServer 参数 DownloadURL 从 GetPolarsCoresDatas 函数 获取
 func DownloadPolarsServer(DownloadURL string) (string, error) {
 	url, err := url.Parse(DownloadURL)
 	if err != nil {
