@@ -4,10 +4,7 @@ project_name: MCST
 builds:
   - binary: MCST
     main: ./cmd/MCST/
-    ldflags:
-      - "-s"
-      - "-w"
-      - "-X main.version={{ .Version }}"
+    ldflags: -s -w -X main.version=${{ .Version }}
     goos:
       - windows
       - linux
