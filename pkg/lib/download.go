@@ -40,19 +40,25 @@ var (
 )
 
 func initDownloader() error {
-	aria2cName := "aria2c"
-	if runtime.GOOS == "windows" {
-		aria2cName = "aria2c.exe"
-	}
-	var err error
-	aria2cPath, err = exec.LookPath(aria2cName)
-	switch err {
-	case nil:
-		EnableAria2c = true
-	case os.ErrNotExist:
-		EnableAria2c = false
-	default:
+	configs, err := LoadConfigs()
+	if err != nil {
 		return err
+	}
+	aria2cPath = configs.Aria2c.Path
+	if aria2cPath == "auto" {
+		aria2cName := "aria2c"
+		if runtime.GOOS == "windows" {
+			aria2cName = "aria2c.exe"
+		}
+		aria2cPath, err = exec.LookPath(aria2cName)
+		switch err {
+		case nil:
+			EnableAria2c = true
+		case os.ErrNotExist:
+			EnableAria2c = false
+		default:
+			return err
+		}
 	}
 	return nil
 }
@@ -92,8 +98,8 @@ func (d *Downloader) Download() (string, error) {
 			Saucer:        "[green]=[reset]",
 			SaucerHead:    "[green]>[reset]",
 			SaucerPadding: " ",
-			BarStart:      "[",
-			BarEnd:        "]",
+			BarStart:      "[black][[reset]",
+			BarEnd:        "[black]][reset]",
 		}),
 		progressbar.OptionSetWriter(ansiStderr),
 		progressbar.OptionShowBytes(true),
@@ -131,48 +137,28 @@ func (d *Downloader) aria2cDownload() error {
 	if err != nil {
 		return err
 	}
-	// f.WriteString(fmt.Sprintf(`%s
-	// dir=%s
-	// out=%s`, d.URL.String(), DownloadsDir, d.fileName))
-	f.WriteString(d.URL.String())
+	f.WriteString(d.URL.String() + "\n")
 	if d.URL.Host != "sourceforge.net" {
-		f.WriteString("    referer=" + filepath.Dir(d.URL.Path))
+		f.WriteString(fmt.Sprintf("\treferer=%s://%s%s\n", d.URL.Scheme, d.URL.Host, filepath.Dir(d.URL.Path)))
 	}
-	f.WriteString("    dir=" + DownloadsDir)
-	f.WriteString("    out=" + d.fileName)
+	f.WriteString(fmt.Sprintf("\tdir=%s\n", DownloadsDir))
+	f.WriteString(fmt.Sprintf("\tout=%s\n", d.fileName))
 	err = f.Close()
 	if err != nil {
 		return err
 	}
+	defer os.Remove(inputFilePath)
 	cmd := exec.Command(aria2cPath)
 	cmd.Args = append(cmd.Args,
-		fmt.Sprintf("--input-file='%s'", inputFilePath),
-		fmt.Sprintf("--user-agent='MCST/%s'", Version),
-		"--allow-overwrite=true",
-		"--auto-file-renaming=false",
-		fmt.Sprintf("--retry-wait=%d", configs.Aria2c.RetryWait),
-		fmt.Sprintf("--max-connection-per-server=%d", configs.Aria2c.MaxConnectionPerServer),
-		fmt.Sprintf("--min-split-size=%s", configs.Aria2c.MinSplitSize),
-		"--console-log-level=warn",
-		"--no-conf=true",
-		"--follow-metalink=true",
-		"--metalink-preferred-protocol=https",
-		"--min-tls-version=TLSv1.2",
+		fmt.Sprintf("--input-file=%s", inputFilePath),
+		fmt.Sprintf("--user-agent=MCST/%s", Version),
 		fmt.Sprintf("--stop-with-process=%d", os.Getpid()),
-		"--continue",
-		"--summary-interval=0",
-		"--auto-save-interval=1",
 	)
+	cmd.Args = append(cmd.Args, configs.Aria2c.Args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
 	if err := cmd.Run(); err != nil {
-		if err := os.Remove(inputFilePath); err != nil {
-			return err
-		}
-		return err
-	}
-	if err := os.Remove(inputFilePath); err != nil {
 		return err
 	}
 	return nil

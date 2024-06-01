@@ -30,7 +30,7 @@ var (
 	ServersDir   string
 	DownloadsDir string
 	PluginsDir   string
-	configsPath string
+	configsPath  string
 )
 
 func initData() error {
@@ -42,21 +42,47 @@ func initData() error {
 	ServersDir = filepath.Join(DataDir, "servers")
 	DownloadsDir = filepath.Join(DataDir, "downloads")
 	PluginsDir = filepath.Join(DataDir, "plugins")
-	createDirIfNotExist(DataDir)
-	createDirIfNotExist(ServersDir)
-	createDirIfNotExist(DownloadsDir)
-	createDirIfNotExist(PluginsDir)
+
 	configsPath = filepath.Join(DataDir, "configs.json")
-	if _, err := os.Stat(configsPath); os.IsNotExist(err) {
+
+	switch _, err := os.Stat(DataDir); {
+	case err == nil: // 目录存在
+		break
+	case os.IsNotExist(err): // 第一次运行; 初始化
+		if err := os.MkdirAll(DataDir, 0755); err != nil {
+			return err
+		}
+		if err := os.MkdirAll(ServersDir, 0755); err != nil {
+			return err
+		}
+		if err := os.MkdirAll(DownloadsDir, 0755); err != nil {
+			return err
+		}
+		if err := os.MkdirAll(PluginsDir, 0755); err != nil {
+			return err
+		}
 		jsonData, err := json.MarshalIndent(MCSCSConfig{
 			Cores:   []Core{},
 			Servers: map[string]Server{},
 			Aria2c: Aria2c{
-				RetryWait:              2,
-				Split:                  10,
-				MaxConnectionPerServer: 16,
-				MinSplitSize:           "5M",
+				Path: "auto",
+				Args: []string{
+					"--allow-overwrite=true",
+					"--auto-file-renaming=false",
+					"--retry-wait=2",
+					"--max-connection-per-server=8",
+					"--min-split-size=5M",
+					"--console-log-level=warn",
+					"--no-conf=true",
+					"--follow-metalink=true",
+					"--metalink-preferred-protocol=https",
+					"--min-tls-version=TLSv1.2",
+					"--continue",
+					"--summary-interval=0",
+					"--auto-save-interval=0",
+				},
 			},
+			AutoAcceptEULA: false,
 		}, "", "    ")
 		if err != nil {
 			return err
@@ -64,6 +90,8 @@ func initData() error {
 		if err := os.WriteFile(configsPath, jsonData, 0644); err != nil {
 			return err
 		}
+	default: // 其他错误
+		return err
 	}
 	return nil
 }
@@ -89,26 +117,15 @@ type Server struct {
 }
 
 type Aria2c struct {
-	RetryWait              int    `json:"retry_wait"`                // 重试等待时间(秒)
-	Split                  int    `json:"split"`                     // 分块大小(M)
-	MaxConnectionPerServer int    `json:"max_connection_per_server"` // 单服务器最大连接数
-	MinSplitSize           string `json:"min_split_size"`            // 最小分块大小
+	Path string   `json:"path"` // aria2c路径; 如果为 'auto' 则自动寻找
+	Args []string `json:"args"` // aria2c参数
 }
 
 type MCSCSConfig struct {
 	Cores         []Core            `json:"cores"`           // 核心列表
 	Servers       map[string]Server `json:"servers"`         // 服务器列表, 如果服务器名称(key)为temp, CreatePage调用时会视为暂存配置而不是名为temp的服务器
 	Aria2c        Aria2c            `json:"aria2c"`          // aria2c配置
-	AutoAgreeEULA bool              `json:"auto_agree_eula"` // 是否自动同意EULA
-}
-
-func createDirIfNotExist(path string) {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		err := os.MkdirAll(path, 0755)
-		if err != nil {
-			panic(err)
-		}
-	}
+	AutoAcceptEULA bool              `json:"auto_accept_eula"` // 是否自动同意EULA
 }
 
 func LoadConfigs() (MCSCSConfig, error) {

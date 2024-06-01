@@ -42,6 +42,7 @@ func main() {
 			&pages.Start,
 			&pages.Config,
 			&pages.Completion,
+			&pages.Settings,
 		},
 		EnableBashCompletion: true,
 	}
