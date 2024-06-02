@@ -55,7 +55,7 @@ func initDownloader() error {
 		switch {
 		case err == nil:
 			EnableAria2c = true
-		case errors.Is(err, os.ErrNotExist):
+		case errors.Is(err, exec.ErrNotFound):
 			EnableAria2c = false
 		default:
 			return err

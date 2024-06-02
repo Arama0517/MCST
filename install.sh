@@ -17,21 +17,415 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+# From https://github.com/golangci/golangci-lint/blob/master/install.sh
 set -e
 
-# 设置Github仓库信息
-OWNER="Arama-Vanarana"
-REPO="MCServerTool"
-GITHUB_API="https://api.github.com/repos/${OWNER}/${REPO}/releases/latest"
-GITHUB_DOWNLOAD="https://github.com/${OWNER}/${REPO}/releases/download"
+usage() {
+  this=$1
+  cat <<EOF
+$this: 下载 Arama-Vanarana/MCServerTool 的 可执行文件
 
-get_latest_version() {
-  TAG=$(curl -H "Accept: application/vnd.github.v3+json" -s $GITHUB_API | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-  if [ -z "$TAG" ]; then
-    echo "Failed to fetch the latest version."
-    exit 1
-  fi
+Usage: $this [-b <bindir>] [-d] [<tag>]
+  -b 设置安装的目录, 默认: ./bin
+  -d 开启调试日志
+   <tag> 是来自 <https://github.com/Arama-Vanarana/MCServerTool/releases/> 的一个标签
+   如果没有指定则使用最新的
+
+EOF
+  exit 2
 }
 
-get_latest_version
-curl "$GITHUB_DOWNLOAD/$TAG/MCST-Linux.tar.gz"
+parse_args() {
+  # BINDIR is ./bin unless set be ENV
+  # overridden by flag below
+
+  BINDIR=${BINDIR:-./bin}
+  while getopts "b:dh?x" arg; do
+    case "$arg" in
+      b) BINDIR="$OPTARG" ;;
+      d) log_set_priority 10 ;;
+      h | \?) usage "$0" ;;
+      x) set -x ;;
+    esac
+  done
+  shift $((OPTIND - 1))
+  TAG=$1
+}
+# this function wraps all the destructive operations
+# if a curl|bash cuts off the end of the script due to
+# network, either nothing will happen or will syntax error
+# out preventing half-done work
+execute() {
+  tmpdir=$(mktemp -d)
+  log_debug "下载文件到 ${tmpdir}"
+  http_download "${tmpdir}/${TARBALL}" "${TARBALL_URL}"
+  http_download "${tmpdir}/${CHECKSUM}" "${CHECKSUM_URL}"
+  hash_sha256_verify "${tmpdir}/${TARBALL}" "${tmpdir}/${CHECKSUM}"
+  srcdir="${tmpdir}/${NAME}"
+  rm -rf "${srcdir}"
+  (cd "${tmpdir}" && untar "${TARBALL}")
+  test ! -d "${BINDIR}" && install -d "${BINDIR}"
+  for binexe in $BINARIES; do
+    if [ "$OS" = "windows" ]; then
+      binexe="${binexe}.exe"
+    fi
+    install "${srcdir}/${binexe}" "${BINDIR}/"
+    log_info "已安装: ${BINDIR}/${binexe}"
+  done
+  rm -rf "${tmpdir}"
+}
+get_binaries() {
+  case "$PLATFORM" in
+    darwin/amd64) BINARIES="MCST" ;;
+    darwin/arm64) BINARIES="MCST" ;;
+    darwin/armv6) BINARIES="MCST" ;;
+    darwin/armv7) BINARIES="MCST" ;;
+    darwin/mips64) BINARIES="MCST" ;;
+    darwin/mips64le) BINARIES="MCST" ;;
+    darwin/ppc64le) BINARIES="MCST" ;;
+    darwin/s390x) BINARIES="MCST" ;;
+    freebsd/386) BINARIES="MCST" ;;
+    freebsd/amd64) BINARIES="MCST" ;;
+    freebsd/armv6) BINARIES="MCST" ;;
+    freebsd/armv7) BINARIES="MCST" ;;
+    freebsd/mips64) BINARIES="MCST" ;;
+    freebsd/mips64le) BINARIES="MCST" ;;
+    freebsd/ppc64le) BINARIES="MCST" ;;
+    freebsd/s390x) BINARIES="MCST" ;;
+    illumos/amd64) BINARIES="MCST" ;;
+    linux/386) BINARIES="MCST" ;;
+    linux/amd64) BINARIES="MCST" ;;
+    linux/arm64) BINARIES="MCST" ;;
+    linux/armv6) BINARIES="MCST" ;;
+    linux/armv7) BINARIES="MCST" ;;
+    linux/mips64) BINARIES="MCST" ;;
+    linux/mips64le) BINARIES="MCST" ;;
+    linux/ppc64le) BINARIES="MCST" ;;
+    linux/s390x) BINARIES="MCST" ;;
+    linux/riscv64) BINARIES="MCST" ;;
+    linux/loong64) BINARIES="MCST" ;;
+    netbsd/386) BINARIES="MCST" ;;
+    netbsd/amd64) BINARIES="MCST" ;;
+    netbsd/armv6) BINARIES="MCST" ;;
+    netbsd/armv7) BINARIES="MCST" ;;
+    windows/386) BINARIES="MCST" ;;
+    windows/amd64) BINARIES="MCST" ;;
+    windows/arm64) BINARIES="MCST" ;;
+    windows/armv6) BINARIES="MCST" ;;
+    windows/armv7) BINARIES="MCST" ;;
+    windows/mips64) BINARIES="MCST" ;;
+    windows/mips64le) BINARIES="MCST" ;;
+    windows/ppc64le) BINARIES="MCST" ;;
+    windows/s390x) BINARIES="MCST" ;;
+    *)
+      log_crit "不支持 $PLATFORM 平台. 请确保此脚本是最新的并且是从 <https://github.com/${PREFIX}/issues/new/> 下载的"
+      exit 1
+      ;;
+  esac
+}
+tag_to_version() {
+  if [ -z "${TAG}" ]; then
+    log_info "正在从 GitHub 寻找最新版本标签"
+  else
+    log_info "正在从 GitHub 寻找 '${TAG}' 标签"
+  fi
+  REALTAG=$(github_release "$OWNER/$REPO" "${TAG}") && true
+  if test -z "$REALTAG"; then
+    log_crit "没有找到 '${TAG}' 标签 - 使用最新版本或从<https://github.com/${PREFIX}/releases/>获取其他版本"
+    exit 1
+  fi
+  # if version starts with 'v', remove it
+  TAG="$REALTAG"
+  VERSION=${TAG#v}
+}
+adjust_format() {
+  # change format (tar.gz or zip) based on OS
+  case ${OS} in
+    windows) FORMAT=zip ;;
+  esac
+  true
+}
+adjust_os() {
+  # adjust archive name based on OS
+  true
+}
+adjust_arch() {
+  # adjust archive name based on ARCH
+  true
+}
+
+cat /dev/null <<EOF
+------------------------------------------------------------------------
+https://github.com/client9/shlib - portable posix shell functions
+Public domain - http://unlicense.org
+https://github.com/client9/shlib/blob/master/LICENSE.md
+but credit (and pull requests) appreciated.
+------------------------------------------------------------------------
+EOF
+is_command() {
+  command -v "$1" >/dev/null
+}
+echoerr() {
+  echo "$@" 1>&2
+}
+_logp=6
+log_set_priority() {
+  _logp="$1"
+}
+log_priority() {
+  if test -z "$1"; then
+    echo "$_logp"
+    return
+  fi
+  [ "$1" -le "$_logp" ]
+}
+log_tag() {
+  case $1 in
+    0) echo "emerg" ;;
+    1) echo "alert" ;;
+    2) echo "crit" ;;
+    3) echo "err" ;;
+    4) echo "warning" ;;
+    5) echo "notice" ;;
+    6) echo "info" ;;
+    7) echo "debug" ;;
+    *) echo "$1" ;;
+  esac
+}
+log_debug() {
+  log_priority 7 || return 0
+  echoerr "$(log_prefix)" "$(log_tag 7)" "$@"
+}
+log_info() {
+  log_priority 6 || return 0
+  echoerr "$(log_prefix)" "$(log_tag 6)" "$@"
+}
+log_err() {
+  log_priority 3 || return 0
+  echoerr "$(log_prefix)" "$(log_tag 3)" "$@"
+}
+log_crit() {
+  log_priority 2 || return 0
+  echoerr "$(log_prefix)" "$(log_tag 2)" "$@"
+}
+uname_os() {
+  os=$(uname -s | tr '[:upper:]' '[:lower:]')
+  case "$os" in
+    msys*) os="windows" ;;
+    mingw*) os="windows" ;;
+    cygwin*) os="windows" ;;
+    win*) os="windows" ;;
+    sunos) [ "$(uname -o)" = "illumos" ] && os=illumos ;;
+  esac
+  echo "$os"
+}
+uname_arch() {
+  arch=$(uname -m)
+  case $arch in
+    x86_64) arch="amd64" ;;
+    x86) arch="386" ;;
+    i686) arch="386" ;;
+    i386) arch="386" ;;
+    i86pc) arch="amd64" ;;
+    aarch64) arch="arm64" ;;
+    armv5*) arch="armv5" ;;
+    armv6*) arch="armv6" ;;
+    armv7*) arch="armv7" ;;
+    loongarch64) arch="loong64" ;;
+  esac
+  echo "${arch}"
+}
+uname_os_check() {
+  os=$(uname_os)
+  case "$os" in
+    darwin) return 0 ;;
+    dragonfly) return 0 ;;
+    freebsd) return 0 ;;
+    illumos) return 0;;
+    linux) return 0 ;;
+    android) return 0 ;;
+    nacl) return 0 ;;
+    netbsd) return 0 ;;
+    openbsd) return 0 ;;
+    plan9) return 0 ;;
+    solaris) return 0 ;;
+    windows) return 0 ;;
+  esac
+  log_crit "uname_os_check '$(uname -s)' 被转换为 '$os' 这不是 'GOOS' 的值"
+  return 1
+}
+uname_arch_check() {
+  arch=$(uname_arch)
+  case "$arch" in
+    386) return 0 ;;
+    amd64) return 0 ;;
+    arm64) return 0 ;;
+    armv5) return 0 ;;
+    armv6) return 0 ;;
+    armv7) return 0 ;;
+    ppc64) return 0 ;;
+    ppc64le) return 0 ;;
+    mips) return 0 ;;
+    mipsle) return 0 ;;
+    mips64) return 0 ;;
+    mips64le) return 0 ;;
+    s390x) return 0 ;;
+    riscv64) return 0 ;;
+    amd64p32) return 0 ;;
+    loong64) return 0 ;;
+  esac
+  log_crit "uname_arch_check '$(uname -m)' 被转换为 '$arch' 这不是 'GOARCH' 的值"
+  return 1
+}
+untar() {
+  tarball=$1
+  case "${tarball}" in
+    *.tar.gz | *.tgz) tar --no-same-owner -xzf "${tarball}" ;;
+    *.tar) tar --no-same-owner -xf "${tarball}" ;;
+    *.zip) unzip "${tarball}" ;;
+    *)
+      log_err "未知的压缩方式: ${tarball}"
+      return 1
+      ;;
+  esac
+}
+http_download_curl() {
+  local_file=$1
+  source_url=$2
+  header=$3
+  if [ -z "$header" ]; then
+    code=$(curl -w '%{http_code}' -sL -o "$local_file" "$source_url")
+  else
+    code=$(curl -w '%{http_code}' -sL -H "$header" -o "$local_file" "$source_url")
+  fi
+  if [ "$code" != "200" ]; then
+    log_debug "http_download_curl 请求状态码: $code"
+    return 1
+  fi
+  return 0
+}
+http_download_wget() {
+  local_file=$1
+  source_url=$2
+  header=$3
+  if [ -z "$header" ]; then
+    wget -q -O "$local_file" "$source_url"
+  else
+    wget -q --header "$header" -O "$local_file" "$source_url"
+  fi
+}
+http_download() {
+  log_debug "http_download $2"
+  if is_command curl; then
+    http_download_curl "$@"
+    return
+  elif is_command wget; then
+    http_download_wget "$@"
+    return
+  fi
+  log_crit "http_download 没有找到 'wget' 或 'curl'"
+  return 1
+}
+http_copy() {
+  tmp=$(mktemp)
+  http_download "${tmp}" "$1" "$2" || return 1
+  body=$(cat "$tmp")
+  rm -f "${tmp}"
+  echo "$body"
+}
+github_release() {
+  owner_repo=$1
+  version=$2
+  test -z "$version" && version="latest"
+  giturl="https://github.com/${owner_repo}/releases/${version}"
+  json=$(http_copy "$giturl" "Accept:application/json")
+  test -z "$json" && return 1
+  version=$(echo "$json" | tr -s '\n' ' ' | sed 's/.*"tag_name":"//' | sed 's/".*//')
+  test -z "$version" && return 1
+  echo "$version"
+}
+hash_sha256() {
+  TARGET=${1:-/dev/stdin}
+  if is_command gsha256sum; then
+    hash=$(gsha256sum "$TARGET") || return 1
+    echo "$hash" | cut -d ' ' -f 1
+  elif is_command sha256sum; then
+    hash=$(sha256sum "$TARGET") || return 1
+    echo "$hash" | cut -d ' ' -f 1
+  elif is_command shasum; then
+    hash=$(shasum -a 256 "$TARGET" 2>/dev/null) || return 1
+    echo "$hash" | cut -d ' ' -f 1
+  elif is_command openssl; then
+    hash=$(openssl -dst openssl dgst -sha256 "$TARGET") || return 1
+    echo "$hash" | cut -d ' ' -f a
+  else
+    log_crit "hash_sha256 没有找到用于计算 sha256 的命令"
+    return 1
+  fi
+}
+hash_sha256_verify() {
+  TARGET=$1
+  checksums=$2
+  if [ -z "$checksums" ]; then
+    log_err "hash_sha256_verify 未在参数2中指定校验和文件"
+    return 1
+  fi
+  BASENAME=${TARGET##*/}
+  want=$(grep "${BASENAME}" "${checksums}" 2>/dev/null | tr '\t' ' ' | cut -d ' ' -f 1)
+  if [ -z "$want" ]; then
+    log_err "hash_sha256_verify 在 '${checksums}' 中找不到 '${TARGET}' 的校验和"
+    return 1
+  fi
+  got=$(hash_sha256 "$TARGET")
+  if [ "$want" != "$got" ]; then
+    log_err "hash_sha256_verify "$TARGET" 的校验和未验证通过, 期望值为 ${want}, 实际值为 $got"
+    return 1
+  fi
+}
+cat /dev/null <<EOF
+------------------------------------------------------------------------
+End of functions from https://github.com/client9/shlib
+------------------------------------------------------------------------
+EOF
+
+PROJECT_NAME="MCST"
+OWNER="Arama-Vanarana"
+REPO="MCServerTool"
+BINARY=MCST
+FORMAT=tar.gz
+OS=$(uname_os)
+ARCH=$(uname_arch)
+PREFIX="$OWNER/$REPO"
+
+# use in logging routines
+log_prefix() {
+	echo "$PREFIX"
+}
+PLATFORM="${OS}/${ARCH}"
+GITHUB_DOWNLOAD=https://github.com/${OWNER}/${REPO}/releases/download
+
+uname_os_check "$OS"
+uname_arch_check "$ARCH"
+
+parse_args "$@"
+
+get_binaries
+
+tag_to_version
+
+adjust_format
+
+adjust_os
+
+adjust_arch
+
+log_info "发现适用于 ${TAG}/${OS}/${ARCH} 的版本：${VERSION}"
+
+NAME=${BINARY}-${VERSION}-${OS}-${ARCH}
+TARBALL=${NAME}.${FORMAT}
+TARBALL_URL=${GITHUB_DOWNLOAD}/${TAG}/${TARBALL}
+CHECKSUM=${PROJECT_NAME}-${VERSION}-checksums.txt
+CHECKSUM_URL=${GITHUB_DOWNLOAD}/${TAG}/${CHECKSUM}
+
+
+execute

@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 ---
 project_name: MCST
 
@@ -6,16 +7,33 @@ builds:
     main: ./cmd/MCST/
     ldflags: -s -w
     goos:
+      - darwin
       - windows
       - linux
+      - freebsd
+      - netbsd
+      - illumos
     goarch:
       - amd64
-      - "386"
       - arm64
       - arm
+      - "386"
+      - ppc64le
+      - s390x
+      - mips64
+      - mips64le
+      - riscv64
+      - loong64
     goarm:
       - "6"
       - "7"
+    gomips:
+      - hardfloat
+    ignore:
+      - goos: darwin
+        goarch: "386"
+      - goos: freebsd
+        goarch: arm64
 
 archives:
   - format: tar.gz
@@ -31,10 +49,27 @@ archives:
 checksum:
   name_template: '{{ .ProjectName }}-{{ .Version }}-checksums.txt'
 
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '(?i)^docs?:'
+      - '(?i)^docs\([^:]+\):'
+      - '(?i)^docs\[[^:]+\]:'
+      - '^tests?:'
+      - '(?i)^dev:'
+      - '(?i)^chore:'
+      - '^build\(deps\): bump .* in /docs \(#\d+\)'
+      - '^build\(deps\): bump .* in /\.github/peril \(#\d+\)'
+      - '^build\(deps\): bump .* in /scripts/gen_github_action_config \(#\d+\)'
+      - Merge pull request
+      - Merge branch
+
 release:
   github:
     owner: Arama-Vanarana
     name: MCServerTool
+  name_template: "Minecraft Server Tool ${{ .Version }}"
   draft: true
 
 source:
