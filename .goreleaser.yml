@@ -4,7 +4,7 @@ project_name: MCST
 builds:
   - binary: MCST
     main: ./cmd/MCST/
-    ldflags: -s -w -X
+    ldflags: -s -w
     goos:
       - windows
       - linux
