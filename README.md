@@ -21,6 +21,7 @@
 git clone https://github.com/Arama-Vanarana/MCServerTool.git --depth 1
 cd MCServerTool
 sudo make install
+# 删除源代码
 cd ..
 rm -rf MCServerTool
 # 运行MCSCS
