@@ -20,14 +20,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/urfave/cli/v2"
 	"os"
 
 	"github.com/Arama-Vanarana/MCServerTool/internal/pages"
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
-)
-
-var (
-	version = "unknown"
 )
 
 func main() {
@@ -37,7 +34,7 @@ func main() {
 	app := cli.App{
 		Name:    "MCST",
 		Usage:   "Minecraft Server Tool",
-		Version: version,
+		Version: lib.Version,
 		Commands: []*cli.Command{
 			&pages.Create,
 			&pages.Download,

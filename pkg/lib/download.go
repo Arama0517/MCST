@@ -160,7 +160,7 @@ func (d *Downloader) aria2cDownload() error {
 	cmd := exec.Command(aria2cPath)
 	cmd.Args = append(cmd.Args,
 		fmt.Sprintf("--input-file=%s", inputFilePath),
-		fmt.Sprintf("--user-agent=MCST/%s", Version),
+		fmt.Sprintf("--user-agent=%s", userAgent),
 		fmt.Sprintf("--stop-with-process=%d", os.Getpid()),
 	)
 	cmd.Args = append(cmd.Args, configs.Aria2c.Args...)
