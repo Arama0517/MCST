@@ -19,3 +19,5 @@ jobs:
         with:
           version: latest
           args: release --clean --timeout=90m
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
