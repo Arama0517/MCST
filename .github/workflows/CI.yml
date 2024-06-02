@@ -23,19 +23,18 @@ jobs:
         name: 检查代码
         strategy:
             matrix:
-                go: [stable]
-                os: [ubuntu-latest, windows-latest]
+                os: [ubuntu-latest, macos-latest, windows-latest]
         runs-on: ${{ matrix.os }}
         steps:
             - uses: actions/checkout@v4
             - name: 初始化 Go
               uses: actions/setup-go@v5
               with:
-                  go-version: ${{ matrix.go }}
+                  go-version: stable
             - name: 检查代码质量
               uses: golangci/golangci-lint-action@v6
               with:
                   version: latest
                   args: --verbose --timeout 30m
             - name: 测试
-              run: go test -short -v ./...
+              run: make test

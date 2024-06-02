@@ -25,12 +25,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
-
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
 func GetFastMirrorDatas() (map[string]FastMirrorData, error) {

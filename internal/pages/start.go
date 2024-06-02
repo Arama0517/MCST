@@ -21,11 +21,10 @@ package pages
 import (
 	"errors"
 	"fmt"
-	"os/exec"
-	"path/filepath"
-
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 	"github.com/urfave/cli/v2"
+	"os/exec"
+	"path/filepath"
 )
 
 var Start = cli.Command{

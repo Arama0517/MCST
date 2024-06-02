@@ -21,6 +21,8 @@ package lib
 import (
 	"errors"
 	"fmt"
+	"github.com/k0kubun/go-ansi"
+	"github.com/schollz/progressbar/v3"
 	"io"
 	"mime"
 	"net/http"
@@ -30,9 +32,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"time"
-
-	"github.com/k0kubun/go-ansi"
-	"github.com/schollz/progressbar/v3"
 )
 
 var (

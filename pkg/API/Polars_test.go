@@ -21,10 +21,9 @@ package api_test
 import (
 	"encoding/json"
 	"fmt"
-	"testing"
-
 	api "github.com/Arama-Vanarana/MCServerTool/pkg/API"
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"testing"
 )
 
 func init() {

@@ -21,12 +21,11 @@ package pages
 import (
 	"errors"
 	"fmt"
-	"net/url"
-	"path/filepath"
-
 	api "github.com/Arama-Vanarana/MCServerTool/pkg/API"
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 	"github.com/urfave/cli/v2"
+	"net/url"
+	"path/filepath"
 )
 
 var Download = cli.Command{
@@ -112,9 +111,10 @@ var Download = cli.Command{
 			},
 		},
 		{
-			Name:    "FastMirror",
-			Aliases: []string{"fm"},
-			Usage:   "从无极镜像(https://www.fastmirror.net)下载核心, 如果不使用 '-l' 或 '--list' 参数就会下载指定的版本(必须含有 '-c' , '-m' 和 '-b' 参数)",
+			Name:        "fastmirror",
+			Aliases:     []string{"fm"},
+			Usage:       "从无极镜像(https://www.fastmirror.net)下载核心",
+			Description: "如果不使用 '-l' 或 '--list' 参数就会下载指定的版本(必须含有 '--core' , '--mc_version' 和 '--build_version' 参数)",
 			Flags: []cli.Flag{
 				&cli.StringFlag{
 					Name:    "core",
@@ -134,15 +134,16 @@ var Download = cli.Command{
 				&cli.BoolFlag{
 					Name:    "list",
 					Aliases: []string{"l"},
-					Usage:   "列出无极镜像可用版本, 例如 '-c Mohist -l' 参数就会输出Mohist的可用版本, 使用 '-c Mohist -m 1.20.1 -l' 参数就会返回Mohist 1.20.1的可用构建版本",
+					Usage:   "列出无极镜像可用版本; 例如: \n\t仅使用 '-l' 参数, 输出所有可用核心\n\t使用 '-c Mohist -l' 参数, 输出Mohist的可用版本\n\t使用 '-c Mohist -m 1.20.1 -l' 参数, 输出Mohist 1.20.1的可用构建版本\r",
 				},
 			},
 			Action: fastMirror,
 		},
 		{
-			Name:    "Polars",
-			Aliases: []string{"pl"},
-			Usage:   "从极星云镜像(https://mirror.polars.cc)下载核心, 如果不使用 '-l' 或 '--list' 参数就会下载指定的版本(必须含有 '--id' 参数) 不推荐使用(因为核心更新时间较落后)",
+			Name:        "polars",
+			Aliases:     []string{"pl"},
+			Usage:       "从极星云镜像(https://mirror.polars.cc)下载核心, 不推荐使用(因为核心更新时间较落后)",
+			Description: "如果不使用 '-l' 或 '--list' 参数就会下载指定的版本(必须含有 '--type_id' 和 '--core_id' 参数)",
 			Flags: []cli.Flag{
 				&cli.IntFlag{
 					Name:    "type_id",
@@ -157,7 +158,7 @@ var Download = cli.Command{
 				&cli.BoolFlag{
 					Name:    "list",
 					Aliases: []string{"l"},
-					Usage:   "列出极星云镜像可用版本, 例如不带任何参数就会输出所有可用的核心和他的ID, 使用 '--id' 参数就会输出指定核心的可用版本",
+					Usage:   "列出极星云镜像可用版本, 例如: 不带任何参数就会输出所有可用的核心和他的ID, 使用 '--id' 参数就会输出指定核心的可用版本",
 				},
 			},
 			Action: polars,

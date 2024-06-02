@@ -20,21 +20,23 @@ package main
 
 import (
 	"fmt"
-	"github.com/urfave/cli/v2"
-	"os"
-
 	"github.com/Arama-Vanarana/MCServerTool/internal/pages"
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/urfave/cli/v2"
+	"os"
 )
 
 func main() {
-	if err := lib.InitAll(); err != nil {
-		panic(err)
-	}
 	app := cli.App{
 		Name:    "MCST",
-		Usage:   "Minecraft Server Tool",
+		Usage:   "a command-line utility making Minecraft server creation quick and easy for beginners.",
 		Version: lib.Version,
+		Before: func(context *cli.Context) error {
+			if err := lib.InitAll(); err != nil {
+				return err
+			}
+			return nil
+		},
 		Commands: []*cli.Command{
 			&pages.Create,
 			&pages.Download,
