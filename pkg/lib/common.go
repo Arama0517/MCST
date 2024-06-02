@@ -35,7 +35,7 @@ func InitAll() error {
 	return nil
 }
 
-var Version = "1.0.0"
+var Version = "1.0"
 var userAgent = "MCServerTool/" + Version
 
 // Request 请求URL, 返回响应; 运行成功后请添加`defer resp.Body.Close()`到你的代码内
