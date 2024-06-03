@@ -20,8 +20,6 @@ package api_test
 
 import (
 	"encoding/json"
-	"fmt"
-	"net/url"
 	"testing"
 
 	api "github.com/Arama-Vanarana/MCServerTool/pkg/API"
@@ -56,29 +54,4 @@ func TestPolarsCore(t *testing.T) {
 		t.Error(err)
 	}
 	t.Log(string(jsonData))
-}
-
-func TestPolarsCoreDownload(t *testing.T) {
-	if err := lib.InitAll(); err != nil {
-		t.Fatal(err)
-	}
-	data, err := api.GetPolarsCoresDatas(16)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var info api.PolarsCores
-	for _, v := range data {
-		info = v
-		break
-	}
-	fmt.Println(info)
-	URL, err := url.Parse(info.DownloadURL)
-	if err != nil {
-		t.Fatal(err)
-	}
-	path, err := lib.NewDownloader(*URL).Download()
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(path)
 }

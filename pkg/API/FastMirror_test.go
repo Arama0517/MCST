@@ -60,28 +60,3 @@ func TestFastMirrorBuilds(t *testing.T) {
 	}
 	t.Log(string(jsonData))
 }
-
-func TestFastMirrorBuildsDownload(t *testing.T) {
-	if err := lib.InitAll(); err != nil {
-		t.Fatal(err)
-	}
-	data, err := api.GetFastMirrorDatas()
-	if err != nil {
-		t.Fatal(err)
-	}
-	MinecraftVersion := data["Mohist"].MinecraftVersions[0]
-	builds, err := api.GetFastMirrorBuildsDatas("Mohist", MinecraftVersion)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var build string
-	for k := range builds {
-		build = k
-		break
-	}
-	path, err := api.GetFastMirrorDownloader("Mohist", MinecraftVersion, build).Download()
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(path)
-}

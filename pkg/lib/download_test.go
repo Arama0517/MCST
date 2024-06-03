@@ -33,6 +33,9 @@ var URL = url.URL{ // https://ash-speed.hetzner.com/100MB.bin
 }
 
 func TestDownload(t *testing.T) {
+	if testing.Short() {
+		t.Skip("跳过下载")
+	}
 	if err := lib.InitAll(); err != nil {
 		t.Fatal(err)
 	}
@@ -48,6 +51,9 @@ func TestDownload(t *testing.T) {
 }
 
 func TestAria2Downlaod(t *testing.T) {
+	if testing.Short() {
+		t.Skip("跳过下载")
+	}
 	if err := lib.InitAll(); err != nil {
 		t.Fatal(err)
 	}
