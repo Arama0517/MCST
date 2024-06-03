@@ -20,10 +20,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/Arama-Vanarana/MCServerTool/internal/pages"
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 	"github.com/urfave/cli/v2"
-	"os"
 )
 
 func main() {
@@ -43,6 +44,7 @@ func main() {
 			&pages.List,
 			&pages.Start,
 			&pages.Config,
+			&pages.Delete,
 			&pages.Completion,
 			&pages.Settings,
 		},

@@ -22,13 +22,14 @@ import (
 	"crypto/sha1"
 	"errors"
 	"fmt"
-	api "github.com/Arama-Vanarana/MCServerTool/pkg/API"
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
-	"github.com/urfave/cli/v2"
 	"io"
 	"net/url"
 	"os"
 	"path/filepath"
+
+	api "github.com/Arama-Vanarana/MCServerTool/pkg/API"
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/urfave/cli/v2"
 )
 
 var Download = cli.Command{

@@ -2,28 +2,63 @@
 
 - Powered by **[Golang](https://go.dev/)**
 
-# 安装
+## 安装
 
-## Windows
+### Windows
 
-1. 在[Releases](../../releases/latest)下载最新版
+1. 在[Releases](https://github.com/Arama-Vanarana/MCServerTool/releases/latest)下载最新版
 2. 解压到任意目录
-3. 运行`MCST.exe`
 
-## Linux
+### Linux
 
-1. 安装[make](https://www.gnu.org/software/make), [go](https://go.dev/dl)
+#### 通过下载二进制安装
 
-2. 运行以下命令
+> 请在curl和wget中选一个下载方式
 
-```bash
-# 克隆仓库
-git clone https://github.com/Arama-Vanarana/MCServerTool.git --depth 1
+##### curl
+
+```shell
+# 如果你在root用户运行命令请去掉sudo
+curl -sSfL https://raw.githubusercontent.com/Arama-Vanarana/MCServerTool/main/install.sh | sudo sh -s -- -b /usr/local/bin
+```
+
+##### wget
+
+```shell
+# 如果你在root用户运行命令请去掉sudo
+wget -O- -nv https://raw.githubusercontent.com/Arama-Vanarana/MCServerTool/main/install.sh | sudo sh -s -- -b /usr/local/bin
+```
+
+#### 从源代码编译
+
+1. 安装[Git](https://www.git-scm.com/downloads)和[Go](https://go.dev/dl)
+2. 运行命令
+
+```shell
+# 1. 克隆仓库并进入
+git clone https://github.com/Arama-Vanarana/MCServerTool.git
 cd MCServerTool
-sudo make install
-# 删除源代码
+# 2. 编译程序
+go build -s -w -o MCST ./cmd/MCST/main.go 
+# 3. 安装到 /usr/local/bin
+## 如果你在root用户运行命令请去掉sudo
+sudo cp MCST /usr/local/bin
+# 4. (可选) 删除仓库源代码
 cd ..
-rm -rf MCServerTool
-# 运行MCSCS
-MCST
+rm -r MCServerTool
+```
+
+## 卸载
+
+### Windows
+
+- 删除解压程序的文件夹
+
+### Linux
+
+- 运行命令
+
+```shell
+# 如果你在root用户运行命令请去掉sudo
+sudo rm /usr/local/bin/MCST
 ```

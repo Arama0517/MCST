@@ -19,10 +19,11 @@
 package lib_test
 
 import (
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 	"net/url"
 	"os"
 	"testing"
+
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
 var URL = url.URL{ // https://ash-speed.hetzner.com/100MB.bin

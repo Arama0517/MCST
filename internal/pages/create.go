@@ -22,15 +22,16 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
-	"github.com/shirou/gopsutil/v3/mem"
-	"github.com/urfave/cli/v2"
 	"io"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/shirou/gopsutil/v3/mem"
+	"github.com/urfave/cli/v2"
 )
 
 var Create = cli.Command{

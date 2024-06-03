@@ -21,10 +21,11 @@ package api_test
 import (
 	"encoding/json"
 	"fmt"
-	api "github.com/Arama-Vanarana/MCServerTool/pkg/API"
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 	"net/url"
 	"testing"
+
+	api "github.com/Arama-Vanarana/MCServerTool/pkg/API"
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
 func init() {

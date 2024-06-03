@@ -23,10 +23,11 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
 func GetPolarsData() (map[string]PolarsData, error) {

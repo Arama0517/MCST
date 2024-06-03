@@ -22,10 +22,11 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
 func GetFastMirrorDatas() (map[string]FastMirrorData, error) {
@@ -38,12 +39,14 @@ func GetFastMirrorDatas() (map[string]FastMirrorData, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 	var data struct {
 		Data []FastMirrorData `json:"data"`
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		return nil, err
+	}
+	if err := resp.Body.Close(); err != nil {
 		return nil, err
 	}
 	if err := json.Unmarshal(body, &data); err != nil {
@@ -66,7 +69,6 @@ func GetFastMirrorBuildsDatas(Core string, MinecraftVersion string) (map[string]
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 	var data struct {
 		Data struct {
 			Builds []FastMirrorBuilds `json:"builds"`
@@ -74,6 +76,9 @@ func GetFastMirrorBuildsDatas(Core string, MinecraftVersion string) (map[string]
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		return nil, err
+	}
+	if err := resp.Body.Close(); err != nil {
 		return nil, err
 	}
 	err = json.Unmarshal(body, &data)
