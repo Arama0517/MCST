@@ -48,7 +48,10 @@ var Settings = cli.Command{
 						}
 						path := context.Path("path")
 						if path == "" {
-							fmt.Println(configs.Aria2c.Path)
+							_, err := fmt.Fprintln(context.App.Writer, configs.Aria2c.Path)
+							if err != nil {
+								return err
+							}
 						} else {
 							configs.Aria2c.Path = path
 							err = configs.Save()
@@ -76,7 +79,10 @@ var Settings = cli.Command{
 						args := context.StringSlice("arg")
 						if len(args) == 0 {
 							for _, arg := range configs.Aria2c.Args {
-								fmt.Print(arg + " ")
+								_, err2 := fmt.Fprintln(context.App.Writer, arg+" ")
+								if err2 != nil {
+									return err2
+								}
 							}
 						} else {
 							configs.Aria2c.Args = args
@@ -111,7 +117,10 @@ var Settings = cli.Command{
 						return err
 					}
 				} else {
-					fmt.Println(configs.AutoAcceptEULA)
+					_, err := fmt.Fprintln(context.App.Writer, configs.AutoAcceptEULA)
+					if err != nil {
+						return err
+					}
 				}
 				return nil
 			},

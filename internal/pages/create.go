@@ -140,7 +140,7 @@ func create(context *cli.Context) error {
 	if err := os.MkdirAll(serverPath, 0755); err != nil {
 		return err
 	}
-	choice, err := confirm("你是否同意EULA协议<https://aka.ms/MinecraftEULA/>?")
+	choice, err := confirm("你是否同意EULA协议<https://aka.ms/MinecraftEULA/>?", context)
 	if err != nil {
 		return err
 	}
@@ -234,8 +234,10 @@ func toBytes(byteStr string) (uint64, error) {
 	return parsedNum * multiplier, nil
 }
 
-func confirm(description string) (bool, error) {
-	fmt.Printf("%s (y/n): ", description)
+func confirm(description string, context *cli.Context) (bool, error) {
+	if _, err := fmt.Fprintf(context.App.Writer, "%s (y/n): ", description); err != nil {
+		return false, err
+	}
 	reader := bufio.NewReader(os.Stdin)
 	choice, err := reader.ReadString('\n')
 	if err != nil {

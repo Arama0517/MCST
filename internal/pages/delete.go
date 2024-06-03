@@ -21,7 +21,7 @@ var Delete = cli.Command{
 		if err != nil {
 			return err
 		}
-		switch c, err := confirm("确认删除此服务器?"); {
+		switch c, err := confirm("确认删除此服务器?", context); {
 		case err != nil:
 			return err
 		case c:

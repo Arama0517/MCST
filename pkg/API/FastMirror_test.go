@@ -75,7 +75,7 @@ func TestFastMirrorBuildsDownload(t *testing.T) {
 		build = k
 		break
 	}
-	path, err := api.DownloadFastMirrorServer("Mohist", MinecraftVersion, build)
+	path, err := api.GetFastMirrorDownloader("Mohist", MinecraftVersion, build).Download()
 	if err != nil {
 		t.Fatal(err)
 	}

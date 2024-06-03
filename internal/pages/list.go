@@ -27,14 +27,18 @@ import (
 var List = cli.Command{
 	Name:  "list",
 	Usage: "列出已创建的服务器",
-	Action: func(_ *cli.Context) error {
+	Action: func(context *cli.Context) error {
 		configs, err := lib.LoadConfigs()
 		if err != nil {
 			return err
 		}
-		fmt.Println("已创建的服务器:")
+		if _, err := fmt.Fprintln(context.App.Writer, "已创建的服务器:"); err != nil {
+			return err
+		}
 		for _, config := range configs.Servers {
-			fmt.Println(config.Name)
+			if _, err := fmt.Fprintln(context.App.Writer, config.Name); err != nil {
+				return err
+			}
 		}
 		return nil
 	},

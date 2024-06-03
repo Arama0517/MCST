@@ -23,6 +23,43 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var Completion = cli.Command{
+	Name:  "completion",
+	Usage: "生成自动补全脚本",
+	Subcommands: []*cli.Command{
+		{
+			Name:  "bash",
+			Usage: "生成Bash自动补全脚本",
+			Action: func(context *cli.Context) error {
+				if _, err := fmt.Fprintln(context.App.Writer, bashCompletion); err != nil {
+					return err
+				}
+				return nil
+			},
+		},
+		{
+			Name:  "zsh",
+			Usage: "生成ZShell自动补全脚本",
+			Action: func(context *cli.Context) error {
+				if _, err := fmt.Fprintln(context.App.Writer, zshCompletion); err != nil {
+					return err
+				}
+				return nil
+			},
+		},
+		{
+			Name:  "powershell",
+			Usage: "生成PowerShell自动补全脚本",
+			Action: func(context *cli.Context) error {
+				if _, err := fmt.Fprintln(context.App.Writer, powershellCompletion); err != nil {
+					return err
+				}
+				return nil
+			},
+		},
+	},
+}
+
 var bashCompletion = `#! /bin/bash
 
 : ${PROG:="MCST"}
@@ -88,34 +125,3 @@ Register-ArgumentCompleter -Native -CommandName $name -ScriptBlock {
         [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
     }
 }`
-
-var Completion = cli.Command{
-	Name:  "completion",
-	Usage: "生成自动补全脚本",
-	Subcommands: []*cli.Command{
-		{
-			Name:  "bash",
-			Usage: "生成Bash自动补全脚本",
-			Action: func(_ *cli.Context) error {
-				fmt.Println(bashCompletion)
-				return nil
-			},
-		},
-		{
-			Name:  "zsh",
-			Usage: "生成ZShell自动补全脚本",
-			Action: func(_ *cli.Context) error {
-				fmt.Println(zshCompletion)
-				return nil
-			},
-		},
-		{
-			Name:  "powershell",
-			Usage: "生成PowerShell自动补全脚本",
-			Action: func(_ *cli.Context) error {
-				fmt.Println(powershellCompletion)
-				return nil
-			},
-		},
-	},
-}

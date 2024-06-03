@@ -67,9 +67,12 @@ func initData() error {
 			Aria2c: Aria2c{
 				Path: "auto",
 				Args: []string{
+					"--always-resume=false",
+					"--max-resume-failure-tries=0",
 					"--allow-overwrite=true",
 					"--auto-file-renaming=false",
 					"--retry-wait=2",
+					"--split=16",
 					"--max-connection-per-server=8",
 					"--min-split-size=5M",
 					"--console-log-level=warn",
@@ -97,10 +100,10 @@ func initData() error {
 }
 
 type Core struct {
-	URL        url.URL     `json:"url"`         // 下载地址(如果不是本地的话)
-	FileName   string      `json:"file_name"`   // 文件名
-	FilePath   string      `json:"file_path"`   // 文件路径
-	ExtrasData interface{} `json:"extras_data"` // 其他数据
+	URL        url.URL `json:"url"`         // 下载地址(如果不是本地的话)
+	FileName   string  `json:"file_name"`   // 文件名
+	FilePath   string  `json:"file_path"`   // 文件路径
+	ExtrasData any     `json:"extras_data"` // 其他数据
 }
 
 type Java struct {

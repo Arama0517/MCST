@@ -39,13 +39,16 @@ var Download = cli.Command{
 			Name:    "list",
 			Aliases: []string{"l"},
 			Usage:   "查看已下载的核心",
-			Action: func(_ *cli.Context) error {
+			Action: func(context *cli.Context) error {
 				configs, err := lib.LoadConfigs()
 				if err != nil {
 					return err
 				}
 				for i, Core := range configs.Cores {
-					fmt.Printf("%s(%d): %s\n", Core.FileName, i, Core.FilePath)
+					_, err := fmt.Fprintf(context.App.Writer, "%s(%d): %s\n", Core.FileName, i, Core.FilePath)
+					if err != nil {
+						return err
+					}
 				}
 				return nil
 			},
@@ -135,6 +138,11 @@ var Download = cli.Command{
 					Usage:   "构建版本, 例如: build524",
 				},
 				&cli.BoolFlag{
+					Name:    "verbose",
+					Aliases: []string{"v"},
+					Usage:   "更详细的输出, 如果没有使用 '--list' 此参数不生效",
+				},
+				&cli.BoolFlag{
 					Name:    "list",
 					Aliases: []string{"l"},
 					Usage:   "列出无极镜像可用版本; 例如: \n\t仅使用 '-l' 参数, 输出所有可用核心\n\t使用 '-c Mohist -l' 参数, 输出Mohist的可用版本\n\t使用 '-c Mohist -m 1.20.1 -l' 参数, 输出Mohist 1.20.1的可用构建版本\r",
@@ -174,11 +182,12 @@ func fastMirror(context *cli.Context) error {
 	minecraftVersion := context.String("mc_version")
 	buildVersion := context.String("build_version")
 	list := context.Bool("list")
-	fastMirror, err := api.GetFastMirrorDatas()
-	if err != nil {
-		return err
-	}
+	verbose := context.Bool("verbose")
 	if list {
+		fastMirror, err := api.GetFastMirrorDatas()
+		if err != nil {
+			return err
+		}
 		switch {
 		case core != "" && minecraftVersion != "":
 			fastMirrorBuilds, err := api.GetFastMirrorBuildsDatas(core, minecraftVersion)
@@ -186,11 +195,45 @@ func fastMirror(context *cli.Context) error {
 				return err
 			}
 			for _, data := range fastMirrorBuilds {
-				fmt.Printf("%s: 更新时间: %s, SHA1: %s\n", data.CoreVersion, data.UpdateTime, data.Sha1)
+				if verbose {
+					_, err := fmt.Fprintf(context.App.Writer, "%s: 更新时间: %s, SHA1: %s\n", data.CoreVersion, data.UpdateTime, data.Sha1)
+					if err != nil {
+						return err
+					}
+				} else {
+					_, err := fmt.Fprintf(context.App.Writer, "%s ", data.CoreVersion)
+					if err != nil {
+						return err
+					}
+				}
 			}
 		case core != "":
 			for _, data := range fastMirror[core].MinecraftVersions {
-				fmt.Println(data)
+				if verbose {
+					_, err := fmt.Fprintln(context.App.Writer, data)
+					if err != nil {
+						return err
+					}
+				} else {
+					_, err := fmt.Fprintf(context.App.Writer, "%s ", data)
+					if err != nil {
+						return err
+					}
+				}
+			}
+		case minecraftVersion == "":
+			for _, data := range fastMirror {
+				if verbose {
+					_, err := fmt.Fprintf(context.App.Writer, "%s <%s>\n", data.Name, data.Homepage)
+					if err != nil {
+						return err
+					}
+				} else {
+					_, err := fmt.Fprintf(context.App.Writer, "%s ", data.Name)
+					if err != nil {
+						return err
+					}
+				}
 			}
 		default:
 			return errors.New("没有这个用法")
@@ -261,7 +304,10 @@ func polars(context *cli.Context) error {
 		switch {
 		case typeID == 0 && coreID == 0:
 			for _, data := range polars {
-				fmt.Printf("%s(%d): %s\n", data.Name, data.ID, data.Description)
+				_, err := fmt.Fprintf(context.App.Writer, "%s(%d): %s\n", data.Name, data.ID, data.Description)
+				if err != nil {
+					return err
+				}
 			}
 		case typeID != 0 && coreID == 0:
 			data, err := api.GetPolarsCoresDatas(typeID)
@@ -269,7 +315,10 @@ func polars(context *cli.Context) error {
 				return err
 			}
 			for _, core := range data {
-				fmt.Printf("%s(%d): %s\n", core.Name, core.ID, core.DownloadURL)
+				_, err := fmt.Fprintf(context.App.Writer, "%s(%d): <%s>\n", core.Name, core.ID, core.DownloadURL)
+				if err != nil {
+					return err
+				}
 			}
 		default:
 			return errors.New("没有这个用法")

@@ -49,7 +49,11 @@ var Start = cli.Command{
 			return errors.New("服务器不存在")
 		}
 		cmd := exec.Command(server.Java.Path)
-		cmd.Args = append(cmd.Args, fmt.Sprintf("-Xmx%d", server.Java.Xmx), fmt.Sprintf("-Xms%d", server.Java.Xms), "-Dfile.encoding=UTF-8")
+		cmd.Args = append(cmd.Args,
+			fmt.Sprintf("-Xmx%d", server.Java.Xmx),
+			fmt.Sprintf("-Xms%d", server.Java.Xms),
+			"-Dfile.encoding=UTF-8",
+		)
 		cmd.Args = append(cmd.Args, server.Java.Args...)
 		cmd.Args = append(cmd.Args, "-jar", "server.jar")
 		cmd.Args = append(cmd.Args, server.ServerArgs...)
