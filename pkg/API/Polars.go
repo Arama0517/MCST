@@ -87,21 +87,6 @@ func GetPolarsCoresDatas(ID int) (map[int]PolarsCores, error) {
 	return parsedData, nil
 }
 
-// DownloadPolarsServer 参数 DownloadURL 从 GetPolarsCoresDatas 函数 获取
-func DownloadPolarsServer(DownloadURL string) (string, error) {
-	url, err := url.Parse(DownloadURL)
-	if err != nil {
-		return "", err
-	}
-	path, err := (&lib.Downloader{
-		URL: *url,
-	}).Download()
-	if err != nil {
-		return "", err
-	}
-	return path, nil
-}
-
 type PolarsData struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`

@@ -21,15 +21,11 @@
 package api
 
 import (
-	"crypto/sha1"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 )
 
 func GetFastMirrorDatas() (map[string]FastMirrorData, error) {
@@ -92,39 +88,12 @@ func GetFastMirrorBuildsDatas(Core string, MinecraftVersion string) (map[string]
 	return parseDatas, nil
 }
 
-func DownloadFastMirrorServer(Core, MinecraftVersion, BuildVersion string) (string, error) {
-	path, err := (&lib.Downloader{
-		URL: url.URL{
-			Scheme: "https",
-			Host:   "download.fastmirror.net",
-			Path:   "/download/" + Core + "/" + MinecraftVersion + "/" + BuildVersion,
-		},
-	}).Download()
-	if err != nil {
-		return "", err
-	}
-	file, err := os.Open(path)
-	if err != nil {
-		return "", err
-	}
-	defer file.Close()
-	hasher := sha1.New()
-	if _, err := io.Copy(hasher, file); err != nil {
-		return "", err
-	}
-	hash := hasher.Sum(nil)
-	FastMirrorBuildsData, err := GetFastMirrorBuildsDatas(Core, MinecraftVersion)
-	if err != nil {
-		return "", err
-	}
-	if fmt.Sprintf("%x", hash) != FastMirrorBuildsData[BuildVersion].Sha1 {
-		err := os.Remove(path)
-		if err != nil {
-			return "", err
-		}
-		return "", errors.New("Sha1不匹配")
-	}
-	return path, nil
+func GetFastMirrorDownloader(Core, MinecraftVersion, BuildVersion string) *lib.Downloader {
+	return lib.NewDownloader(url.URL{
+		Scheme: "https",
+		Host:   "download.fastmirror.net",
+		Path:   "/download/" + Core + "/" + MinecraftVersion + "/" + BuildVersion,
+	})
 }
 
 type FastMirrorData struct {

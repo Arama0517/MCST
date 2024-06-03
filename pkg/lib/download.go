@@ -21,7 +21,6 @@ package lib
 import (
 	"errors"
 	"fmt"
-	"github.com/k0kubun/go-ansi"
 	"github.com/schollz/progressbar/v3"
 	"io"
 	"mime"
@@ -64,12 +63,13 @@ func initDownloader() error {
 }
 
 func NewDownloader(url url.URL) *Downloader {
-	return &Downloader{URL: url}
+	return &Downloader{URL: url, Stdout: os.Stdout, Stderr: os.Stderr}
 }
 
 type Downloader struct {
-	URL      url.URL // 下载的 URL
-	fileName string  // 文件名
+	URL            url.URL   // 下载的 URL
+	Stdout, Stderr io.Writer // 输出
+	fileName       string    // 文件名
 }
 
 func (d *Downloader) Download() (string, error) {
@@ -88,7 +88,6 @@ func (d *Downloader) Download() (string, error) {
 		return path, d.aria2cDownload()
 	}
 	// 单线程
-	ansiStderr := ansi.NewAnsiStderr()
 	bar := progressbar.NewOptions64(
 		resp.ContentLength,
 		progressbar.OptionEnableColorCodes(true),
@@ -101,13 +100,13 @@ func (d *Downloader) Download() (string, error) {
 			BarStart:      "[black][[reset]",
 			BarEnd:        "[black]][reset]",
 		}),
-		progressbar.OptionSetWriter(ansiStderr),
+		progressbar.OptionSetWriter(d.Stderr),
 		progressbar.OptionShowBytes(true),
 		progressbar.OptionShowCount(),
 		progressbar.OptionSpinnerType(14),
 		progressbar.OptionThrottle(65*time.Millisecond),
 		progressbar.OptionOnCompletion(func() {
-			_, err := fmt.Fprint(ansiStderr, "\n")
+			_, err := fmt.Fprint(d.Stderr, "\n")
 			if err != nil {
 				return
 			}
@@ -163,9 +162,8 @@ func (d *Downloader) aria2cDownload() error {
 		fmt.Sprintf("--stop-with-process=%d", os.Getpid()),
 	)
 	cmd.Args = append(cmd.Args, configs.Aria2c.Args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
+	cmd.Stdout = d.Stdout
+	cmd.Stderr = d.Stderr
 	if err := cmd.Run(); err != nil {
 		if err := os.Remove(inputFilePath); err != nil {
 			return err

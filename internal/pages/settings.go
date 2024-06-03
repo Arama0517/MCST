@@ -41,12 +41,12 @@ var Settings = cli.Command{
 							Usage: "Aria2c 路径, 如果为auto则自动寻找",
 						},
 					},
-					Action: func(ctx *cli.Context) error {
+					Action: func(context *cli.Context) error {
 						configs, err := lib.LoadConfigs()
 						if err != nil {
 							return err
 						}
-						path := ctx.Path("path")
+						path := context.Path("path")
 						if path == "" {
 							fmt.Println(configs.Aria2c.Path)
 						} else {
@@ -68,12 +68,12 @@ var Settings = cli.Command{
 							Usage: "Aria2c 参数",
 						},
 					},
-					Action: func(ctx *cli.Context) error {
+					Action: func(context *cli.Context) error {
 						configs, err := lib.LoadConfigs()
 						if err != nil {
 							return err
 						}
-						args := ctx.StringSlice("arg")
+						args := context.StringSlice("arg")
 						if len(args) == 0 {
 							for _, arg := range configs.Aria2c.Args {
 								fmt.Print(arg + " ")
@@ -99,13 +99,13 @@ var Settings = cli.Command{
 					Usage: "是否同意EULA协议",
 				},
 			},
-			Action: func(ctx *cli.Context) error {
+			Action: func(context *cli.Context) error {
 				configs, err := lib.LoadConfigs()
 				if err != nil {
 					return err
 				}
-				if ctx.IsSet("accept") {
-					configs.AutoAcceptEULA = ctx.Bool("accept")
+				if context.IsSet("accept") {
+					configs.AutoAcceptEULA = context.Bool("accept")
 					err = configs.Save()
 					if err != nil {
 						return err

@@ -89,24 +89,24 @@ var Create = cli.Command{
 	Action: create,
 }
 
-func create(ctx *cli.Context) error {
+func create(context *cli.Context) error {
 	// 配置
 	configs, err := lib.LoadConfigs()
 	if err != nil {
 		return err
 	}
 	var config lib.Server
-	config.Name = ctx.String("name")
+	config.Name = context.String("name")
 	for name := range configs.Servers {
 		if name == config.Name {
 			return errors.New("服务器已存在")
 		}
 	}
-	config.Java.Xms, err = toBytes(ctx.String("Xms"))
+	config.Java.Xms, err = toBytes(context.String("Xms"))
 	if err != nil {
 		return err
 	}
-	config.Java.Xmx, err = toBytes(ctx.String("Xmx"))
+	config.Java.Xmx, err = toBytes(context.String("Xmx"))
 	if err != nil {
 		return err
 	}
@@ -123,13 +123,13 @@ func create(ctx *cli.Context) error {
 		return errors.New("Xms和Xmx不能大于系统内存")
 	}
 	config.Java.Encoding = "UTF-8"
-	if ctx.Bool("gbk") {
+	if context.Bool("gbk") {
 		config.Java.Encoding = "GBK"
 	}
-	config.Java.Path = ctx.Path("java")
-	config.Java.Args = ctx.StringSlice("jvm_args")
-	config.ServerArgs = ctx.StringSlice("server_args")
-	coreIndex := ctx.Int("core")
+	config.Java.Path = context.Path("java")
+	config.Java.Args = context.StringSlice("jvm_args")
+	config.ServerArgs = context.StringSlice("server_args")
+	coreIndex := context.Int("core")
 	if coreIndex < 0 || coreIndex >= len(configs.Cores) {
 		return errors.New("核心不存在")
 	}

@@ -19,12 +19,15 @@
 package pages
 
 import (
+	"crypto/sha1"
 	"errors"
 	"fmt"
 	api "github.com/Arama-Vanarana/MCServerTool/pkg/API"
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 	"github.com/urfave/cli/v2"
+	"io"
 	"net/url"
+	"os"
 	"path/filepath"
 )
 
@@ -58,13 +61,13 @@ var Download = cli.Command{
 					Required: true,
 				},
 			},
-			Action: func(ctx *cli.Context) error {
+			Action: func(context *cli.Context) error {
 				configs, err := lib.LoadConfigs()
 				if err != nil {
 					return err
 				}
 				configs.Cores = append(configs.Cores, lib.Core{
-					FileName: ctx.Path("path"),
+					FileName: context.Path("path"),
 				})
 				if err := configs.Save(); err != nil {
 					return err
@@ -84,12 +87,12 @@ var Download = cli.Command{
 					Required: true,
 				},
 			},
-			Action: func(ctx *cli.Context) error {
+			Action: func(context *cli.Context) error {
 				configs, err := lib.LoadConfigs()
 				if err != nil {
 					return err
 				}
-				url, err := url.Parse(ctx.String("url"))
+				url, err := url.Parse(context.String("url"))
 				if err != nil {
 					return err
 				}
@@ -166,11 +169,11 @@ var Download = cli.Command{
 	},
 }
 
-func fastMirror(ctx *cli.Context) error {
-	core := ctx.String("core")
-	minecraftVersion := ctx.String("mc_version")
-	buildVersion := ctx.String("build_version")
-	list := ctx.Bool("list")
+func fastMirror(context *cli.Context) error {
+	core := context.String("core")
+	minecraftVersion := context.String("mc_version")
+	buildVersion := context.String("build_version")
+	list := context.Bool("list")
 	fastMirror, err := api.GetFastMirrorDatas()
 	if err != nil {
 		return err
@@ -196,8 +199,34 @@ func fastMirror(ctx *cli.Context) error {
 		if core == "" || minecraftVersion == "" || buildVersion == "" {
 			return errors.New("缺少必要参数")
 		}
-		path, err := api.DownloadFastMirrorServer(core, minecraftVersion, buildVersion)
+		downloader := api.GetFastMirrorDownloader(core, minecraftVersion, buildVersion)
+		downloader.Stdout = context.App.Writer
+		downloader.Stderr = context.App.ErrWriter
+		path, err := downloader.Download()
 		if err != nil {
+			return err
+		}
+		file, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		hasher := sha1.New()
+		if _, err := io.Copy(hasher, file); err != nil {
+			return err
+		}
+		hash := hasher.Sum(nil)
+		FastMirrorBuildsData, err := api.GetFastMirrorBuildsDatas(core, minecraftVersion)
+		if err != nil {
+			return err
+		}
+		if fmt.Sprintf("%x", hash) != FastMirrorBuildsData[buildVersion].Sha1 {
+			err := os.Remove(path)
+			if err != nil {
+				return err
+			}
+			return errors.New("SHA1不匹配")
+		}
+		if err := file.Close(); err != nil {
 			return err
 		}
 		configs, err := lib.LoadConfigs()
@@ -220,10 +249,10 @@ func fastMirror(ctx *cli.Context) error {
 	return nil
 }
 
-func polars(ctx *cli.Context) error {
-	typeID := ctx.Int("type_id")
-	coreID := ctx.Int("core_id")
-	list := ctx.Bool("list")
+func polars(context *cli.Context) error {
+	typeID := context.Int("type_id")
+	coreID := context.Int("core_id")
+	list := context.Bool("list")
 	polars, err := api.GetPolarsData()
 	if err != nil {
 		return err
@@ -253,15 +282,18 @@ func polars(ctx *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		path, err := api.DownloadPolarsServer(data[coreID].DownloadURL)
+		URL, err := url.Parse(data[coreID].DownloadURL)
+		if err != nil {
+			return err
+		}
+		downloader := lib.NewDownloader(*URL)
+		downloader.Stdout = context.App.Writer
+		downloader.Stderr = context.App.ErrWriter
+		path, err := downloader.Download()
 		if err != nil {
 			return err
 		}
 		configs, err := lib.LoadConfigs()
-		if err != nil {
-			return err
-		}
-		URL, err := url.Parse(data[coreID].DownloadURL)
 		if err != nil {
 			return err
 		}

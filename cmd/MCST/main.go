@@ -31,7 +31,7 @@ func main() {
 		Name:    "MCST",
 		Usage:   "a command-line utility making Minecraft server creation quick and easy for beginners.",
 		Version: lib.Version,
-		Before: func(context *cli.Context) error {
+		Before: func(_ *cli.Context) error {
 			if err := lib.InitAll(); err != nil {
 				return err
 			}

@@ -23,6 +23,7 @@ import (
 	"fmt"
 	api "github.com/Arama-Vanarana/MCServerTool/pkg/API"
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"net/url"
 	"testing"
 )
 
@@ -67,7 +68,11 @@ func TestPolarsCoreDownload(t *testing.T) {
 		break
 	}
 	fmt.Println(info)
-	path, err := api.DownloadPolarsServer(info.DownloadURL)
+	URL, err := url.Parse(info.DownloadURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	path, err := lib.NewDownloader(*URL).Download()
 	if err != nil {
 		t.Fatal(err)
 	}

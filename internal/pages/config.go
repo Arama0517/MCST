@@ -71,24 +71,24 @@ var Config = cli.Command{
 			Usage:   "Minecraft服务器特有参数",
 		},
 	},
-	Action: func(ctx *cli.Context) error {
+	Action: func(context *cli.Context) error {
 		configs, err := lib.LoadConfigs()
 		if err != nil {
 			return err
 		}
-		server, exists := configs.Servers[ctx.String("server")]
+		server, exists := configs.Servers[context.String("server")]
 		if !exists {
 			return errors.New("服务器不存在")
 		}
-		name := ctx.String("name")
+		name := context.String("name")
 		if name != "" {
 			server.Name = name
 		}
-		Xms, err := toBytes(ctx.String("Xms"))
+		Xms, err := toBytes(context.String("Xms"))
 		if err != nil {
 			return err
 		}
-		Xmx, err := toBytes(ctx.String("Xmx"))
+		Xmx, err := toBytes(context.String("Xmx"))
 		if err != nil {
 			return err
 		}
@@ -106,19 +106,19 @@ var Config = cli.Command{
 		}
 		server.Java.Xms = Xms
 		server.Java.Xmx = Xmx
-		encoding := ctx.String("encoding")
+		encoding := context.String("encoding")
 		if encoding != "" {
 			server.Java.Encoding = encoding
 		}
-		java := ctx.Path("java")
+		java := context.Path("java")
 		if java != "" {
 			server.Java.Path = java
 		}
-		jvmArgs := ctx.StringSlice("jvm_args")
+		jvmArgs := context.StringSlice("jvm_args")
 		if len(jvmArgs) > 0 {
 			server.Java.Args = jvmArgs
 		}
-		serverArgs := ctx.StringSlice("server_args")
+		serverArgs := context.StringSlice("server_args")
 		if len(serverArgs) > 0 {
 			server.ServerArgs = serverArgs
 		}

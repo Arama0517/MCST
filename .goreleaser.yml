@@ -69,7 +69,7 @@ release:
   github:
     owner: Arama-Vanarana
     name: MCServerTool
-  name_template: "Minecraft Server Tool v${{ .Version }}"
+  name_template: "Minecraft Server Tool v{{ .Version }}"
   draft: true
 
 source:

@@ -39,12 +39,12 @@ var Start = cli.Command{
 			Required: true,
 		},
 	},
-	Action: func(ctx *cli.Context) error {
+	Action: func(context *cli.Context) error {
 		configs, err := lib.LoadConfigs()
 		if err != nil {
 			return err
 		}
-		server, exists := configs.Servers[ctx.String("server")]
+		server, exists := configs.Servers[context.String("server")]
 		if !exists {
 			return errors.New("服务器不存在")
 		}
@@ -54,8 +54,8 @@ var Start = cli.Command{
 		cmd.Args = append(cmd.Args, "-jar", "server.jar")
 		cmd.Args = append(cmd.Args, server.ServerArgs...)
 		cmd.Dir = filepath.Join(lib.ServersDir, server.Name)
-		cmd.Stdout = ctx.App.Writer
-		cmd.Stderr = ctx.App.ErrWriter
+		cmd.Stdout = context.App.Writer
+		cmd.Stderr = context.App.ErrWriter
 		if err := cmd.Run(); err != nil {
 			return err
 		}

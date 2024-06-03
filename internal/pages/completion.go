@@ -23,15 +23,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var Completion = cli.Command{
-	Name:  "completion",
-	Usage: "生成自动补全脚本",
-	Subcommands: []*cli.Command{
-		{
-			Name:  "bash",
-			Usage: "生成Bash自动补全脚本",
-			Action: func(_ *cli.Context) error {
-				fmt.Println(`#! /bin/bash
+var bashCompletion = `#! /bin/bash
 
 : ${PROG:="MCST"}
 
@@ -65,15 +57,9 @@ _cli_bash_autocomplete() {
 }
 
 complete -o bashdefault -o default -o nospace -F _cli_bash_autocomplete $PROG
-unset PROG`)
-				return nil
-			},
-		},
-		{
-			Name:  "zsh",
-			Usage: "生成ZShell自动补全脚本",
-			Action: func(_ *cli.Context) error {
-				fmt.Println(`#compdef MCST
+unset PROG`
+
+var zshCompletion = `#compdef MCST
 
 _cli_zsh_autocomplete() {
   local -a opts
@@ -92,7 +78,34 @@ _cli_zsh_autocomplete() {
   fi
 }
 
-compdef _cli_zsh_autocomplete MCST`)
+compdef _cli_zsh_autocomplete MCST`
+
+var powershellCompletion = `$name = "MCST"
+Register-ArgumentCompleter -Native -CommandName $name -ScriptBlock {
+    param($commandName, $wordToComplete, $cursorPosition)
+    $other = "$wordToComplete --generate-bash-completion"
+    Invoke-Expression $other | ForEach-Object {
+        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
+    }
+}`
+
+var Completion = cli.Command{
+	Name:  "completion",
+	Usage: "生成自动补全脚本",
+	Subcommands: []*cli.Command{
+		{
+			Name:  "bash",
+			Usage: "生成Bash自动补全脚本",
+			Action: func(_ *cli.Context) error {
+				fmt.Println(bashCompletion)
+				return nil
+			},
+		},
+		{
+			Name:  "zsh",
+			Usage: "生成ZShell自动补全脚本",
+			Action: func(_ *cli.Context) error {
+				fmt.Println(zshCompletion)
 				return nil
 			},
 		},
@@ -100,14 +113,7 @@ compdef _cli_zsh_autocomplete MCST`)
 			Name:  "powershell",
 			Usage: "生成PowerShell自动补全脚本",
 			Action: func(_ *cli.Context) error {
-				fmt.Println(`$name = "MCST"
-Register-ArgumentCompleter -Native -CommandName $name -ScriptBlock {
-    param($commandName, $wordToComplete, $cursorPosition)
-    $other = "$wordToComplete --generate-bash-completion"
-    Invoke-Expression $other | ForEach-Object {
-        [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)
-    }
-}`)
+				fmt.Println(powershellCompletion)
 				return nil
 			},
 		},
