@@ -28,13 +28,10 @@ import (
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
-func init() {
-	if err := lib.InitAll(); err != nil {
-		panic(err)
-	}
-}
-
 func TestPolars(t *testing.T) {
+	if err := lib.InitAll(); err != nil {
+		t.Fatal(err)
+	}
 	data, err := api.GetPolarsData()
 	if err != nil {
 		t.Fatal(err)
@@ -47,6 +44,9 @@ func TestPolars(t *testing.T) {
 }
 
 func TestPolarsCore(t *testing.T) {
+	if err := lib.InitAll(); err != nil {
+		t.Fatal(err)
+	}
 	data, err := api.GetPolarsCoresDatas(16)
 	if err != nil {
 		t.Fatal(err)
@@ -59,6 +59,9 @@ func TestPolarsCore(t *testing.T) {
 }
 
 func TestPolarsCoreDownload(t *testing.T) {
+	if err := lib.InitAll(); err != nil {
+		t.Fatal(err)
+	}
 	data, err := api.GetPolarsCoresDatas(16)
 	if err != nil {
 		t.Fatal(err)

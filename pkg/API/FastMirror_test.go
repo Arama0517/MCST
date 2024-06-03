@@ -26,13 +26,10 @@ import (
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
-func init() {
-	if err := lib.InitAll(); err != nil {
-		panic(err)
-	}
-}
-
 func TestFastMirror(t *testing.T) {
+	if err := lib.InitAll(); err != nil {
+		t.Fatal(err)
+	}
 	data, err := api.GetFastMirrorDatas()
 	if err != nil {
 		t.Fatal(err)
@@ -45,6 +42,9 @@ func TestFastMirror(t *testing.T) {
 }
 
 func TestFastMirrorBuilds(t *testing.T) {
+	if err := lib.InitAll(); err != nil {
+		t.Fatal(err)
+	}
 	data, err := api.GetFastMirrorDatas()
 	if err != nil {
 		t.Fatal(err)
@@ -62,6 +62,9 @@ func TestFastMirrorBuilds(t *testing.T) {
 }
 
 func TestFastMirrorBuildsDownload(t *testing.T) {
+	if err := lib.InitAll(); err != nil {
+		t.Fatal(err)
+	}
 	data, err := api.GetFastMirrorDatas()
 	if err != nil {
 		t.Fatal(err)
