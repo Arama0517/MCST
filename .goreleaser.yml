@@ -2,10 +2,16 @@
 ---
 project_name: MCST
 
+before:
+  hooks:
+    - go mod tidy
+
 builds:
   - binary: MCST
     main: ./cmd/MCST/
-    ldflags: -s -w
+    ldflags:
+      - -s
+      - -w
     goos:
       - darwin
       - windows
@@ -43,10 +49,11 @@ archives:
         format: zip
     name_template: '{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     files:
-      - LICENSE.txt
+      - LICENSE
       - README.md
 
 checksum:
+
   name_template: '{{ .ProjectName }}-{{ .Version }}-checksums.txt'
 
 changelog:
@@ -75,3 +82,38 @@ release:
 source:
   enabled: true
   name_template: '{{ .ProjectName }}-{{ .Version }}-source'
+
+nfpms:
+  - id: MCST-nfpms
+    package_name: MCST
+    file_name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    homepage: https://github.com/Arama-Vanarana/MCServerTool/
+    maintainer: "Arama <3584075812@qq.com>"
+    description: A command-line utility making Minecraft server creation quick and easy for beginners.
+    license: GPLv3
+    section: golang
+    formats:
+      - deb
+      - rpm
+    umask: 0o022
+    overrides:
+      deb:
+        contents:
+          - src: LICENSE
+            dst: /usr/share/doc/MCST/copyright
+          - src: README.md
+            dst: /usr/share/doc/MCST/README.md
+        recommends:
+          - golang-go
+      rpm:
+        contents:
+          - src: LICENSE
+            dst: /usr/share/doc/MCST/LICENSE
+            type: license
+          - src: README.md
+            dst: /usr/share/doc/MCST/README.md
+            type: readme
+        recommends:
+          - /usr/bin/go
+    rpm:
+      group: Games
