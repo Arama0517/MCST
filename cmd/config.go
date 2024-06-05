@@ -16,38 +16,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package lib
+package cmd
 
 import (
-	"io"
-	"net/http"
-	"net/url"
+	"fmt"
+
+	"github.com/spf13/cobra"
 )
 
-// InitAll 一键全部初始化(按顺序)
-func InitAll() error {
-	if err := initData(); err != nil {
-		return err
-	}
-	if err := initDownloader(); err != nil {
-		return err
-	}
-	return nil
+type configCmdFlags struct {
+	a bool
 }
 
-// Request 请求URL, 返回响应; 运行成功后请添加`defer resp.Body.Close()`到你的代码内
-func Request(URL url.URL, Method string, Header map[string]string, Body io.Reader) (*http.Response, error) {
-	client := http.Client{}
-	req, err := http.NewRequest(Method, URL.String(), Body)
-	if err != nil {
-		return nil, err
+func newConfigCmd() *cobra.Command {
+	flags := &configCmdFlags{}
+	cmd := &cobra.Command{
+		Use:   "config",
+		Short: "配置服务器",
+		Long:  "配置服务器的各项参数",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Println(flags.a)
+			return nil
+		},
 	}
-	for k, v := range Header {
-		req.Header.Set(k, v)
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+	cmd.Flags().BoolVarP(&flags.a, "a", "a", false, "aaa")
+	return cmd
 }

@@ -1,4 +1,3 @@
-# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 ---
 project_name: MCST
 
@@ -6,9 +5,12 @@ before:
   hooks:
     - go mod tidy
 
+gomod:
+  proxy: true
+
 builds:
   - binary: MCST
-    main: ./cmd/MCST/
+    main: ./cmd/MCST/main.go
     ldflags:
       - -s
       - -w
@@ -53,7 +55,6 @@ archives:
       - README.md
 
 checksum:
-
   name_template: '{{ .ProjectName }}-{{ .Version }}-checksums.txt'
 
 changelog:
@@ -95,6 +96,7 @@ nfpms:
     formats:
       - deb
       - rpm
+      - archlinux
     umask: 0o022
     overrides:
       deb:
@@ -103,17 +105,26 @@ nfpms:
             dst: /usr/share/doc/MCST/copyright
           - src: README.md
             dst: /usr/share/doc/MCST/README.md
-        recommends:
-          - golang-go
+        dependencies:
+          - aria2
       rpm:
         contents:
           - src: LICENSE
             dst: /usr/share/doc/MCST/LICENSE
-            type: license
           - src: README.md
             dst: /usr/share/doc/MCST/README.md
-            type: readme
-        recommends:
-          - /usr/bin/go
+        dependencies:
+          - aria2
+      archlinux:
+        contents:
+          - src: LICENSE
+            dst: /usr/share/doc/MCST/LICENSE
+          - src: README.md
+            dst: /usr/share/doc/MCST/README
+        dependencies:
+          - aria2
     rpm:
       group: Games
+    archlinux:
+      pkgbase: food
+      packager: GoReleaser <staff@goreleaser.com>

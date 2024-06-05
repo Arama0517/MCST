@@ -3,6 +3,3 @@ linters:
     enable:
         - revive
         - misspell
-    fast: true
-run:
-    concurrency: 0
