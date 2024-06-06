@@ -29,5 +29,8 @@ var (
 )
 
 func main() {
-	cmd.Execute(os.Exit, os.Args[1:], version)
+	err := cmd.Execute(os.Exit, os.Args[1:], version)
+	if err != nil {
+		return
+	}
 }

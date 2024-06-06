@@ -45,7 +45,7 @@ type createCmdFlage struct {
 	core       int
 }
 
-func newCreateCmd() (*cobra.Command, error) {
+func newCreateCmd() *cobra.Command {
 	flags := createCmdFlage{}
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -59,21 +59,15 @@ func newCreateCmd() (*cobra.Command, error) {
 	cmd.Flags().StringVarP(&flags.name, "name", "n", "", "服务器名称")
 	cmd.Flags().StringVar(&flags.xms, "xms", "1G", "Java虚拟机初始堆内存")
 	cmd.Flags().StringVar(&flags.xmx, "xmx", "1G", "Java虚拟机最大堆内存")
-	cmd.Flags().StringVarP(&flags.encoding, "encoding", "e", "1G", "输出编码")
+	cmd.Flags().StringVarP(&flags.encoding, "encoding", "e", "UTF-8", "输出编码")
 	cmd.Flags().StringVarP(&flags.java, "java", "j", "", "使用的Java")
 	cmd.Flags().StringSliceVar(&flags.jvmArgs, "jvm_args", []string{"-Dlog4j2.formatMsgNoLookups=true"}, "Java虚拟机其他参数")
 	cmd.Flags().StringSliceVar(&flags.serverArgs, "server_args", []string{"--nogui"}, "Minecraft服务器参数")
 	cmd.Flags().IntVarP(&flags.core, "core", "c", 0, "使用的核心")
-	if err := cmd.MarkFlagRequired("name"); err != nil {
-		return nil, err
-	}
-	if err := cmd.MarkFlagRequired("java"); err != nil {
-		return nil, err
-	}
-	if err := cmd.MarkFlagRequired("core"); err != nil {
-		return nil, err
-	}
-	return cmd, nil
+	_ = cmd.MarkFlagRequired("name")
+	_ = cmd.MarkFlagRequired("java")
+	_ = cmd.MarkFlagRequired("core")
+	return cmd
 }
 
 func create(flags createCmdFlage, cmd *cobra.Command) error {
