@@ -17,8 +17,13 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: stable
-      - uses: sigstore/cosign-installer@v3.5.0
+      - uses: sigstore/cosign-installer@main
       - uses: anchore/sbom-action/download-syft@v0.16.0
+      - name: 写入cosign私钥
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+        run: |
+          echo $COSIGN_PRIVATE_KEY > cosign.key
       - name: 创建发行版
         uses: goreleaser/goreleaser-action@v5
         with:
@@ -26,3 +31,4 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COSIGN_PWD: ${{ secrets.COSIGN_PWD }}
