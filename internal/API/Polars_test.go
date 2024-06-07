@@ -27,7 +27,7 @@ import (
 )
 
 func TestPolars(t *testing.T) {
-	if err := lib.InitAll(); err != nil {
+	if err := lib.InitAll("dev"); err != nil {
 		t.Fatal(err)
 	}
 	data, err := api.GetPolarsData()
@@ -42,7 +42,7 @@ func TestPolars(t *testing.T) {
 }
 
 func TestPolarsCore(t *testing.T) {
-	if err := lib.InitAll(); err != nil {
+	if err := lib.InitAll("dev"); err != nil {
 		t.Fatal(err)
 	}
 	data, err := api.GetPolarsCoresDatas(16)

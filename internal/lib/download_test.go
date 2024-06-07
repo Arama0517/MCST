@@ -36,7 +36,7 @@ func TestDownload(t *testing.T) {
 	if testing.Short() {
 		t.Skip("跳过下载")
 	}
-	if err := lib2.InitAll(); err != nil {
+	if err := lib2.InitAll("dev"); err != nil {
 		t.Fatal(err)
 	}
 	lib2.EnableAria2c = false
@@ -54,7 +54,7 @@ func TestAria2Downlaod(t *testing.T) {
 	if testing.Short() {
 		t.Skip("跳过下载")
 	}
-	if err := lib2.InitAll(); err != nil {
+	if err := lib2.InitAll("dev"); err != nil {
 		t.Fatal(err)
 	}
 	lib2.EnableAria2c = true
