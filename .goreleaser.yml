@@ -150,7 +150,7 @@ signs:
   - cmd: cosign
     artifacts: all
     stdin: "{{ .Env.COSIGN_PWD }}"
-    certificate: "${artifact}.pem"
+#    output: true
     args:
       - "sign-blob"
       - "--key=cosign.key"
