@@ -51,6 +51,6 @@ func newRootCmd(version string) *cobra.Command {
 	}
 	cmd.SetVersionTemplate("{{.Version}}")
 	cmd.PersistentFlags().BoolVar(&verbose, "debug", false, "调试模式(更多的日志)")
-	cmd.AddCommand(newCreateCmd(), newDownloadCmd(), newConfigCmd(), newListCmd(), newManCmd())
+	cmd.AddCommand(newCreateCmd(), newDownloadCmd(), newConfigCmd(), newStartCmd(), newListCmd(), newManCmd())
 	return cmd
 }
