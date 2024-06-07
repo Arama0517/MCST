@@ -16,38 +16,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package lib
+package cmd
 
 import (
-	"io"
-	"net/http"
-	"net/url"
+	"fmt"
+	"os"
+
+	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
+	"github.com/spf13/cobra"
 )
 
-// InitAll 一键全部初始化(按顺序)
-func InitAll() error {
-	if err := initData(); err != nil {
-		return err
+func newListCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "list",
+		Short: "列出服务器",
+		Long:  "列出所有服务器的名称",
+		RunE: func(_ *cobra.Command, _ []string) error {
+			configs, err := lib.LoadConfigs()
+			if err != nil {
+				return err
+			}
+			if _, err := fmt.Fprintln(os.Stderr, "已创建的服务器:"); err != nil {
+				return err
+			}
+			for _, config := range configs.Servers {
+				fmt.Println(config.Name)
+			}
+			return nil
+		},
 	}
-	if err := initDownloader(); err != nil {
-		return err
-	}
-	return nil
-}
-
-// Request 请求URL, 返回响应; 运行成功后请添加`defer resp.Body.Close()`到你的代码内
-func Request(URL url.URL, Method string, Header map[string]string, Body io.Reader) (*http.Response, error) {
-	client := http.Client{}
-	req, err := http.NewRequest(Method, URL.String(), Body)
-	if err != nil {
-		return nil, err
-	}
-	for k, v := range Header {
-		req.Header.Set(k, v)
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+	return cmd
 }

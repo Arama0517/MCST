@@ -16,31 +16,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package pages
+package cmd
 
 import (
 	"fmt"
+	"os"
 
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
-	"github.com/urfave/cli/v2"
+	mcoral "github.com/muesli/mango-cobra"
+	"github.com/muesli/roff"
+	"github.com/spf13/cobra"
 )
 
-var List = cli.Command{
-	Name:  "list",
-	Usage: "列出已创建的服务器",
-	Action: func(context *cli.Context) error {
-		configs, err := lib.LoadConfigs()
-		if err != nil {
-			return err
-		}
-		if _, err := fmt.Fprintln(context.App.Writer, "已创建的服务器:"); err != nil {
-			return err
-		}
-		for _, config := range configs.Servers {
-			if _, err := fmt.Fprintln(context.App.Writer, config.Name); err != nil {
+func newManCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:                   "man",
+		Short:                 "生成man手册",
+		SilenceUsage:          true,
+		DisableFlagsInUseLine: true,
+		Hidden:                true,
+		Args:                  cobra.NoArgs,
+		ValidArgsFunction:     cobra.NoFileCompletions,
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			manPage, err := mcoral.NewManPage(1, cmd.Root())
+			if err != nil {
 				return err
 			}
-		}
-		return nil
-	},
+			_, err = fmt.Fprint(os.Stdout, manPage.Build(roff.NewDocument()))
+			return err
+		},
+	}
+	return cmd
 }

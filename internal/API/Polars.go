@@ -27,7 +27,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
 )
 
 func GetPolarsData() (map[string]PolarsData, error) {
@@ -59,11 +59,11 @@ func GetPolarsData() (map[string]PolarsData, error) {
 	return result, nil
 }
 
-func GetPolarsCoresDatas(ID int) (map[int]PolarsCores, error) {
+func GetPolarsCoresDatas(id int) (map[int]PolarsCores, error) {
 	resp, err := lib.Request(url.URL{
 		Scheme: "https",
 		Host:   "mirror.polars.cc",
-		Path:   fmt.Sprintf("/api/query/minecraft/core/%d", ID),
+		Path:   fmt.Sprintf("/api/query/minecraft/core/%d", id),
 	}, http.MethodGet, nil, nil)
 	if err != nil {
 		return nil, err
@@ -98,6 +98,6 @@ type PolarsData struct {
 type PolarsCores struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`
-	DownloadURL string `json:"downloadUrl"`
+	DownloadURL string `json:"download_url"`
 	Type        int    `json:"type"`
 }

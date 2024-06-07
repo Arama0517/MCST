@@ -49,16 +49,16 @@ func initData() error {
 	case err == nil: // 目录存在
 		break
 	case os.IsNotExist(err): // 第一次运行; 初始化
-		if err := os.MkdirAll(DataDir, 0755); err != nil {
+		if err := os.MkdirAll(DataDir, 0o755); err != nil {
 			return err
 		}
-		if err := os.MkdirAll(ServersDir, 0755); err != nil {
+		if err := os.MkdirAll(ServersDir, 0o755); err != nil {
 			return err
 		}
-		if err := os.MkdirAll(DownloadsDir, 0755); err != nil {
+		if err := os.MkdirAll(DownloadsDir, 0o755); err != nil {
 			return err
 		}
-		if err := os.MkdirAll(PluginsDir, 0755); err != nil {
+		if err := os.MkdirAll(PluginsDir, 0o755); err != nil {
 			return err
 		}
 		jsonData, err := json.MarshalIndent(MCSCSConfig{
@@ -90,7 +90,7 @@ func initData() error {
 		if err != nil {
 			return err
 		}
-		if err := os.WriteFile(configsPath, jsonData, 0644); err != nil {
+		if err := os.WriteFile(configsPath, jsonData, 0o644); err != nil {
 			return err
 		}
 	default: // 其他错误
@@ -109,8 +109,8 @@ type Core struct {
 type Java struct {
 	Path     string   `json:"path"`     // Java路径
 	Args     []string `json:"args"`     // Java虚拟机参数
-	Xmx      uint64   `json:"Xmx"`      // Java虚拟机最大堆内存
-	Xms      uint64   `json:"Xms"`      // Java虚拟机初始堆内存
+	Xmx      uint64   `json:"xmx"`      // Java虚拟机最大堆内存
+	Xms      uint64   `json:"xms"`      // Java虚拟机初始堆内存
 	Encoding string   `json:"encoding"` // 编码
 }
 type Server struct {
@@ -149,7 +149,7 @@ func (c *MCSCSConfig) Save() error {
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(configsPath, jsonConfig, 0644)
+	err = os.WriteFile(configsPath, jsonConfig, 0o644)
 	if err != nil {
 		return err
 	}

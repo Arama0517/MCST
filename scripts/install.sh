@@ -378,7 +378,7 @@ hash_sha256_verify() {
   fi
   got=$(hash_sha256 "$TARGET")
   if [ "$want" != "$got" ]; then
-    log_err "hash_sha256_verify "$TARGET" 的校验和未验证通过, 期望值为 ${want}, 实际值为 $got"
+    log_err "hash_sha256_verify $TARGET 的校验和未验证通过, 期望值为 ${want}, 实际值为 $got"
     return 1
   fi
 }

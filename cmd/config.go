@@ -19,10 +19,10 @@
 package cmd
 
 import (
-	"errors"
 	"os"
+	"path/filepath"
 
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
 	"github.com/caarlos0/log"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/spf13/cobra"
@@ -36,6 +36,7 @@ type configCmdFlags struct {
 	java       string
 	jvmArgs    []string
 	serverArgs []string
+	delete     bool // 如果为true就删除服务器
 }
 
 func newConfigCmd() *cobra.Command {
@@ -43,7 +44,8 @@ func newConfigCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config",
 		Short: "配置服务器",
-		Long:  "配置服务器的各项参数",
+		Long: `配置服务器的各项参数
+如果使用 '--delete' 参数则删除服务器(慎重, 无法复原)`,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			configs, err := lib.LoadConfigs()
 			if err != nil {
@@ -51,9 +53,17 @@ func newConfigCmd() *cobra.Command {
 			}
 			config, exists := configs.Servers[flags.name]
 			if !exists {
-				return errors.New("服务器不存在")
+				return ErrServerNotFound
 			}
 			cmdFlags := cmd.Flags()
+			if flags.delete {
+				delete(configs.Servers, flags.name)
+				if err := os.RemoveAll(filepath.Join(lib.ServersDir, flags.name)); err != nil {
+					return err
+				}
+				log.Info("删除服务器成功")
+				return nil
+			}
 			memInfo, err := mem.VirtualMemory()
 			if err != nil {
 				return err
@@ -65,11 +75,11 @@ func newConfigCmd() *cobra.Command {
 				}
 				switch {
 				case ram > config.Java.Xmx:
-					return errors.New("参数错误 Xms 不可大于 Xmx")
+					return ErrXmxLessThanXms
 				case ram < 1048576:
-					return errors.New("参数错误 Xms 不可小于 1MiB")
+					return ErrXmsToLow
 				case ram > memInfo.Total:
-					return errors.New("参数错误 Xms 不可大于物理内存")
+					return ErrXmsExceedsPhysicalMemory
 				}
 				config.Java.Xms = ram
 			}
@@ -80,11 +90,11 @@ func newConfigCmd() *cobra.Command {
 				}
 				switch {
 				case ram < config.Java.Xms:
-					return errors.New("参数错误 Xmx 不可小于 Xms")
+					return ErrXmxLessThanXms
 				case ram < 1048576:
-					return errors.New("参数错误 Xmx 不可小于 1MiB")
+					return ErrXmxTooLow
 				case ram > memInfo.Total:
-					return errors.New("参数错误 Xmx 不可大于物理内存")
+					return ErrXmxExceedsPhysicalMemory
 				}
 				config.Java.Xmx = ram
 			}
@@ -94,9 +104,8 @@ func newConfigCmd() *cobra.Command {
 			if cmdFlags.Changed("java") {
 				if _, err := os.Stat(flags.java); err != nil {
 					return err
-				} else {
-					config.Java.Path = flags.java
 				}
+				config.Java.Path = flags.java
 			}
 			if cmdFlags.Changed("jvm_args") {
 				config.Java.Args = flags.jvmArgs
@@ -115,6 +124,7 @@ func newConfigCmd() *cobra.Command {
 	cmd.Flags().StringVarP(&flags.java, "java", "j", "", "使用的Java")
 	cmd.Flags().StringSliceVar(&flags.jvmArgs, "jvm_args", []string{}, "Java虚拟机其他参数")
 	cmd.Flags().StringSliceVar(&flags.serverArgs, "server_args", []string{}, "Minecraft服务器参数")
+	cmd.Flags().BoolVar(&flags.delete, "delete", false, "删除服务器")
 	_ = cmd.MarkFlagRequired("name")
 	return cmd
 }

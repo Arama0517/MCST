@@ -19,54 +19,38 @@
 package cmd
 
 import (
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
 	"github.com/caarlos0/log"
 	"github.com/spf13/cobra"
 )
 
 func Execute(exit func(int), args []string, version string) error {
-	root, err := newRootCmd(exit, version)
-	if err != nil {
-		return err
-	}
-	root.cmd.SetArgs(args)
-	if err := root.cmd.Execute(); err != nil {
+	cmd := newRootCmd(version)
+	cmd.SetArgs(args)
+	if err := cmd.Execute(); err != nil {
 		log.WithError(err).Error("错误")
-		root.exit(1)
+		exit(1)
 	}
 	return nil
 }
 
-type rootCmd struct {
-	cmd     *cobra.Command
-	exit    func(int)
-	verbose bool
-}
-
-func newRootCmd(exit func(int), version string) (*rootCmd, error) {
-	root := &rootCmd{
-		exit: exit,
-	}
-	root.cmd = &cobra.Command{
-		Use:               "MCST",
-		Version:           version,
-		SilenceUsage:      true,
-		SilenceErrors:     true,
-		Args:              cobra.NoArgs,
-		ValidArgsFunction: cobra.NoFileCompletions,
-		PersistentPreRun: func(*cobra.Command, []string) {
-			if root.verbose {
+func newRootCmd(version string) *cobra.Command {
+	var verbose bool
+	cmd := &cobra.Command{
+		Use:           "MCST",
+		Version:       version,
+		SilenceUsage:  true,
+		SilenceErrors: true,
+		PersistentPreRunE: func(*cobra.Command, []string) error {
+			if verbose {
 				log.SetLevel(log.DebugLevel)
 				log.Debug("调试模式开启")
 			}
-			if err := lib.InitAll(); err != nil {
-				log.WithError(err).Error("初始化失败")
-				root.exit(1)
-			}
+			return lib.InitAll(version)
 		},
 	}
-	root.cmd.SetVersionTemplate("{{.Version}}")
-	root.cmd.PersistentFlags().BoolVar(&root.verbose, "debug", false, "调试模式(更多的日志)")
-	root.cmd.AddCommand(newCreateCmd(), newDownloadCmd(), newConfigCmd())
-	return root, nil
+	cmd.SetVersionTemplate("{{.Version}}")
+	cmd.PersistentFlags().BoolVar(&verbose, "debug", false, "调试模式(更多的日志)")
+	cmd.AddCommand(newCreateCmd(), newDownloadCmd(), newConfigCmd(), newListCmd(), newManCmd())
+	return cmd
 }

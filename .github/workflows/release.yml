@@ -1,9 +1,14 @@
-name: CD
+name: release
 
 on:
   push:
+    branches:
+      - "main"
     tags:
-      - v*
+      - "v*"
+
+permissions:
+  contents: write
 
 jobs:
   release:
@@ -18,6 +23,6 @@ jobs:
         uses: goreleaser/goreleaser-action@v5
         with:
           version: latest
-          args: release --clean --timeout=90m
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

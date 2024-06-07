@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package main
 
 import (
@@ -24,9 +25,7 @@ import (
 	"github.com/Arama-Vanarana/MCServerTool/cmd"
 )
 
-var (
-	version = "dev"
-)
+var version = "dev" // 开发时使用的版本号, 发布时使用 '-X main.version=X.X.X' 参数构建
 
 func main() {
 	err := cmd.Execute(os.Exit, os.Args[1:], version)

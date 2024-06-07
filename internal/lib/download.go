@@ -70,7 +70,6 @@ func NewDownloader(url url.URL) *Downloader {
 type Downloader struct {
 	URL            url.URL   // 下载的 URL
 	Stdout, Stderr io.Writer // 输出
-	UserAgent      string    // UA
 	fileName       string    // 文件名
 }
 
@@ -127,6 +126,9 @@ func (d *Downloader) Download() (string, error) {
 	if err := file.Close(); err != nil {
 		return "", err
 	}
+	if err := resp.Body.Close(); err != nil {
+		return "", err
+	}
 	return path, nil
 }
 
@@ -160,7 +162,7 @@ func (d *Downloader) aria2cDownload() error {
 	cmd := exec.Command(aria2cPath)
 	cmd.Args = append(cmd.Args,
 		fmt.Sprintf("--input-file=%s", inputFilePath),
-		fmt.Sprintf("--user-agent=%s", d.UserAgent),
+		fmt.Sprintf("--user-agent=MCST/%s", version),
 		fmt.Sprintf("--stop-with-process=%d", os.Getpid()),
 	)
 	cmd.Args = append(cmd.Args, configs.Aria2c.Args...)

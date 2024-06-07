@@ -16,54 +16,38 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package lib_test
+package lib
 
 import (
+	"fmt"
+	"io"
+	"net/http"
 	"net/url"
-	"os"
-	"testing"
-
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
-var URL = url.URL{ // https://ash-speed.hetzner.com/100MB.bin
-	Scheme: "https",
-	Host:   "ash-speed.hetzner.com",
-	Path:   "/100MB.bin",
+// InitAll 一键全部初始化(按顺序)
+func InitAll(v string) error {
+	version = v
+	if err := initData(); err != nil {
+		return err
+	}
+	if err := initDownloader(); err != nil {
+		return err
+	}
+	return nil
 }
 
-func TestDownload(t *testing.T) {
-	if testing.Short() {
-		t.Skip("跳过下载")
-	}
-	if err := lib.InitAll(); err != nil {
-		t.Fatal(err)
-	}
-	lib.EnableAria2c = false
-	path, err := lib.NewDownloader(URL).Download()
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(path)
-	if err := os.Remove(path); err != nil {
-		t.Fatal(err)
-	}
-}
+var version string
 
-func TestAria2Downlaod(t *testing.T) {
-	if testing.Short() {
-		t.Skip("跳过下载")
-	}
-	if err := lib.InitAll(); err != nil {
-		t.Fatal(err)
-	}
-	lib.EnableAria2c = true
-	path, err := lib.NewDownloader(URL).Download()
+// Request 请求URL, 返回响应; 运行成功后请添加`defer resp.Body.Close()`到你的代码内
+func Request(url url.URL, method string, header map[string]string, body io.Reader) (*http.Response, error) {
+	request, err := http.NewRequest(method, url.String(), body)
 	if err != nil {
-		t.Fatal(err)
+		return nil, err
 	}
-	t.Log(path)
-	if err := os.Remove(path); err != nil {
-		t.Fatal(err)
+	request.Header.Set("User-Agent", fmt.Sprintf("MCST/%s", version))
+	for key, value := range header {
+		request.Header.Set(key, value)
 	}
+	return http.DefaultClient.Do(request)
 }

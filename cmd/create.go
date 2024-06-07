@@ -29,7 +29,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/spf13/cobra"
 )
@@ -52,8 +52,8 @@ func newCreateCmd() *cobra.Command {
 		Short: "创建服务器",
 		Long: `如果你还未下载任何核心, 请使用 'MCST download' 下载核心
 必须指定--name, --java, --core`,
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			return create(flags, cmd)
+		RunE: func(_ *cobra.Command, _ []string) error {
+			return create(flags)
 		},
 	}
 	cmd.Flags().StringVarP(&flags.name, "name", "n", "", "服务器名称")
@@ -70,7 +70,7 @@ func newCreateCmd() *cobra.Command {
 	return cmd
 }
 
-func create(flags createCmdFlage, cmd *cobra.Command) error {
+func create(flags createCmdFlage) error {
 	configs, err := lib.LoadConfigs()
 	if err != nil {
 		return err
@@ -95,12 +95,16 @@ func create(flags createCmdFlage, cmd *cobra.Command) error {
 		return err
 	}
 	switch {
+	case config.Java.Xms < 1048576:
+		return ErrXmsToLow
+	case config.Java.Xmx < 1048576:
+		return ErrXmxTooLow
 	case config.Java.Xmx < config.Java.Xms:
-		return errors.New("参数错误 Xmx 不可小于 Xms")
-	case config.Java.Xmx < 1048576, config.Java.Xms < 1048576:
-		return errors.New("参数错误 Xmx 或 Xms 不可小于 1MiB")
-	case config.Java.Xmx > memInfo.Total, config.Java.Xms > memInfo.Total:
-		return errors.New("参数错误 Xmx 或 Xms 不可大于物理内存")
+		return ErrXmxLessThanXms
+	case config.Java.Xms > memInfo.Total:
+		return ErrXmsExceedsPhysicalMemory
+	case config.Java.Xmx > memInfo.Total:
+		return ErrXmxExceedsPhysicalMemory
 	}
 	config.Java.Encoding = flags.encoding
 	config.Java.Path = flags.java
@@ -126,18 +130,18 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MCST 2006"))
 	if err := configs.Save(); err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Join(lib.ServersDir, config.Name), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Join(lib.ServersDir, config.Name), 0o755); err != nil {
 		return err
 	}
-	if EULAFile, err := os.Open(filepath.Join(lib.ServersDir, config.Name, "eula.txt")); err != nil {
+	EULAFile, err := os.Open(filepath.Join(lib.ServersDir, config.Name, "eula.txt"))
+	if err != nil {
 		return err
-	} else {
-		if _, err := EULAFile.WriteString(EULAFileData); err != nil {
-			return err
-		}
-		if err := EULAFile.Close(); err != nil {
-			return err
-		}
+	}
+	if _, err := EULAFile.WriteString(EULAFileData); err != nil {
+		return err
+	}
+	if err := EULAFile.Close(); err != nil {
+		return err
 	}
 
 	// 保存
@@ -155,7 +159,7 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MCST 2006"))
 	if _, err = io.Copy(dstFile, srcFile); err != nil {
 		return err
 	}
-	if err := os.Chmod(filepath.Join(lib.ServersDir, config.Name, "server.jar"), 0755); err != nil {
+	if err := os.Chmod(filepath.Join(lib.ServersDir, config.Name, "server.jar"), 0o755); err != nil {
 		return err
 	}
 	if err := srcFile.Close(); err != nil {
@@ -172,11 +176,12 @@ func toBytes(byteStr string) (uint64, error) {
 
 	// 分离数字部分和单位部分
 	for _, char := range byteStr {
-		if char >= '0' && char <= '9' {
+		switch {
+		case char >= '0' && char <= '9':
 			num += string(char)
-		} else if (char >= 'A' && char <= 'Z') || (char >= 'a' && char <= 'z') {
+		case (char >= 'A' && char <= 'Z') || (char >= 'a' && char <= 'z'):
 			unit += strings.ToUpper(string(char))
-		} else {
+		default:
 			return 0, nil
 		}
 	}

@@ -22,8 +22,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	api "github.com/Arama-Vanarana/MCServerTool/pkg/API"
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/Arama-Vanarana/MCServerTool/internal/API"
+	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
 )
 
 func TestPolars(t *testing.T) {

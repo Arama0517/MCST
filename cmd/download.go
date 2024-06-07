@@ -23,7 +23,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
 	"github.com/caarlos0/log"
 	"github.com/spf13/cobra"
 )
@@ -38,7 +38,7 @@ func newDownloadCmd() *cobra.Command {
 	listCmd := &cobra.Command{
 		Use:   "list",
 		Short: "列出所有核心",
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			configs, err := lib.LoadConfigs()
 			if err != nil {
 				return err
@@ -59,7 +59,7 @@ func newLocalCmd() *cobra.Command {
 		Use:   "local",
 		Short: "本地",
 		Long:  "从本地获取核心",
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			if _, err := os.Stat(path); err != nil {
 				return err
 			}
@@ -88,7 +88,7 @@ func newRemoteCmd() *cobra.Command {
 		Use:   "remote",
 		Short: "远程",
 		Long:  "从指定的URL下载核心",
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			URL, err := url.Parse(URL)
 			if err != nil {
 				return err
