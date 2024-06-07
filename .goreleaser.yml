@@ -148,13 +148,13 @@ sboms:
 
 signs:
   - cmd: cosign
+    artifacts: all
+    stdin: "{{ .Env.COSIGN_PWD }}"
     certificate: "${artifact}.pem"
-    output: true
-    artifacts: checksum
     args:
-      - sign-blob
+      - "sign-blob"
       - "--key=cosign.key"
       - "--output-certificate=${certificate}"
       - "--output-signature=${signature}"
       - "${artifact}"
-      - --yes
+      - "--yes"
