@@ -1,5 +1,8 @@
-### Goreleaser template
-dist/*
+### GoReleaser template
+dist/
+completions/
+manpages/
+cosign.key
 
 ### VisualStudioCode template
 .vscode/*
