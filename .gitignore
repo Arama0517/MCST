@@ -1,3 +1,6 @@
+### Goreleaser template
+dist/*
+
 ### VisualStudioCode template
 .vscode/*
 !.vscode/settings.json
@@ -113,4 +116,3 @@ fabric.properties
 
 # Go workspace file
 go.work
-

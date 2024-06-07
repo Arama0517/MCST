@@ -35,9 +35,6 @@ func InitAll() error {
 	return nil
 }
 
-var Version = "1.0.0"
-var userAgent = "MCServerTool/" + Version
-
 // Request 请求URL, 返回响应; 运行成功后请添加`defer resp.Body.Close()`到你的代码内
 func Request(URL url.URL, Method string, Header map[string]string, Body io.Reader) (*http.Response, error) {
 	client := http.Client{}
@@ -45,7 +42,6 @@ func Request(URL url.URL, Method string, Header map[string]string, Body io.Reade
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", userAgent)
 	for k, v := range Header {
 		req.Header.Set(k, v)
 	}

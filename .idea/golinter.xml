@@ -4,8 +4,13 @@
     <option name="enabledLinters">
       <list>
         <option value="ineffassign" />
+        <option value="staticcheck" />
+        <option value="govet" />
         <option value="misspell" />
+        <option value="errcheck" />
+        <option value="unused" />
         <option value="revive" />
+        <option value="gosimple" />
       </list>
     </option>
     <option name="goLinterExe" value="\\wsl.localhost\Arch\home\arama\go\bin\golangci-lint" />
