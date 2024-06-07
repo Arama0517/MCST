@@ -145,15 +145,3 @@ nfpms:
 
 sboms:
   - artifacts: archive
-
-signs:
-  - cmd: cosign
-    artifacts: all
-    stdin: "{{ .Env.COSIGN_PWD }}"
-    output: true
-    args:
-      - "sign-blob"
-      - "--key=cosign.key"
-      - "--output-signature=${signature}"
-      - "${artifact}"
-      - "--yes"
