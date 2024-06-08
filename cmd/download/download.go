@@ -16,50 +16,61 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package cmd
+package download
 
 import (
+	"fmt"
 	"net/url"
 	"os"
 	"path/filepath"
 
 	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
-	"github.com/caarlos0/log"
+	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )
 
-func newDownloadCmd() *cobra.Command {
+func NewDownloadCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "download",
 		Short: "下载核心",
 		Long:  "从远程或本地获取核心",
 	}
+	cmd.AddCommand(newListCmd(), newLocalCmd(), newRemoteCmd(), newFastMirrorCmd())
+	return cmd
+}
 
-	listCmd := &cobra.Command{
-		Use:   "list",
-		Short: "列出所有核心",
-		RunE: func(_ *cobra.Command, _ []string) error {
+func newListCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "list",
+		Aliases: []string{"fm"},
+		Short:   "列出所有核心",
+		RunE: func(*cobra.Command, []string) error {
 			configs, err := lib.LoadConfigs()
 			if err != nil {
 				return err
 			}
-			for index, core := range configs.Cores {
-				log.WithField("info", core).WithField("index", index).Info(core.FileName)
+			for _, core := range configs.Cores {
+				log.WithFields(log.Fields{
+					"URL":  core.URL,
+					"文件名":  core.FileName,
+					"文件路径": core.FilePath,
+					"其他数据": core.ExtrasData.(log.Fields),
+				}).Info(fmt.Sprint(core.ID))
 			}
 			return nil
 		},
 	}
-	cmd.AddCommand(listCmd, newLocalCmd(), newRemoteCmd())
 	return cmd
 }
 
 func newLocalCmd() *cobra.Command {
 	var path string
 	cmd := &cobra.Command{
-		Use:   "local",
-		Short: "本地",
-		Long:  "从本地获取核心",
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Use:     "local",
+		Aliases: []string{"lo"},
+		Short:   "本地",
+		Long:    "从本地获取核心",
+		RunE: func(*cobra.Command, []string) error {
 			if _, err := os.Stat(path); err != nil {
 				return err
 			}
@@ -68,8 +79,10 @@ func newLocalCmd() *cobra.Command {
 				return err
 			}
 			configs.Cores = append(configs.Cores, lib.Core{
+				URL:      "unknown",
 				FileName: filepath.Base(path),
 				FilePath: path,
+				ID:       len(configs.Cores) + 1,
 			})
 			if err := configs.Save(); err != nil {
 				return err
@@ -85,10 +98,11 @@ func newLocalCmd() *cobra.Command {
 func newRemoteCmd() *cobra.Command {
 	var URL string
 	cmd := &cobra.Command{
-		Use:   "remote",
-		Short: "远程",
-		Long:  "从指定的URL下载核心",
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Use:     "remote",
+		Aliases: []string{"r"},
+		Short:   "远程",
+		Long:    "从指定的URL下载核心",
+		RunE: func(*cobra.Command, []string) error {
 			URL, err := url.Parse(URL)
 			if err != nil {
 				return err
@@ -102,9 +116,10 @@ func newRemoteCmd() *cobra.Command {
 				return err
 			}
 			configs.Cores = append(configs.Cores, lib.Core{
-				URL:      *URL,
+				URL:      URL.String(),
 				FileName: filepath.Base(path),
 				FilePath: path,
+				ID:       len(configs.Cores) + 1,
 			})
 			if err := configs.Save(); err != nil {
 				return err

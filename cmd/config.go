@@ -23,7 +23,7 @@ import (
 	"path/filepath"
 
 	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
-	"github.com/caarlos0/log"
+	"github.com/apex/log"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/spf13/cobra"
 )

@@ -64,13 +64,12 @@ func initDownloader() error {
 }
 
 func NewDownloader(url url.URL) *Downloader {
-	return &Downloader{URL: url, Stdout: os.Stdout, Stderr: os.Stderr}
+	return &Downloader{URL: url}
 }
 
 type Downloader struct {
-	URL            url.URL   // 下载的 URL
-	Stdout, Stderr io.Writer // 输出
-	fileName       string    // 文件名
+	URL      url.URL // 下载的 URL
+	FileName string  // 文件名
 }
 
 func (d *Downloader) Download() (string, error) {
@@ -79,8 +78,8 @@ func (d *Downloader) Download() (string, error) {
 		return "", err
 	}
 
-	d.getFileName(resp.Header, d.URL)
-	path := filepath.Join(DownloadsDir, d.fileName)
+	d.GetFileName(resp.Header, d.URL)
+	path := filepath.Join(DownloadsDir, d.FileName)
 	if _, err := os.Stat(path); err == nil {
 		return path, nil
 	}
@@ -101,18 +100,18 @@ func (d *Downloader) Download() (string, error) {
 			BarStart:      "[black][[reset]",
 			BarEnd:        "[black]][reset]",
 		}),
-		progressbar.OptionSetWriter(d.Stderr),
+		progressbar.OptionSetWriter(os.Stderr),
 		progressbar.OptionShowBytes(true),
 		progressbar.OptionShowCount(),
 		progressbar.OptionSpinnerType(14),
 		progressbar.OptionThrottle(65*time.Millisecond),
 		progressbar.OptionOnCompletion(func() {
-			_, err := fmt.Fprint(d.Stderr, "\n")
+			_, err := fmt.Fprint(os.Stderr, "\n")
 			if err != nil {
 				return
 			}
 		}))
-	file, err := os.Create(filepath.Join(DownloadsDir, d.fileName))
+	file, err := os.Create(filepath.Join(DownloadsDir, d.FileName))
 	if err != nil {
 		return "", err
 	}
@@ -137,7 +136,7 @@ func (d *Downloader) aria2cDownload() error {
 	if err != nil {
 		return err
 	}
-	inputFilePath := filepath.Join(DownloadsDir, fmt.Sprintf("%s.txt", d.fileName))
+	inputFilePath := filepath.Join(DownloadsDir, fmt.Sprintf("%s.txt", d.FileName))
 	f, err := os.Create(inputFilePath)
 	if err != nil {
 		return err
@@ -153,7 +152,7 @@ func (d *Downloader) aria2cDownload() error {
 	if _, err := f.WriteString(fmt.Sprintf("\tdir=%s\n", DownloadsDir)); err != nil {
 		return err
 	}
-	if _, err := f.WriteString(fmt.Sprintf("\tout=%s\n", d.fileName)); err != nil {
+	if _, err := f.WriteString(fmt.Sprintf("\tout=%s\n", d.FileName)); err != nil {
 		return err
 	}
 	if err = f.Close(); err != nil {
@@ -166,8 +165,8 @@ func (d *Downloader) aria2cDownload() error {
 		fmt.Sprintf("--stop-with-process=%d", os.Getpid()),
 	)
 	cmd.Args = append(cmd.Args, configs.Aria2c.Args...)
-	cmd.Stdout = d.Stdout
-	cmd.Stderr = d.Stderr
+	cmd.Stdout = os.Stderr
+	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		if err := os.Remove(inputFilePath); err != nil {
 			return err
@@ -180,18 +179,18 @@ func (d *Downloader) aria2cDownload() error {
 	return nil
 }
 
-func (d *Downloader) getFileName(header http.Header, url url.URL) {
+func (d *Downloader) GetFileName(header http.Header, url url.URL) {
 	// 尝试从 Content-Disposition 头部获取文件名
 	if disposition := header.Get("Content-Disposition"); disposition != "" {
 		_, params, err := mime.ParseMediaType(disposition)
 		if err == nil {
 			if filename, ok := params["filename"]; ok {
-				d.fileName = filename
+				d.FileName = filename
 				return
 			}
 		}
 	}
 
 	// 如果没有 Content-Disposition 头部，则从 URL 中获取文件名
-	d.fileName = filepath.Base(url.Path)
+	d.FileName = filepath.Base(url.Path)
 }

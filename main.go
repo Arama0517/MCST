@@ -19,7 +19,6 @@
 package main
 
 import (
-	_ "embed"
 	"os"
 
 	"github.com/Arama-Vanarana/MCServerTool/cmd"
@@ -28,8 +27,7 @@ import (
 var version = "dev" // 开发时使用的版本号, 发布时使用 '-X main.version=X.X.X' 参数构建
 
 func main() {
-	err := cmd.Execute(os.Exit, os.Args[1:], version)
-	if err != nil {
+	if err := cmd.Execute(os.Exit, os.Args[1:], version); err != nil {
 		return
 	}
 }

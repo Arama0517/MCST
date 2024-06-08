@@ -13,12 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: 初始化 Go
-        uses: actions/setup-go@v5
+      - uses: actions/setup-go@v5
         with:
           go-version: stable
       - uses: anchore/sbom-action/download-syft@v0.16.0
-      - name: 创建发行版
+      - name: release
         uses: goreleaser/goreleaser-action@v5
         with:
           version: latest

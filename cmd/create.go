@@ -19,8 +19,6 @@
 package cmd
 
 import (
-	"bufio"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -43,6 +41,7 @@ type createCmdFlage struct {
 	jvmArgs    []string
 	serverArgs []string
 	core       int
+	eula       bool
 }
 
 func newCreateCmd() *cobra.Command {
@@ -53,6 +52,9 @@ func newCreateCmd() *cobra.Command {
 		Long: `如果你还未下载任何核心, 请使用 'MCST download' 下载核心
 必须指定--name, --java, --core`,
 		RunE: func(_ *cobra.Command, _ []string) error {
+			if !flags.eula {
+				return ErrEulaRequired
+			}
 			return create(flags)
 		},
 	}
@@ -63,7 +65,13 @@ func newCreateCmd() *cobra.Command {
 	cmd.Flags().StringVarP(&flags.java, "java", "j", "", "使用的Java")
 	cmd.Flags().StringSliceVar(&flags.jvmArgs, "jvm_args", []string{"-Dlog4j2.formatMsgNoLookups=true"}, "Java虚拟机其他参数")
 	cmd.Flags().StringSliceVar(&flags.serverArgs, "server_args", []string{"--nogui"}, "Minecraft服务器参数")
-	cmd.Flags().IntVarP(&flags.core, "core", "c", 0, "使用的核心")
+	cmd.Flags().IntVarP(&flags.core, "core", "c", 0, "使用的核心ID")
+	cmd.Flags().BoolVar(&flags.eula, "eula", false, "是否同意EULA协议(https://aka.ms/MinecraftEULA/)")
+	if configs, err := lib.LoadConfigs(); err != nil || !configs.AutoAcceptEULA {
+		_ = cmd.MarkFlagRequired("eula")
+	} else {
+		flags.eula = true
+	}
 	_ = cmd.MarkFlagRequired("name")
 	_ = cmd.MarkFlagRequired("java")
 	_ = cmd.MarkFlagRequired("core")
@@ -79,7 +87,7 @@ func create(flags createCmdFlage) error {
 	config.Name = flags.name
 	for name := range configs.Servers {
 		if name == flags.name {
-			return errors.New("参数错误 服务器已存在, 请更换一个服务器名称")
+			return ErrServerExists
 		}
 	}
 	config.Java.Xms, err = toBytes(flags.xms)
@@ -111,7 +119,7 @@ func create(flags createCmdFlage) error {
 	config.Java.Args = flags.jvmArgs
 	config.ServerArgs = flags.serverArgs
 	if flags.core < 0 || flags.core > len(configs.Cores) {
-		return errors.New("参数错误 核心不存在")
+		return ErrCoreNotFound
 	}
 	configs.Servers[config.Name] = config
 
@@ -119,17 +127,7 @@ func create(flags createCmdFlage) error {
 	EULAFileData := fmt.Sprintf(`# Create By Minecraft Server Tool
 # By changing the setting below to TRUE you are indicating your agreement to Minecraft EULA(<https://aka.ms/MinecraftEULA/>).
 # %s
-eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MCST 2006"))
-	if !configs.AutoAcceptEULA {
-		if choice, err := confirm("你是否同意EULA协议<https://aka.ms/MinecraftEULA/>?"); err != nil {
-			return err
-		} else if !choice {
-			return errors.New("你必须同意EULA协议<https://aka.ms/MinecraftEULA/>才能创建服务器")
-		}
-	}
-	if err := configs.Save(); err != nil {
-		return err
-	}
+eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
 	if err := os.MkdirAll(filepath.Join(lib.ServersDir, config.Name), 0o755); err != nil {
 		return err
 	}
@@ -145,9 +143,6 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MCST 2006"))
 	}
 
 	// 保存
-	if err := configs.Save(); err != nil {
-		return err
-	}
 	srcFile, err := os.Open(configs.Cores[flags.core].FilePath)
 	if err != nil {
 		return err
@@ -168,8 +163,22 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MCST 2006"))
 	if err := dstFile.Close(); err != nil {
 		return err
 	}
+	if err := configs.Save(); err != nil {
+		return err
+	}
 	return nil
 }
+
+var (
+	TiB uint64 = 1099511627776 // Tebibyte: 1024 * 1024 * 1024 * 1024
+	TB  uint64 = 1000000000000 // Terabyte: 1000 * 1000 * 1000 * 1000
+	GiB uint64 = 1073741824    // Gibibyte: 1024 * 1024 * 1024
+	GB  uint64 = 1000000000    // Gigabyte: 1000 * 1000 * 1000
+	MiB uint64 = 1048576       // Mebibyte: 1024 * 1024
+	MB  uint64 = 1000000       // Megabyte: 1000 * 1000
+	KiB uint64 = 1024          // Kibibyte
+	KB  uint64 = 1000          // Kilobyte
+)
 
 func toBytes(byteStr string) (uint64, error) {
 	var num, unit string
@@ -186,48 +195,30 @@ func toBytes(byteStr string) (uint64, error) {
 		}
 	}
 
-	var multiplier uint64
-	switch unit {
-	case "T", "TB", "TIB":
-		multiplier = 1024 * 1024 * 1024 * 1024
-	case "G", "GB", "GIB":
-		multiplier = 1024 * 1024 * 1024
-	case "M", "MB", "MIB":
-		multiplier = 1024 * 1024
-	case "K", "KB", "KIB":
-		multiplier = 1024
-	case "B", "BYTES", "":
-		multiplier = 1
-	default:
-		return 0, errors.New("这不是一个有效的单位")
-	}
-
 	parsedNum, err := strconv.ParseUint(num, 10, 64)
 	if err != nil {
 		return 0, err
 	}
-
-	return parsedNum * multiplier, nil
-}
-
-func confirm(description string) (bool, error) {
-	if _, err := fmt.Printf("%s (y/n): ", description); err != nil {
-		return false, err
-	}
-	reader := bufio.NewReader(os.Stdin)
-	choice, err := reader.ReadString('\n')
-	if err != nil {
-		return false, err
-	}
-	choice = strings.TrimSpace(strings.ToLower(choice))
-	for {
-		switch choice {
-		case "y", "yes":
-			return true, nil
-		case "n", "no":
-			return false, nil
-		default:
-			continue
-		}
+	switch unit {
+	case "T", "TIB":
+		return parsedNum * TiB, nil
+	case "TB":
+		return parsedNum * TB, nil
+	case "G", "GIB":
+		return parsedNum * GiB, nil
+	case "GB":
+		return parsedNum * GB, nil
+	case "M", "MIB":
+		return parsedNum * MiB, nil
+	case "MB":
+		return parsedNum * MB, nil
+	case "K", "KIB":
+		return parsedNum * KiB, nil
+	case "KB":
+		return parsedNum * KB, nil
+	case "B", "BYTES", "":
+		return parsedNum, nil
+	default:
+		return 0, ErrInvalidUnit
 	}
 }

@@ -19,14 +19,17 @@
 package cmd
 
 import (
+	"github.com/Arama-Vanarana/MCServerTool/cmd/download"
 	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
-	"github.com/caarlos0/log"
+	"github.com/apex/log"
+	"github.com/apex/log/handlers/cli"
 	"github.com/spf13/cobra"
 )
 
 func Execute(exit func(int), args []string, version string) error {
 	cmd := newRootCmd(version)
 	cmd.SetArgs(args)
+	log.WithField("args", args).Debug("参数")
 	if err := cmd.Execute(); err != nil {
 		log.WithError(err).Error("错误")
 		exit(1)
@@ -42,6 +45,7 @@ func newRootCmd(version string) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		PersistentPreRunE: func(*cobra.Command, []string) error {
+			log.SetHandler(cli.Default)
 			if verbose {
 				log.SetLevel(log.DebugLevel)
 				log.Debug("调试模式开启")
@@ -51,6 +55,6 @@ func newRootCmd(version string) *cobra.Command {
 	}
 	cmd.SetVersionTemplate("{{.Version}}")
 	cmd.PersistentFlags().BoolVar(&verbose, "debug", false, "调试模式(更多的日志)")
-	cmd.AddCommand(newCreateCmd(), newDownloadCmd(), newConfigCmd(), newStartCmd(), newListCmd(), newManCmd())
+	cmd.AddCommand(newCreateCmd(), download.NewDownloadCmd(), newConfigCmd(), newStartCmd(), newListCmd(), newManCmd())
 	return cmd
 }

@@ -23,6 +23,7 @@ import (
 	"os"
 
 	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
+	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )
 
@@ -40,7 +41,12 @@ func newListCmd() *cobra.Command {
 				return err
 			}
 			for _, config := range configs.Servers {
-				fmt.Println(config.Name)
+				log.WithFields(log.Fields{
+					"服务器编码":     config.Java.Encoding,
+					"JVM初始堆内存":  config.Java.Xms,
+					"JVM最大堆内存":  config.Java.Xmx,
+					"Java虚拟机参数": config.Java.Args,
+					"服务器参数":     config.ServerArgs})
 			}
 			return nil
 		},

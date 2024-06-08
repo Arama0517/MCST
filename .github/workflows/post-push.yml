@@ -1,0 +1,52 @@
+name: golangci-lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - "go.*"
+      - "**/*.go"
+      - ".github/workflows/*.yml"
+
+env:
+  GOPROXY: "https://proxy.golang.org"
+
+jobs:
+  lint:
+    permissions:
+      contents: read
+      pull-requests: read
+    name: 检查代码
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false
+      - name: 检查代码质量
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          args: --timeout=5m
+
+  build:
+    name: 构建并测试
+    needs:
+      - lint
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - run: go build .
+      - run: go test -v -parallel 2  ./...

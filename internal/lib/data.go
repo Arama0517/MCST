@@ -20,7 +20,6 @@ package lib
 
 import (
 	"encoding/json"
-	"net/url"
 	"os"
 	"path/filepath"
 )
@@ -100,10 +99,11 @@ func initData() error {
 }
 
 type Core struct {
-	URL        url.URL `json:"url"`         // 下载地址(如果不是本地的话)
-	FileName   string  `json:"file_name"`   // 文件名
-	FilePath   string  `json:"file_path"`   // 文件路径
-	ExtrasData any     `json:"extras_data"` // 其他数据
+	URL        string `json:"url"`         // 下载地址(如果不是本地的话)
+	FileName   string `json:"file_name"`   // 文件名
+	FilePath   string `json:"file_path"`   // 文件路径
+	ID         int    `json:"id"`          // ID: len+1
+	ExtrasData any    `json:"extras_data"` // 其他数据
 }
 
 type Java struct {
