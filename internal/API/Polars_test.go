@@ -24,10 +24,11 @@ import (
 
 	"github.com/Arama-Vanarana/MCServerTool/internal/API"
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	goversion "github.com/caarlos0/go-version"
 )
 
 func TestPolars(t *testing.T) {
-	if err := lib.InitAll("dev"); err != nil {
+	if err := lib.InitAll(goversion.GetVersionInfo()); err != nil {
 		t.Fatal(err)
 	}
 	data, err := api.GetPolarsData()
@@ -42,7 +43,7 @@ func TestPolars(t *testing.T) {
 }
 
 func TestPolarsCore(t *testing.T) {
-	if err := lib.InitAll("dev"); err != nil {
+	if err := lib.InitAll(goversion.GetVersionInfo()); err != nil {
 		t.Fatal(err)
 	}
 	data, err := api.GetPolarsCoresDatas(16)

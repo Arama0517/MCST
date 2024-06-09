@@ -1,5 +1,5 @@
 /*
- * Minecraft Server Tool(MCST) is a command-libe utility making Minecraft server creation quick and easy for beginners.
+ * Minecraft Server Tool(MCST) is a command-line utility making Minecraft server creation quick and easy for beginners.
  * Copyright (c) 2024-2024 Arama.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -23,7 +23,8 @@ import (
 	"os"
 	"testing"
 
-	lib2 "github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	goversion "github.com/caarlos0/go-version"
 )
 
 var URL = url.URL{ // https://ash-speed.hetzner.com/100MB.bin
@@ -36,11 +37,11 @@ func TestDownload(t *testing.T) {
 	if testing.Short() {
 		t.Skip("跳过下载")
 	}
-	if err := lib2.InitAll("dev"); err != nil {
+	if err := lib.InitAll(goversion.GetVersionInfo()); err != nil {
 		t.Fatal(err)
 	}
-	lib2.EnableAria2c = false
-	path, err := lib2.NewDownloader(URL).Download()
+	lib.EnableAria2c = false
+	path, err := lib.NewDownloader(URL).Download()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,11 +55,11 @@ func TestAria2Downlaod(t *testing.T) {
 	if testing.Short() {
 		t.Skip("跳过下载")
 	}
-	if err := lib2.InitAll("dev"); err != nil {
+	if err := lib.InitAll(goversion.GetVersionInfo()); err != nil {
 		t.Fatal(err)
 	}
-	lib2.EnableAria2c = true
-	path, err := lib2.NewDownloader(URL).Download()
+	lib.EnableAria2c = true
+	path, err := lib.NewDownloader(URL).Download()
 	if err != nil {
 		t.Fatal(err)
 	}

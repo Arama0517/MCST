@@ -1,6 +1,6 @@
 module github.com/Arama-Vanarana/MCServerTool
 
-go 1.22.3
+go 1.22.4
 
 require (
 	github.com/apex/log v1.9.0

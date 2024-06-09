@@ -24,10 +24,11 @@ import (
 
 	"github.com/Arama-Vanarana/MCServerTool/internal/API"
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	goversion "github.com/caarlos0/go-version"
 )
 
 func TestFastMirror(t *testing.T) {
-	if err := lib.InitAll("dev"); err != nil {
+	if err := lib.InitAll(goversion.GetVersionInfo()); err != nil {
 		t.Fatal(err)
 	}
 	data, err := api.GetFastMirrorDatas()
@@ -42,7 +43,7 @@ func TestFastMirror(t *testing.T) {
 }
 
 func TestFastMirrorBuilds(t *testing.T) {
-	if err := lib.InitAll("dev"); err != nil {
+	if err := lib.InitAll(goversion.GetVersionInfo()); err != nil {
 		t.Fatal(err)
 	}
 	data, err := api.GetFastMirrorDatas()
