@@ -19,14 +19,14 @@
 package cmd
 
 import (
-	"github.com/Arama-Vanarana/MCServerTool/cmd/download"
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
+	goversion "github.com/caarlos0/go-version"
 	"github.com/spf13/cobra"
 )
 
-func Execute(exit func(int), args []string, version string) error {
+func Execute(exit func(int), args []string, version goversion.Info) error {
 	cmd := newRootCmd(version)
 	cmd.SetArgs(args)
 	if err := cmd.Execute(); err != nil {
@@ -36,17 +36,12 @@ func Execute(exit func(int), args []string, version string) error {
 	return nil
 }
 
-func newRootCmd(version string) *cobra.Command {
+func newRootCmd(version goversion.Info) *cobra.Command {
 	var verbose bool
 	cmd := &cobra.Command{
-		Use: "MCST",
-		Long: ` __  __  _____  _____                       _______          _ 
-|  \/  |/ ____|/ ____|                     |__   __|        | |
-| \  / | |    | (___   ___ _ ____   _____ _ __| | ___   ___ | |
-| |\/| | |     \___ \ / _ \ '__\ \ / / _ \ '__| |/ _ \ / _ \| |
-| |  | | |____ ____) |  __/ |   \ V /  __/ |  | | (_) | (_) | |
-|_|  |_|\_____|_____/ \___|_|    \_/ \___|_|  |_|\___/ \___/|_|`,
-		Version:       version,
+		Use:           "MCST",
+		Long:          version.ASCIIName,
+		Version:       version.String(),
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		PersistentPreRunE: func(_ *cobra.Command, args []string) error {
@@ -63,6 +58,6 @@ func newRootCmd(version string) *cobra.Command {
 	}
 	cmd.SetVersionTemplate("{{.Version}}")
 	cmd.PersistentFlags().BoolVar(&verbose, "debug", false, "调试模式(更多的日志)")
-	cmd.AddCommand(newCreateCmd(), download.NewDownloadCmd(), newConfigCmd(), newStartCmd(), newListCmd(), newManCmd())
+	cmd.AddCommand(newCreateCmd(), newDownloadCmd(), newConfigCmd(), newStartCmd(), newListCmd(), newManCmd())
 	return cmd
 }

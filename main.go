@@ -20,7 +20,6 @@ package main
 
 import (
 	_ "embed"
-	"fmt"
 	"os"
 
 	"github.com/Arama-Vanarana/MCServerTool/cmd"
@@ -36,8 +35,7 @@ var (
 )
 
 func main() {
-	fmt.Println(buildVersion(version, commit, treeState, date, builtBy).String())
-	if err := cmd.Execute(os.Exit, os.Args[1:], version); err != nil {
+	if err := cmd.Execute(os.Exit, os.Args[1:], buildVersion(version, commit, treeState, date, builtBy)); err != nil {
 		return
 	}
 }

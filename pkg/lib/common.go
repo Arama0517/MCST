@@ -23,11 +23,13 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+
+	goversion "github.com/caarlos0/go-version"
 )
 
 // InitAll 一键全部初始化(按顺序)
-func InitAll(v string) error {
-	version = v
+func InitAll(v goversion.Info) error {
+	version = v.GitVersion
 	if err := initData(); err != nil {
 		return err
 	}
