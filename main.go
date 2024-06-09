@@ -19,15 +19,52 @@
 package main
 
 import (
+	_ "embed"
+	"fmt"
 	"os"
 
 	"github.com/Arama-Vanarana/MCServerTool/cmd"
+	"github.com/caarlos0/go-version"
 )
 
-var version = "dev" // 开发时使用的版本号, 发布时使用 '-X main.version=X.X.X' 参数构建
+var (
+	version   = ""
+	commit    = ""
+	treeState = ""
+	date      = ""
+	builtBy   = ""
+)
 
 func main() {
+	fmt.Println(buildVersion(version, commit, treeState, date, builtBy).String())
 	if err := cmd.Execute(os.Exit, os.Args[1:], version); err != nil {
 		return
 	}
+}
+
+//go:embed art.txt
+var asciiArt string
+
+func buildVersion(version, commit, date, builtBy, treeState string) goversion.Info {
+	return goversion.GetVersionInfo(
+		goversion.WithAppDetails("MCServerTool", "A command-line utility making Minecraft server creation quick and easy for beginners.", ""),
+		goversion.WithASCIIName(asciiArt),
+		func(i *goversion.Info) {
+			if commit != "" {
+				i.GitCommit = commit
+			}
+			if treeState != "" {
+				i.GitTreeState = treeState
+			}
+			if date != "" {
+				i.BuildDate = date
+			}
+			if version != "" {
+				i.GitVersion = version
+			}
+			if builtBy != "" {
+				i.BuiltBy = builtBy
+			}
+		},
+	)
 }

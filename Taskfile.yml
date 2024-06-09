@@ -1,0 +1,52 @@
+version: 3
+
+env:
+  GO111MODULE: on
+  GOPROXY: https://proxy.golang.org,direct
+
+tasks:
+  setup:
+    desc: 下载依赖
+    cmds:
+      - go mod tidy
+
+  build:
+    desc: 构建
+    sources:
+      - ./**/*.go
+    generates:
+      - ./MCST
+    cmds:
+      - go build -o MCST
+
+  test:
+    desc: 测试
+    cmds:
+      - go test -failfast -race -parallel 2 -timeout=5m ./...
+
+  lint:
+    desc: 使用golangci-lint检查代码
+    cmds:
+      - golangci-lint run --config ./.golangci.yaml ./...
+
+  ci:
+    desc: 运行所有CI步骤
+    cmds:
+      - task: setup
+      - task: build
+      - task: test
+
+  default:
+    desc: 运行默认任务
+    cmds:
+      - task: ci
+
+  release:
+    desc: 创建一个新Tag
+    vars:
+      NEXT:
+        sh: svu n
+    cmds:
+      - git tag {{.NEXT}}
+      - echo {{.NEXT}}
+      - git push origin --tags

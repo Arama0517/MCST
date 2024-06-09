@@ -5,7 +5,7 @@ import (
 	"time"
 
 	api "github.com/Arama-Vanarana/MCServerTool/internal/API"
-	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )
@@ -39,10 +39,7 @@ func newFastMirrorCmd() *cobra.Command {
 				FilePath: path,
 				ID:       len(configs.Cores) + 1,
 			})
-			if err := configs.Save(); err != nil {
-				return err
-			}
-			return nil
+			return configs.Save()
 		},
 	}
 	cmd.AddCommand(newListFastMirrorCmd())
@@ -108,7 +105,8 @@ func newListFastMirrorCmd() *cobra.Command {
 					}
 					log.WithFields(log.Fields{
 						"SHA1": data.Sha1,
-						"更新时间": updateTime.Format("2006-01-02 15:04:05")}).Info(data.CoreVersion)
+						"更新时间": updateTime.Format("2006-01-02 15:04:05"),
+					}).Info(data.CoreVersion)
 				}
 			}
 			return nil

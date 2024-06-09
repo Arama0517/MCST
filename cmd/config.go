@@ -22,7 +22,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 	"github.com/apex/log"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/spf13/cobra"
@@ -76,7 +76,7 @@ func newConfigCmd() *cobra.Command {
 				switch {
 				case ram > config.Java.Xmx:
 					return ErrXmxLessThanXms
-				case ram < 1048576:
+				case ram < MiB:
 					return ErrXmsToLow
 				case ram > memInfo.Total:
 					return ErrXmsExceedsPhysicalMemory
@@ -91,7 +91,7 @@ func newConfigCmd() *cobra.Command {
 				switch {
 				case ram < config.Java.Xms:
 					return ErrXmxLessThanXms
-				case ram < 1048576:
+				case ram < MiB:
 					return ErrXmxTooLow
 				case ram > memInfo.Total:
 					return ErrXmxExceedsPhysicalMemory

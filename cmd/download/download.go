@@ -24,7 +24,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )
@@ -35,12 +35,12 @@ func NewDownloadCmd() *cobra.Command {
 		Short: "下载核心",
 		Long:  "从远程或本地获取核心",
 	}
-	cmd.AddCommand(newListCmd(), newLocalCmd(), newRemoteCmd(), newFastMirrorCmd())
+	cmd.AddCommand(newListCmd(), newLocalCmd(), newRemoteCmd(), newFastMirrorCmd(), newPolarsCmd())
 	return cmd
 }
 
 func newListCmd() *cobra.Command {
-	cmd := &cobra.Command{
+	return &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"fm"},
 		Short:   "列出所有核心",
@@ -60,7 +60,6 @@ func newListCmd() *cobra.Command {
 			return nil
 		},
 	}
-	return cmd
 }
 
 func newLocalCmd() *cobra.Command {
@@ -84,10 +83,7 @@ func newLocalCmd() *cobra.Command {
 				FilePath: path,
 				ID:       len(configs.Cores) + 1,
 			})
-			if err := configs.Save(); err != nil {
-				return err
-			}
-			return nil
+			return configs.Save()
 		},
 	}
 	cmd.Flags().StringVarP(&path, "path", "p", "", "核心的路径")
@@ -121,10 +117,7 @@ func newRemoteCmd() *cobra.Command {
 				FilePath: path,
 				ID:       len(configs.Cores) + 1,
 			})
-			if err := configs.Save(); err != nil {
-				return err
-			}
-			return nil
+			return configs.Save()
 		},
 	}
 	cmd.Flags().StringVarP(&URL, "url", "u", "", "核心的URL")

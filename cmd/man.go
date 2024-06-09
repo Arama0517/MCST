@@ -28,7 +28,7 @@ import (
 )
 
 func newManCmd() *cobra.Command {
-	cmd := &cobra.Command{
+	return &cobra.Command{
 		Use:                   "man",
 		Short:                 "生成man手册",
 		SilenceUsage:          true,
@@ -45,5 +45,4 @@ func newManCmd() *cobra.Command {
 			return err
 		},
 	}
-	return cmd
 }

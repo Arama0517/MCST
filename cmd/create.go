@@ -27,7 +27,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/apex/log"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/spf13/cobra"
 )
@@ -103,9 +104,9 @@ func create(flags createCmdFlage) error {
 		return err
 	}
 	switch {
-	case config.Java.Xms < 1048576:
+	case config.Java.Xms < MiB:
 		return ErrXmsToLow
-	case config.Java.Xmx < 1048576:
+	case config.Java.Xmx < MiB:
 		return ErrXmxTooLow
 	case config.Java.Xmx < config.Java.Xms:
 		return ErrXmxLessThanXms
@@ -166,6 +167,7 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
 	if err := configs.Save(); err != nil {
 		return err
 	}
+	log.Info("保存成功")
 	return nil
 }
 

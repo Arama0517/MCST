@@ -23,7 +23,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
+	lib2 "github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
 var URL = url.URL{ // https://ash-speed.hetzner.com/100MB.bin
@@ -36,11 +36,11 @@ func TestDownload(t *testing.T) {
 	if testing.Short() {
 		t.Skip("跳过下载")
 	}
-	if err := lib.InitAll("dev"); err != nil {
+	if err := lib2.InitAll("dev"); err != nil {
 		t.Fatal(err)
 	}
-	lib.EnableAria2c = false
-	path, err := lib.NewDownloader(URL).Download()
+	lib2.EnableAria2c = false
+	path, err := lib2.NewDownloader(URL).Download()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,11 +54,11 @@ func TestAria2Downlaod(t *testing.T) {
 	if testing.Short() {
 		t.Skip("跳过下载")
 	}
-	if err := lib.InitAll("dev"); err != nil {
+	if err := lib2.InitAll("dev"); err != nil {
 		t.Fatal(err)
 	}
-	lib.EnableAria2c = true
-	path, err := lib.NewDownloader(URL).Download()
+	lib2.EnableAria2c = true
+	path, err := lib2.NewDownloader(URL).Download()
 	if err != nil {
 		t.Fatal(err)
 	}

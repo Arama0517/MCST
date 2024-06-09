@@ -22,13 +22,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )
 
 func newListCmd() *cobra.Command {
-	cmd := &cobra.Command{
+	return &cobra.Command{
 		Use:   "list",
 		Short: "列出服务器",
 		Long:  "列出所有服务器的名称",
@@ -46,10 +46,10 @@ func newListCmd() *cobra.Command {
 					"JVM初始堆内存":  config.Java.Xms,
 					"JVM最大堆内存":  config.Java.Xmx,
 					"Java虚拟机参数": config.Java.Args,
-					"服务器参数":     config.ServerArgs})
+					"服务器参数":     config.ServerArgs,
+				})
 			}
 			return nil
 		},
 	}
-	return cmd
 }

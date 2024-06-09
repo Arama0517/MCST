@@ -20,7 +20,7 @@ package cmd
 
 import (
 	"github.com/Arama-Vanarana/MCServerTool/cmd/download"
-	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
 	"github.com/spf13/cobra"
@@ -29,7 +29,6 @@ import (
 func Execute(exit func(int), args []string, version string) error {
 	cmd := newRootCmd(version)
 	cmd.SetArgs(args)
-	log.WithField("args", args).Debug("参数")
 	if err := cmd.Execute(); err != nil {
 		log.WithError(err).Error("错误")
 		exit(1)
@@ -40,17 +39,26 @@ func Execute(exit func(int), args []string, version string) error {
 func newRootCmd(version string) *cobra.Command {
 	var verbose bool
 	cmd := &cobra.Command{
-		Use:           "MCST",
+		Use: "MCST",
+		Long: ` __  __  _____  _____                       _______          _ 
+|  \/  |/ ____|/ ____|                     |__   __|        | |
+| \  / | |    | (___   ___ _ ____   _____ _ __| | ___   ___ | |
+| |\/| | |     \___ \ / _ \ '__\ \ / / _ \ '__| |/ _ \ / _ \| |
+| |  | | |____ ____) |  __/ |   \ V /  __/ |  | | (_) | (_) | |
+|_|  |_|\_____|_____/ \___|_|    \_/ \___|_|  |_|\___/ \___/|_|`,
 		Version:       version,
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		PersistentPreRunE: func(*cobra.Command, []string) error {
+		PersistentPreRunE: func(_ *cobra.Command, args []string) error {
 			log.SetHandler(cli.Default)
 			if verbose {
 				log.SetLevel(log.DebugLevel)
-				log.Debug("调试模式开启")
+				log.WithField("参数", args).Debug("调试模式开启")
 			}
 			return lib.InitAll(version)
+		},
+		PersistentPostRun: func(*cobra.Command, []string) {
+			log.Info("感谢使用MCST!")
 		},
 	}
 	cmd.SetVersionTemplate("{{.Version}}")

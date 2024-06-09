@@ -4,6 +4,7 @@ go 1.22.3
 
 require (
 	github.com/apex/log v1.9.0
+	github.com/caarlos0/go-version v0.1.1
 	github.com/muesli/mango-cobra v1.2.0
 	github.com/muesli/roff v0.1.0
 	github.com/schollz/progressbar/v3 v3.14.3

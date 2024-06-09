@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/Arama-Vanarana/MCServerTool/internal/API"
-	"github.com/Arama-Vanarana/MCServerTool/internal/lib"
+	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
 func TestPolars(t *testing.T) {

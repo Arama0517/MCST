@@ -78,7 +78,7 @@ func (d *Downloader) Download() (string, error) {
 		return "", err
 	}
 
-	d.GetFileName(resp.Header, d.URL)
+	d.getFileName(resp.Header, d.URL)
 	path := filepath.Join(DownloadsDir, d.FileName)
 	if _, err := os.Stat(path); err == nil {
 		return path, nil
@@ -179,7 +179,7 @@ func (d *Downloader) aria2cDownload() error {
 	return nil
 }
 
-func (d *Downloader) GetFileName(header http.Header, url url.URL) {
+func (d *Downloader) getFileName(header http.Header, url url.URL) {
 	// 尝试从 Content-Disposition 头部获取文件名
 	if disposition := header.Get("Content-Disposition"); disposition != "" {
 		_, params, err := mime.ParseMediaType(disposition)

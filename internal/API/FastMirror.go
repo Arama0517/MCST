@@ -22,11 +22,12 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 
-	lib2 "github.com/Arama-Vanarana/MCServerTool/internal/lib"
+	lib2 "github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
 func GetFastMirrorDatas() (map[string]FastMirrorData, error) {
@@ -97,7 +98,7 @@ func GetFastMirrorDownloader(core, minecraftVersion, buildVersion string) *lib2.
 	return lib2.NewDownloader(url.URL{
 		Scheme: "https",
 		Host:   "download.fastmirror.net",
-		Path:   "/download/" + core + "/" + minecraftVersion + "/" + buildVersion,
+		Path:   fmt.Sprintf("/download/%s/%s/%s", core, minecraftVersion, buildVersion),
 	})
 }
 

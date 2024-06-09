@@ -28,7 +28,6 @@ var (
 	DataDir      string
 	ServersDir   string
 	DownloadsDir string
-	PluginsDir   string
 	configsPath  string
 )
 
@@ -40,7 +39,6 @@ func initData() error {
 	DataDir = filepath.Join(UserHomeDir, ".config", "MCST")
 	ServersDir = filepath.Join(DataDir, "servers")
 	DownloadsDir = filepath.Join(DataDir, "downloads")
-	PluginsDir = filepath.Join(DataDir, "plugins")
 
 	configsPath = filepath.Join(DataDir, "configs.json")
 
@@ -55,9 +53,6 @@ func initData() error {
 			return err
 		}
 		if err := os.MkdirAll(DownloadsDir, 0o755); err != nil {
-			return err
-		}
-		if err := os.MkdirAll(PluginsDir, 0o755); err != nil {
 			return err
 		}
 		jsonData, err := json.MarshalIndent(MCSCSConfig{
