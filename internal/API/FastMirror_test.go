@@ -28,7 +28,7 @@ import (
 )
 
 func TestFastMirror(t *testing.T) {
-	if err := lib.InitAll(goversion.GetVersionInfo()); err != nil {
+	if err := lib.Init(goversion.GetVersionInfo()); err != nil {
 		t.Fatal(err)
 	}
 	data, err := api.GetFastMirrorDatas()
@@ -43,7 +43,7 @@ func TestFastMirror(t *testing.T) {
 }
 
 func TestFastMirrorBuilds(t *testing.T) {
-	if err := lib.InitAll(goversion.GetVersionInfo()); err != nil {
+	if err := lib.Init(goversion.GetVersionInfo()); err != nil {
 		t.Fatal(err)
 	}
 	data, err := api.GetFastMirrorDatas()

@@ -28,7 +28,7 @@ import (
 )
 
 func TestPolars(t *testing.T) {
-	if err := lib.InitAll(goversion.GetVersionInfo()); err != nil {
+	if err := lib.Init(goversion.GetVersionInfo()); err != nil {
 		t.Fatal(err)
 	}
 	data, err := api.GetPolarsData()
@@ -43,7 +43,7 @@ func TestPolars(t *testing.T) {
 }
 
 func TestPolarsCore(t *testing.T) {
-	if err := lib.InitAll(goversion.GetVersionInfo()); err != nil {
+	if err := lib.Init(goversion.GetVersionInfo()); err != nil {
 		t.Fatal(err)
 	}
 	data, err := api.GetPolarsCoresDatas(16)

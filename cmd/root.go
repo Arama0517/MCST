@@ -50,10 +50,7 @@ func newRootCmd(version goversion.Info) *cobra.Command {
 				log.SetLevel(log.DebugLevel)
 				log.WithField("参数", args).Debug("调试模式开启")
 			}
-			return lib.InitAll(version)
-		},
-		PersistentPostRun: func(*cobra.Command, []string) {
-			log.Info("感谢使用MCST!")
+			return lib.Init(version)
 		},
 	}
 	cmd.SetVersionTemplate("{{.Version}}")

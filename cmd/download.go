@@ -52,13 +52,18 @@ func newListCoreCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			for _, core := range configs.Cores {
+			keys := make([]int, len(configs.Cores), 1)
+			for k := range configs.Cores {
+				keys = append(keys, k)
+			}
+			sort.Ints(keys)
+			for _, key := range keys {
+				data := configs.Cores[key]
 				log.WithFields(log.Fields{
-					"URL":  core.URL,
-					"文件名":  core.FileName,
-					"文件路径": core.FilePath,
-					"其他数据": core.ExtrasData.(log.Fields),
-				}).Info(fmt.Sprint(core.ID))
+					"URL":  data.URL,
+					"文件名":  data.FileName,
+					"文件路径": data.FilePath,
+				}).Info(fmt.Sprint(key))
 			}
 			return nil
 		},
@@ -80,12 +85,11 @@ func newLocalCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			configs.Cores = append(configs.Cores, lib.Core{
+			configs.Cores[len(configs.Cores)] = lib.Core{
 				URL:      "unknown",
 				FileName: filepath.Base(path),
 				FilePath: path,
-				ID:       len(configs.Cores) + 1,
-			})
+			}
 			return configs.Save()
 		},
 	}
@@ -114,12 +118,11 @@ func newRemoteCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			configs.Cores = append(configs.Cores, lib.Core{
+			configs.Cores[len(configs.Cores)] = lib.Core{
 				URL:      URL.String(),
 				FileName: filepath.Base(path),
 				FilePath: path,
-				ID:       len(configs.Cores) + 1,
-			})
+			}
 			return configs.Save()
 		},
 	}
@@ -151,12 +154,11 @@ func newFastMirrorCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			configs.Cores = append(configs.Cores, lib.Core{
+			configs.Cores[len(configs.Cores)] = lib.Core{
 				URL:      downloader.URL.String(),
 				FileName: downloader.FileName,
 				FilePath: path,
-				ID:       len(configs.Cores) + 1,
-			})
+			}
 			return configs.Save()
 		},
 	}
@@ -259,7 +261,7 @@ func newPolarsCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			configs.Cores = append(configs.Cores, lib.Core{
+			configs.Cores[len(configs.Cores)] = lib.Core{
 				URL:      URL.String(),
 				FileName: downloader.FileName,
 				FilePath: path,
@@ -267,7 +269,7 @@ func newPolarsCmd() *cobra.Command {
 					"type_id": typeID,
 					"core_id": coreID,
 				},
-			})
+			}
 			return configs.Save()
 		},
 	}

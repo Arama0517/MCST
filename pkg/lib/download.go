@@ -34,35 +34,6 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-var (
-	EnableAria2c bool
-	aria2cPath   string
-)
-
-func initDownloader() error {
-	configs, err := LoadConfigs()
-	if err != nil {
-		return err
-	}
-	aria2cPath = configs.Aria2c.Path
-	if aria2cPath == "auto" {
-		aria2cName := "aria2c"
-		if runtime.GOOS == "windows" {
-			aria2cName = "aria2c.exe"
-		}
-		aria2cPath, err = exec.LookPath(aria2cName)
-		switch {
-		case err == nil:
-			EnableAria2c = true
-		case errors.Is(err, exec.ErrNotFound):
-			EnableAria2c = false
-		default:
-			return err
-		}
-	}
-	return nil
-}
-
 func NewDownloader(url url.URL) *Downloader {
 	return &Downloader{URL: url}
 }
@@ -70,6 +41,7 @@ func NewDownloader(url url.URL) *Downloader {
 type Downloader struct {
 	URL      url.URL // 下载的 URL
 	FileName string  // 文件名
+	aria2c   Aria2c  // aria2配置
 }
 
 func (d *Downloader) Download() (string, error) {
@@ -77,14 +49,33 @@ func (d *Downloader) Download() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	d.getFileName(resp.Header, d.URL)
 	path := filepath.Join(DownloadsDir, d.FileName)
 	if _, err := os.Stat(path); err == nil {
 		return path, nil
 	}
 
-	if EnableAria2c {
+	configs, err := LoadConfigs()
+	if err != nil {
+		return "", err
+	}
+	if configs.Aria2c.Path == "auto" {
+		aria2cName := "aria2c"
+		if runtime.GOOS == "windows" {
+			aria2cName = "aria2c.exe"
+		}
+		switch configs.Aria2c.Path, err = exec.LookPath(aria2cName); {
+		case errors.Is(err, nil), errors.Is(err, exec.ErrNotFound):
+			break
+		default:
+			return "", err
+		}
+	}
+	d.aria2c = configs.Aria2c
+	if _, err = os.Stat(d.aria2c.Path); err == nil {
+		if err := resp.Body.Close(); err != nil {
+			return "", err
+		}
 		return path, d.aria2cDownload()
 	}
 	// 单线程
@@ -119,23 +110,19 @@ func (d *Downloader) Download() (string, error) {
 	if _, err := io.Copy(io.MultiWriter(file, bar), resp.Body); err != nil {
 		return "", err
 	}
+	if err := resp.Body.Close(); err != nil {
+		return "", err
+	}
 	if err := bar.Finish(); err != nil {
 		return "", err
 	}
 	if err := file.Close(); err != nil {
 		return "", err
 	}
-	if err := resp.Body.Close(); err != nil {
-		return "", err
-	}
 	return path, nil
 }
 
 func (d *Downloader) aria2cDownload() error {
-	configs, err := LoadConfigs()
-	if err != nil {
-		return err
-	}
 	inputFilePath := filepath.Join(DownloadsDir, fmt.Sprintf("%s.txt", d.FileName))
 	f, err := os.Create(inputFilePath)
 	if err != nil {
@@ -158,25 +145,19 @@ func (d *Downloader) aria2cDownload() error {
 	if err = f.Close(); err != nil {
 		return err
 	}
-	cmd := exec.Command(aria2cPath)
+	defer func(name string) {
+		_ = os.Remove(name)
+	}(inputFilePath)
+	cmd := exec.Command(d.aria2c.Path)
 	cmd.Args = append(cmd.Args,
 		fmt.Sprintf("--input-file=%s", inputFilePath),
 		fmt.Sprintf("--user-agent=MCST/%s", version),
 		fmt.Sprintf("--stop-with-process=%d", os.Getpid()),
 	)
-	cmd.Args = append(cmd.Args, configs.Aria2c.Args...)
+	cmd.Args = append(cmd.Args, d.aria2c.Args...)
 	cmd.Stdout = os.Stderr
 	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		if err := os.Remove(inputFilePath); err != nil {
-			return err
-		}
-		return err
-	}
-	if err := os.Remove(inputFilePath); err != nil {
-		return err
-	}
-	return nil
+	return cmd.Run()
 }
 
 func (d *Downloader) getFileName(header http.Header, url url.URL) {
@@ -190,7 +171,6 @@ func (d *Downloader) getFileName(header http.Header, url url.URL) {
 			}
 		}
 	}
-
 	// 如果没有 Content-Disposition 头部，则从 URL 中获取文件名
 	d.FileName = filepath.Base(url.Path)
 }

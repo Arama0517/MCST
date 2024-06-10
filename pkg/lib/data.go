@@ -28,7 +28,7 @@ var (
 	DataDir      string
 	ServersDir   string
 	DownloadsDir string
-	configsPath  string
+	ConfigsPath  string
 )
 
 func initData() error {
@@ -39,8 +39,7 @@ func initData() error {
 	DataDir = filepath.Join(UserHomeDir, ".config", "MCST")
 	ServersDir = filepath.Join(DataDir, "servers")
 	DownloadsDir = filepath.Join(DataDir, "downloads")
-
-	configsPath = filepath.Join(DataDir, "configs.json")
+	ConfigsPath = filepath.Join(DataDir, "configs.json")
 
 	switch _, err := os.Stat(DataDir); {
 	case err == nil: // 目录存在
@@ -55,8 +54,8 @@ func initData() error {
 		if err := os.MkdirAll(DownloadsDir, 0o755); err != nil {
 			return err
 		}
-		jsonData, err := json.MarshalIndent(MCSCSConfig{
-			Cores:   []Core{},
+		jsonData, err := json.MarshalIndent(Config{
+			Cores:   map[int]Core{},
 			Servers: map[string]Server{},
 			Aria2c: Aria2c{
 				Path: "auto",
@@ -84,7 +83,7 @@ func initData() error {
 		if err != nil {
 			return err
 		}
-		if err := os.WriteFile(configsPath, jsonData, 0o644); err != nil {
+		if err := os.WriteFile(ConfigsPath, jsonData, 0o644); err != nil {
 			return err
 		}
 	default: // 其他错误
@@ -97,7 +96,6 @@ type Core struct {
 	URL        string `json:"url"`         // 下载地址(如果不是本地的话)
 	FileName   string `json:"file_name"`   // 文件名
 	FilePath   string `json:"file_path"`   // 文件路径
-	ID         int    `json:"id"`          // ID: len+1
 	ExtrasData any    `json:"extras_data"` // 其他数据
 }
 
@@ -119,32 +117,32 @@ type Aria2c struct {
 	Args []string `json:"args"` // aria2c参数
 }
 
-type MCSCSConfig struct {
-	Cores          []Core            `json:"cores"`            // 核心列表
+type Config struct {
+	Cores          map[int]Core      `json:"cores"`            // 核心列表
 	Servers        map[string]Server `json:"servers"`          // 服务器列表, 如果服务器名称(key)为temp, CreatePage调用时会视为暂存配置而不是名为temp的服务器
 	Aria2c         Aria2c            `json:"aria2c"`           // aria2c配置
 	AutoAcceptEULA bool              `json:"auto_accept_eula"` // 是否自动同意EULA
 }
 
-func LoadConfigs() (MCSCSConfig, error) {
-	file, err := os.ReadFile(configsPath)
+func LoadConfigs() (Config, error) {
+	file, err := os.ReadFile(ConfigsPath)
 	if err != nil {
-		return MCSCSConfig{}, err
+		return Config{}, err
 	}
-	var config MCSCSConfig
+	var config Config
 	err = json.Unmarshal(file, &config)
 	if err != nil {
-		return MCSCSConfig{}, err
+		return Config{}, err
 	}
 	return config, nil
 }
 
-func (c *MCSCSConfig) Save() error {
+func (c *Config) Save() error {
 	jsonConfig, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(configsPath, jsonConfig, 0o644)
+	err = os.WriteFile(ConfigsPath, jsonConfig, 0o644)
 	if err != nil {
 		return err
 	}

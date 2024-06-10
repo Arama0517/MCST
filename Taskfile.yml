@@ -4,11 +4,18 @@ env:
   GO111MODULE: on
   GOPROXY: https://proxy.golang.org,direct
 
+
+
 tasks:
   setup:
     desc: 下载依赖
     cmds:
       - go mod tidy
+
+  run:
+    desc: 构建
+    cmds:
+      - go run . {{.CLI_ARGS}}
 
   build:
     desc: 构建
@@ -39,7 +46,7 @@ tasks:
   default:
     desc: 运行默认任务
     cmds:
-      - task: ci
+      - task: run
 
   release:
     desc: 创建一个新Tag
