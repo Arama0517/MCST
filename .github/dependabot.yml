@@ -10,6 +10,7 @@ updates:
     schedule:
       interval: "daily"
       time: "08:00"
+      timezone: Asia/Shanghai
     labels:
       - "dependencies"
     commit-message:
@@ -20,6 +21,7 @@ updates:
     schedule:
       interval: "daily"
       time: "08:00"
+      timezone: Asia/Shanghai
     labels:
       - "dependencies"
     commit-message:

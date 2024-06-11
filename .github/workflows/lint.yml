@@ -1,23 +1,29 @@
-name: lint
+name: golangci-lint
 
 on:
   push:
+    tags:
+      - v*
     branches:
       - main
   pull_request:
-    paths:
-      - "go.*"
-      - "**/*.go"
-      - ".github/workflows/*.yml"
-
-env:
-  GOPROXY: "https://proxy.golang.org"
+permissions:
+  contents: read
 
 jobs:
-  ci:
-    name: CI
+  golangci:
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      pull-requests: read # for golangci/golangci-lint-action to fetch pull requests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: arduino/setup-task@v2
-      - run: task ci
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6.0.1
+        with:
+          args: --timeout=5m
+          version: latest
