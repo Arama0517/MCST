@@ -18,7 +18,7 @@ jobs:
           go-version: stable
       - uses: anchore/sbom-action/download-syft@v0.16.0
       - name: release
-        uses: goreleaser/goreleaser-action@v5
+        uses: goreleaser/goreleaser-action@v6
         with:
           version: latest
           args: release --clean
