@@ -19,7 +19,7 @@
 package cmd
 
 import (
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/Arama0517/MCServerTool/pkg/lib"
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
 	goversion "github.com/caarlos0/go-version"

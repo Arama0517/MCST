@@ -27,7 +27,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/Arama0517/MCServerTool/pkg/lib"
 )
 
 func GetPolarsData() (map[string]PolarsData, error) {

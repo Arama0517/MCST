@@ -26,8 +26,8 @@ import (
 	"sort"
 	"time"
 
-	api "github.com/Arama-Vanarana/MCServerTool/internal/API"
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	api "github.com/Arama0517/MCServerTool/internal/API"
+	"github.com/Arama0517/MCServerTool/pkg/lib"
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )

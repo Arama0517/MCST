@@ -27,12 +27,12 @@ import (
 	"net/http"
 	"net/url"
 
-	lib2 "github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/Arama0517/MCServerTool/pkg/lib"
 )
 
 func GetFastMirrorData() (map[string]FastMirrorData, error) {
 	var err error
-	resp, err := lib2.Request(url.URL{
+	resp, err := lib.Request(url.URL{
 		Scheme: "https",
 		Host:   "download.fastmirror.net",
 		Path:   "/api/v3",
@@ -61,7 +61,7 @@ func GetFastMirrorData() (map[string]FastMirrorData, error) {
 }
 
 func GetFastMirrorBuildsData(core string, minecraftVersion string) (map[string]FastMirrorBuilds, error) {
-	resp, err := lib2.Request(url.URL{
+	resp, err := lib.Request(url.URL{
 		Scheme:   "https",
 		Host:     "download.fastmirror.net",
 		Path:     "/api/v3/" + core + "/" + minecraftVersion,
@@ -94,8 +94,8 @@ func GetFastMirrorBuildsData(core string, minecraftVersion string) (map[string]F
 	return parseData, nil
 }
 
-func GetFastMirrorDownloader(core, minecraftVersion, buildVersion string) *lib2.Downloader {
-	return lib2.NewDownloader(url.URL{
+func GetFastMirrorDownloader(core, minecraftVersion, buildVersion string) *lib.Downloader {
+	return lib.NewDownloader(url.URL{
 		Scheme: "https",
 		Host:   "download.fastmirror.net",
 		Path:   fmt.Sprintf("/download/%s/%s/%s", core, minecraftVersion, buildVersion),

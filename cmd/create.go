@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/Arama0517/MCServerTool/pkg/lib"
 	"github.com/apex/log"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/spf13/cobra"

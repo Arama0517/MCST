@@ -114,8 +114,8 @@ source:
 nfpms:
   - file_name_template: "{{ .ConventionalFileName }}"
     id: packages
-    homepage: https://github.com/Arama-Vanarana/MCServerTool
-    description: a command-line utility making Minecraft server creation quick and easy for beginners
+    homepage: https://github.com/Arama0517/MCServerTool
+    description: A command-line utility making Minecraft server creation quick and easy for beginners.
     maintainer: Arama <arama0517@foxmail.com>
     license: GPL-v3
     vendor: MCST
@@ -152,6 +152,41 @@ nfpms:
       lintian_overrides:
         - statically-linked-binary
         - changelog-file-missing-in-native-package
+
+aurs:
+  - homepage: https://github.com/Arama0517/MCServerTool
+    description: A command-line utility making Minecraft server creation quick and easy for beginners.
+    maintainers:
+      - "Arama <arama0517 at foxmail dot com>"
+    license: GPL-v3
+    private_key: "${{ .Env.AUR_KEY }}"
+    git_url: "ssh://aur@aur.archlinux.org/MCServerTool.git"
+    package: |-
+      # bin
+      install -Dm755 "./MCST" "${pkgdir}/usr/bin/MCST"
+      
+      # license
+      install -Dm755 "./LICENSE" "${pkgdir}/usr/share/licenses/MCST/LICENSE"
+      
+      # completions
+      mkdir -p "${pkgdir}/usr/share/bash-completion/completions/"
+      mkdir -p "${pkgdir}/usr/share/zsh/site-functions/"
+      mkdir -p "${pkgdir}/usr/share/fish/vendor_completions.d/"
+      install -Dm644 "./completions/MCST.bash" "${pkgdir}/usr/share/bash-completion/completions/MCST"
+      install -Dm644 "./completions/MCST.zsh" "${pkgdir}/usr/share/zsh/site-functions/MCST"
+      install -Dm644 "./completions/MCST.fish" "${pkgdir}/usr/share/fish/vendor_completions.d/MCST.fish"
+
+      # man pages
+      install -Dm644 "./manpages/MCST.1.gz" "${pkgdir}/usr/share/man/man1/MCST.1.gz"
+
+scoops:
+  - repository:
+      owner: Arama0517
+      name: scoop-bucket
+    directory: bucket
+    homepage: https://github.com/Arama0517/MCServerTool
+    description: A command-line utility making Minecraft server creation quick and easy for beginners
+    license: GPL-v3
 
 sboms:
   - artifacts: archive

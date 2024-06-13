@@ -23,7 +23,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/Arama-Vanarana/MCServerTool/cmd"
+	"github.com/Arama0517/MCServerTool/cmd"
 	"github.com/caarlos0/go-version"
 )
 
