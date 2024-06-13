@@ -58,25 +58,11 @@ func initData() error {
 			Cores:   map[int]Core{},
 			Servers: map[string]Server{},
 			Aria2c: Aria2c{
-				Path: "auto",
-				Args: []string{
-					"--always-resume=false",
-					"--max-resume-failure-tries=0",
-					"--allow-overwrite=true",
-					"--auto-file-renaming=false",
-					"--retry-wait=2",
-					"--split=16",
-					"--max-connection-per-server=8",
-					"--min-split-size=5M",
-					"--console-log-level=warn",
-					"--no-conf=true",
-					"--follow-metalink=true",
-					"--metalink-preferred-protocol=https",
-					"--min-tls-version=TLSv1.2",
-					"--continue",
-					"--summary-interval=0",
-					"--auto-save-interval=0",
-				},
+				Enabled:                true,
+				RetryWait:              2,
+				Split:                  5,
+				MaxConnectionPerServer: 5,
+				MinSplitSize:           "5M",
 			},
 			AutoAcceptEULA: false,
 		}, "", "    ")
@@ -113,8 +99,12 @@ type Server struct {
 }
 
 type Aria2c struct {
-	Path string   `json:"path"` // aria2c路径; 如果为 'auto' 则自动寻找
-	Args []string `json:"args"` // aria2c参数
+	Enabled                bool     `json:"enabled"`
+	RetryWait              int      `json:"retry_wait"`
+	Split                  int      `json:"split"`
+	MaxConnectionPerServer int      `json:"max_connection_per_server"`
+	MinSplitSize           string   `json:"min_split_size"`
+	Option                 []string `json:"option"`
 }
 
 type Config struct {

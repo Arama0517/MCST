@@ -29,14 +29,14 @@ import (
 
 // Init 一键全部初始化(按顺序)
 func Init(v goversion.Info) error {
-	version = v.GitVersion
+	version = v
 	if err := initData(); err != nil {
 		return err
 	}
 	return nil
 }
 
-var version string
+var version goversion.Info
 
 // Request 请求URL, 返回响应; 运行成功后请添加`defer resp.Body.Close()`到你的代码内
 func Request(url url.URL, method string, header map[string]string, body io.Reader) (*http.Response, error) {
@@ -44,7 +44,7 @@ func Request(url url.URL, method string, header map[string]string, body io.Reade
 	if err != nil {
 		return nil, err
 	}
-	request.Header.Set("User-Agent", fmt.Sprintf("MCST/%s", version))
+	request.Header.Set("User-Agent", fmt.Sprintf("MCST/%s ", version.GitVersion))
 	for key, value := range header {
 		request.Header.Set(key, value)
 	}

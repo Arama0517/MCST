@@ -44,8 +44,7 @@ func newConfigCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config",
 		Short: "配置服务器",
-		Long: `配置服务器的各项参数
-如果使用 '--delete' 参数则删除服务器(慎重, 无法复原)`,
+		Long:  "配置服务器的各项参数",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			configs, err := lib.LoadConfigs()
 			if err != nil {
@@ -124,7 +123,7 @@ func newConfigCmd() *cobra.Command {
 	cmd.Flags().StringVarP(&flags.java, "java", "j", "", "使用的Java")
 	cmd.Flags().StringSliceVar(&flags.jvmArgs, "jvm_args", []string{}, "Java虚拟机其他参数")
 	cmd.Flags().StringSliceVar(&flags.serverArgs, "server_args", []string{}, "Minecraft服务器参数")
-	cmd.Flags().BoolVar(&flags.delete, "delete", false, "删除服务器")
+	cmd.Flags().BoolVar(&flags.delete, "delete", false, "删除服务器(慎重, 无法复原)")
 	_ = cmd.MarkFlagRequired("name")
 	return cmd
 }

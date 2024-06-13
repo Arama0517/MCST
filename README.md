@@ -19,14 +19,14 @@
 
 ```shell
 # 如果你在root用户运行命令请去掉sudo
-curl -sSfL https://raw.githubusercontent.com/Arama-Vanarana/MCServerTool/main/install.sh | sudo sh -s -- -b /usr/local/bin
+curl -sSfL https://raw.githubusercontent.com/Arama-Vanarana/MCServerTool/main/scripts/install.sh | sudo sh -s -- -b /usr/local/bin
 ```
 
 ##### wget
 
 ```shell
 # 如果你在root用户运行命令请去掉sudo
-wget -O- -nv https://raw.githubusercontent.com/Arama-Vanarana/MCServerTool/main/install.sh | sudo sh -s -- -b /usr/local/bin
+wget -O- -nv https://raw.githubusercontent.com/Arama-Vanarana/MCServerTool/main/scripts/install.sh | sudo sh -s -- -b /usr/local/bin
 ```
 
 #### 从源代码编译

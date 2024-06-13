@@ -20,6 +20,7 @@ package main
 
 import (
 	_ "embed"
+	"net/url"
 	"os"
 
 	"github.com/Arama-Vanarana/MCServerTool/cmd"
@@ -44,8 +45,13 @@ func main() {
 var asciiArt string
 
 func buildVersion(version, commit, date, builtBy, treeState string) goversion.Info {
+	URL := url.URL{
+		Scheme: "https",
+		Host:   "github.com",
+		Path:   "/Arama-Vanarana/MCServerTool",
+	}
 	return goversion.GetVersionInfo(
-		goversion.WithAppDetails("MCServerTool", "A command-line utility making Minecraft server creation quick and easy for beginners.", ""),
+		goversion.WithAppDetails("MCServerTool", "A command-line utility making Minecraft server creation quick and easy for beginners.", URL.String()),
 		goversion.WithASCIIName(asciiArt),
 		func(i *goversion.Info) {
 			if commit != "" {

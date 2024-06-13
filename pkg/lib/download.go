@@ -39,9 +39,9 @@ func NewDownloader(url url.URL) *Downloader {
 }
 
 type Downloader struct {
-	URL      url.URL // 下载的 URL
-	FileName string  // 文件名
-	aria2c   Aria2c  // aria2配置
+	URL       url.URL // 下载的 URL
+	FileName  string  // 文件名
+	aria2Path string
 }
 
 func (d *Downloader) Download() (string, error) {
@@ -55,28 +55,23 @@ func (d *Downloader) Download() (string, error) {
 		return path, nil
 	}
 
-	configs, err := LoadConfigs()
-	if err != nil {
-		return "", err
-	}
-	if configs.Aria2c.Path == "auto" {
+	if configs, err := LoadConfigs(); err == nil && configs.Aria2c.Enabled {
 		aria2cName := "aria2c"
 		if runtime.GOOS == "windows" {
 			aria2cName = "aria2c.exe"
 		}
-		switch configs.Aria2c.Path, err = exec.LookPath(aria2cName); {
+		switch d.aria2Path, err = exec.LookPath(aria2cName); {
 		case errors.Is(err, nil), errors.Is(err, exec.ErrNotFound):
 			break
 		default:
 			return "", err
 		}
-	}
-	d.aria2c = configs.Aria2c
-	if _, err = os.Stat(d.aria2c.Path); err == nil {
-		if err := resp.Body.Close(); err != nil {
-			return "", err
+		if _, err = os.Stat(d.aria2Path); err == nil {
+			if err := resp.Body.Close(); err != nil {
+				return "", err
+			}
+			return path, d.aria2cDownload()
 		}
-		return path, d.aria2cDownload()
 	}
 	// 单线程
 	bar := progressbar.NewOptions64(
@@ -148,13 +143,31 @@ func (d *Downloader) aria2cDownload() error {
 	defer func(name string) {
 		_ = os.Remove(name)
 	}(inputFilePath)
-	cmd := exec.Command(d.aria2c.Path)
+	configs, err := LoadConfigs()
+	if err != nil {
+		return err
+	}
+	cmd := exec.Command(d.aria2Path)
 	cmd.Args = append(cmd.Args,
 		fmt.Sprintf("--input-file=%s", inputFilePath),
 		fmt.Sprintf("--user-agent=MCST/%s", version),
+		"--allow-overwrite=true",
+		"--auto-file-renaming=false",
+		fmt.Sprintf("--retry-wait=%d", configs.Aria2c.RetryWait),
+		fmt.Sprintf("--split=%d", configs.Aria2c.Split),
+		fmt.Sprintf("--max-connection-per-server==%d", configs.Aria2c.MaxConnectionPerServer),
+		fmt.Sprintf("--min-split-size=%s", configs.Aria2c.MinSplitSize),
+		"--console-log-level=warn",
+		"--no-conf=true",
+		"--follow-metalink=true",
+		"--metalink-preferred-protocol=https",
+		"--min-tls-version=TLSv1.2",
 		fmt.Sprintf("--stop-with-process=%d", os.Getpid()),
+		"--continue",
+		"--summary-interval=0",
+		"--auto-save-interval=1",
 	)
-	cmd.Args = append(cmd.Args, d.aria2c.Args...)
+	cmd.Args = append(cmd.Args, configs.Aria2c.Option...)
 	cmd.Stdout = os.Stderr
 	cmd.Stderr = os.Stderr
 	return cmd.Run()

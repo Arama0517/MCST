@@ -18,6 +18,7 @@ linters:
         - testifylint
         - gocritic
         - nolintlint
+
 linters-settings:
     gocritic:
         disabled-checks:
