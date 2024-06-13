@@ -31,10 +31,14 @@ import (
 func newStartCmd() *cobra.Command {
 	var name string
 	cmd := &cobra.Command{
-		Use:   "start",
-		Short: "启动服务器",
-		Long:  "使用在 '.config/MCST/config.json' 存放的配置启动服务器",
-		RunE: func(_ *cobra.Command, _ []string) error {
+		Use:               "start",
+		Short:             "启动服务器",
+		Long:              "使用在 '.config/MCST/config.json' 存放的配置启动服务器",
+		SilenceUsage:      true,
+		SilenceErrors:     true,
+		Args:              cobra.NoArgs,
+		ValidArgsFunction: cobra.NoFileCompletions,
+		RunE: func(*cobra.Command, []string) error {
 			configs, err := lib.LoadConfigs()
 			if err != nil {
 				return err

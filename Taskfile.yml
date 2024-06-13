@@ -4,8 +4,6 @@ env:
   GO111MODULE: on
   GOPROXY: https://proxy.golang.org,direct
 
-
-
 tasks:
   setup:
     desc: 下载依赖
@@ -34,7 +32,7 @@ tasks:
   lint:
     desc: 使用golangci-lint检查代码
     cmds:
-      - golangci-lint run --config ./.golangci.yaml ./...
+      - golangci-lint run --config ./.golangci.yaml {{.CLI_ARGS}} ./...
 
   ci:
     desc: 运行所有CI步骤
@@ -57,3 +55,13 @@ tasks:
       - git tag {{.NEXT}}
       - echo {{.NEXT}}
       - git push origin --tags
+
+  test:goreleaer:
+    desc: 测试发布
+    cmds:
+      - goreleaser release --skip publish --snapshot --clean
+
+  test:goreleaser:clean:
+    desc: 删除测试发布所产生的文件/文件夹
+    cmds:
+      - rm ./dist ./completions ./manpages -rf

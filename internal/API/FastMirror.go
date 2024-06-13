@@ -30,7 +30,7 @@ import (
 	lib2 "github.com/Arama-Vanarana/MCServerTool/pkg/lib"
 )
 
-func GetFastMirrorDatas() (map[string]FastMirrorData, error) {
+func GetFastMirrorData() (map[string]FastMirrorData, error) {
 	var err error
 	resp, err := lib2.Request(url.URL{
 		Scheme: "https",
@@ -60,7 +60,7 @@ func GetFastMirrorDatas() (map[string]FastMirrorData, error) {
 	return result, nil
 }
 
-func GetFastMirrorBuildsDatas(core string, minecraftVersion string) (map[string]FastMirrorBuilds, error) {
+func GetFastMirrorBuildsData(core string, minecraftVersion string) (map[string]FastMirrorBuilds, error) {
 	resp, err := lib2.Request(url.URL{
 		Scheme:   "https",
 		Host:     "download.fastmirror.net",
@@ -86,12 +86,12 @@ func GetFastMirrorBuildsDatas(core string, minecraftVersion string) (map[string]
 	if err != nil {
 		return nil, err
 	}
-	parseDatas := map[string]FastMirrorBuilds{}
+	parseData := map[string]FastMirrorBuilds{}
 	for i := 0; i < len(data.Data.Builds); i++ {
 		data := data.Data.Builds[i]
-		parseDatas[data.CoreVersion] = data
+		parseData[data.CoreVersion] = data
 	}
-	return parseDatas, nil
+	return parseData, nil
 }
 
 func GetFastMirrorDownloader(core, minecraftVersion, buildVersion string) *lib2.Downloader {
@@ -106,7 +106,7 @@ type FastMirrorData struct {
 	Name              string   `json:"name"`
 	Tag               string   `json:"tag"`
 	Homepage          string   `json:"homepage"`
-	Recommanded       bool     `json:"recommanded"`
+	Recommend         bool     `json:"recommend"`
 	MinecraftVersions []string `json:"mc_versions"`
 }
 

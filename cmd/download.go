@@ -34,9 +34,13 @@ import (
 
 func newDownloadCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "download",
-		Short: "下载核心",
-		Long:  "从远程或本地获取核心",
+		Use:               "download",
+		Short:             "下载核心",
+		Long:              "从远程或本地获取核心",
+		SilenceUsage:      true,
+		SilenceErrors:     true,
+		Args:              cobra.NoArgs,
+		ValidArgsFunction: cobra.NoFileCompletions,
 	}
 	cmd.AddCommand(newListCoreCmd(), newLocalCmd(), newRemoteCmd(), newFastMirrorCmd(), newPolarsCmd())
 	return cmd
@@ -44,9 +48,13 @@ func newDownloadCmd() *cobra.Command {
 
 func newListCoreCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:     "list",
-		Aliases: []string{"fm"},
-		Short:   "列出所有核心",
+		Use:               "list",
+		Aliases:           []string{"fm"},
+		Short:             "列出所有核心",
+		SilenceUsage:      true,
+		SilenceErrors:     true,
+		Args:              cobra.NoArgs,
+		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(*cobra.Command, []string) error {
 			configs, err := lib.LoadConfigs()
 			if err != nil {
@@ -73,10 +81,14 @@ func newListCoreCmd() *cobra.Command {
 func newLocalCmd() *cobra.Command {
 	var path string
 	cmd := &cobra.Command{
-		Use:     "local",
-		Aliases: []string{"lo"},
-		Short:   "本地",
-		Long:    "从本地获取核心",
+		Use:               "local",
+		Aliases:           []string{"lo"},
+		Short:             "本地",
+		Long:              "从本地获取核心",
+		SilenceUsage:      true,
+		SilenceErrors:     true,
+		Args:              cobra.NoArgs,
+		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(*cobra.Command, []string) error {
 			if _, err := os.Stat(path); err != nil {
 				return err
@@ -101,10 +113,14 @@ func newLocalCmd() *cobra.Command {
 func newRemoteCmd() *cobra.Command {
 	var URL string
 	cmd := &cobra.Command{
-		Use:     "remote",
-		Aliases: []string{"r"},
-		Short:   "远程",
-		Long:    "从指定的URL下载核心",
+		Use:               "remote",
+		Aliases:           []string{"r"},
+		Short:             "远程",
+		Long:              "从指定的URL下载核心",
+		SilenceUsage:      true,
+		SilenceErrors:     true,
+		Args:              cobra.NoArgs,
+		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(*cobra.Command, []string) error {
 			URL, err := url.Parse(URL)
 			if err != nil {
@@ -140,10 +156,14 @@ type fastMirrorCmdFlags struct {
 func newFastMirrorCmd() *cobra.Command {
 	flags := fastMirrorCmdFlags{}
 	cmd := &cobra.Command{
-		Use:     "fastmirror",
-		Aliases: []string{"fm"},
-		Short:   "从无极镜像下载核心",
-		Long:    "无极镜像: <https://www.fastmirror.net/>\n请使用 'MCST download fastmirror list' 获取所需的参数",
+		Use:               "fastmirror",
+		Aliases:           []string{"fm"},
+		Short:             "从无极镜像下载核心",
+		Long:              "无极镜像: <https://www.fastmirror.net/>\n请使用 'MCST download fastmirror list' 获取所需的参数",
+		SilenceUsage:      true,
+		SilenceErrors:     true,
+		Args:              cobra.NoArgs,
+		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(*cobra.Command, []string) error {
 			downloader := api.GetFastMirrorDownloader(flags.core, flags.minecraftVersion, flags.buildVersion)
 			path, err := downloader.Download()
@@ -181,8 +201,12 @@ func newListFastMirrorCmd() *cobra.Command {
 1. 不使用任何参数: 输出所有核心的名称
 2. 使用 '--core': 输出此核心的所有Minecraft版本
 3. 使用 '--core' 和 '--mc_version': 返回此核心的所有构建版本`,
+		SilenceUsage:      true,
+		SilenceErrors:     true,
+		Args:              cobra.NoArgs,
+		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			fastMirror, err := api.GetFastMirrorDatas()
+			fastMirror, err := api.GetFastMirrorData()
 			if err != nil {
 				return err
 			}
@@ -196,7 +220,7 @@ func newListFastMirrorCmd() *cobra.Command {
 				for _, key := range keys {
 					data := fastMirror[key]
 					log.WithFields(log.Fields{
-						"推荐": data.Recommanded,
+						"推荐": data.Recommend,
 						"标签": data.Tag,
 						"主页": data.Homepage,
 					}).Info(data.Name)
@@ -208,7 +232,7 @@ func newListFastMirrorCmd() *cobra.Command {
 					log.Info(version)
 				}
 			case cmdFlags.Changed("core") && cmdFlags.Changed("mc_version"):
-				fastMirror, err := api.GetFastMirrorBuildsDatas(flags.core, flags.minecraftVersion)
+				fastMirror, err := api.GetFastMirrorBuildsData(flags.core, flags.minecraftVersion)
 				if err != nil {
 					return err
 				}
@@ -240,11 +264,15 @@ func newListFastMirrorCmd() *cobra.Command {
 func newPolarsCmd() *cobra.Command {
 	var typeID, coreID int
 	cmd := &cobra.Command{
-		Use:   "polars",
-		Short: "从极星云镜像下载核心",
-		Long:  "极星云镜像: <https://mirror.polars.cc/>",
+		Use:               "polars",
+		Short:             "从极星云镜像下载核心",
+		Long:              "极星云镜像: <https://mirror.polars.cc/>",
+		SilenceUsage:      true,
+		SilenceErrors:     true,
+		Args:              cobra.NoArgs,
+		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(*cobra.Command, []string) error {
-			polars, err := api.GetPolarsCoresDatas(typeID)
+			polars, err := api.GetPolarsCoresData(typeID)
 			if err != nil {
 				return err
 			}
@@ -287,9 +315,13 @@ func newListPolarsCmd() *cobra.Command {
 		Long: `使用此命令时拥有两种情况:
 1. 不使用任何参数: 输出所有核心类型的ID
 2. 使用 '--id': 输出此核心的所有的核心ID(用于下载)`,
+		SilenceUsage:      true,
+		SilenceErrors:     true,
+		Args:              cobra.NoArgs,
+		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if cmd.Flags().Changed("id") {
-				polars, err := api.GetPolarsCoresDatas(id)
+				polars, err := api.GetPolarsCoresData(id)
 				if err != nil {
 					return err
 				}

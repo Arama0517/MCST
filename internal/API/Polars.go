@@ -59,7 +59,7 @@ func GetPolarsData() (map[string]PolarsData, error) {
 	return result, nil
 }
 
-func GetPolarsCoresDatas(id int) (map[int]PolarsCores, error) {
+func GetPolarsCoresData(id int) (map[int]PolarsCores, error) {
 	resp, err := lib.Request(url.URL{
 		Scheme: "https",
 		Host:   "mirror.polars.cc",

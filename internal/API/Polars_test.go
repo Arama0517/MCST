@@ -46,7 +46,7 @@ func TestPolarsCore(t *testing.T) {
 	if err := lib.Init(goversion.GetVersionInfo()); err != nil {
 		t.Fatal(err)
 	}
-	data, err := api.GetPolarsCoresDatas(16)
+	data, err := api.GetPolarsCoresData(16)
 	if err != nil {
 		t.Fatal(err)
 	}

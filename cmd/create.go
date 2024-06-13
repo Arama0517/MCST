@@ -33,7 +33,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type createCmdFlage struct {
+type createCmdFlags struct {
 	name       string
 	xms        string
 	xmx        string
@@ -46,17 +46,109 @@ type createCmdFlage struct {
 }
 
 func newCreateCmd() *cobra.Command {
-	flags := createCmdFlage{}
+	flags := createCmdFlags{}
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "创建服务器",
 		Long: `如果你还未下载任何核心, 请使用 'MCST download' 下载核心
 必须指定--name, --java, --core`,
+		SilenceUsage:      true,
+		SilenceErrors:     true,
+		Args:              cobra.NoArgs,
+		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			if !flags.eula {
 				return ErrEulaRequired
 			}
-			return create(flags)
+			configs, err := lib.LoadConfigs()
+			if err != nil {
+				return err
+			}
+			var config lib.Server
+			config.Name = flags.name
+			for name := range configs.Servers {
+				if name == flags.name {
+					return ErrServerExists
+				}
+			}
+			config.Java.Xms, err = toBytes(flags.xms)
+			if err != nil {
+				return err
+			}
+			config.Java.Xmx, err = toBytes(flags.xmx)
+			if err != nil {
+				return err
+			}
+			memInfo, err := mem.VirtualMemory()
+			if err != nil {
+				return err
+			}
+			switch {
+			case config.Java.Xms < MiB:
+				return ErrXmsToLow
+			case config.Java.Xmx < MiB:
+				return ErrXmxTooLow
+			case config.Java.Xmx < config.Java.Xms:
+				return ErrXmxLessThanXms
+			case config.Java.Xms > memInfo.Total:
+				return ErrXmsExceedsPhysicalMemory
+			case config.Java.Xmx > memInfo.Total:
+				return ErrXmxExceedsPhysicalMemory
+			}
+			config.Java.Encoding = flags.encoding
+			config.Java.Path = flags.java
+			config.Java.Args = flags.jvmArgs
+			config.ServerArgs = flags.serverArgs
+			if flags.core < 0 || flags.core > len(configs.Cores) {
+				return ErrCoreNotFound
+			}
+			configs.Servers[config.Name] = config
+
+			// EULA 部分
+			EULAFileData := fmt.Sprintf(`# Create By Minecraft Server Tool
+# By changing the setting below to TRUE you are indicating your agreement to Minecraft EULA(<https://aka.ms/MinecraftEULA/>).
+# %s
+eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
+			if err := os.MkdirAll(filepath.Join(lib.ServersDir, config.Name), 0o755); err != nil {
+				return err
+			}
+			EULAFile, err := os.Open(filepath.Join(lib.ServersDir, config.Name, "eula.txt"))
+			if err != nil {
+				return err
+			}
+			if _, err := EULAFile.WriteString(EULAFileData); err != nil {
+				return err
+			}
+			if err := EULAFile.Close(); err != nil {
+				return err
+			}
+
+			// 保存
+			srcFile, err := os.Open(configs.Cores[flags.core].FilePath)
+			if err != nil {
+				return err
+			}
+			dstFile, err := os.Create(filepath.Join(lib.ServersDir, config.Name, "server.jar"))
+			if err != nil {
+				return err
+			}
+			if _, err = io.Copy(dstFile, srcFile); err != nil {
+				return err
+			}
+			if err := os.Chmod(filepath.Join(lib.ServersDir, config.Name, "server.jar"), 0o755); err != nil {
+				return err
+			}
+			if err := srcFile.Close(); err != nil {
+				return err
+			}
+			if err := dstFile.Close(); err != nil {
+				return err
+			}
+			if err := configs.Save(); err != nil {
+				return err
+			}
+			log.Info("保存成功")
+			return nil
 		},
 	}
 	cmd.Flags().StringVarP(&flags.name, "name", "n", "", "服务器名称")
@@ -77,98 +169,6 @@ func newCreateCmd() *cobra.Command {
 	_ = cmd.MarkFlagRequired("java")
 	_ = cmd.MarkFlagRequired("core")
 	return cmd
-}
-
-func create(flags createCmdFlage) error {
-	configs, err := lib.LoadConfigs()
-	if err != nil {
-		return err
-	}
-	var config lib.Server
-	config.Name = flags.name
-	for name := range configs.Servers {
-		if name == flags.name {
-			return ErrServerExists
-		}
-	}
-	config.Java.Xms, err = toBytes(flags.xms)
-	if err != nil {
-		return err
-	}
-	config.Java.Xmx, err = toBytes(flags.xmx)
-	if err != nil {
-		return err
-	}
-	memInfo, err := mem.VirtualMemory()
-	if err != nil {
-		return err
-	}
-	switch {
-	case config.Java.Xms < MiB:
-		return ErrXmsToLow
-	case config.Java.Xmx < MiB:
-		return ErrXmxTooLow
-	case config.Java.Xmx < config.Java.Xms:
-		return ErrXmxLessThanXms
-	case config.Java.Xms > memInfo.Total:
-		return ErrXmsExceedsPhysicalMemory
-	case config.Java.Xmx > memInfo.Total:
-		return ErrXmxExceedsPhysicalMemory
-	}
-	config.Java.Encoding = flags.encoding
-	config.Java.Path = flags.java
-	config.Java.Args = flags.jvmArgs
-	config.ServerArgs = flags.serverArgs
-	if flags.core < 0 || flags.core > len(configs.Cores) {
-		return ErrCoreNotFound
-	}
-	configs.Servers[config.Name] = config
-
-	// EULA 部分
-	EULAFileData := fmt.Sprintf(`# Create By Minecraft Server Tool
-# By changing the setting below to TRUE you are indicating your agreement to Minecraft EULA(<https://aka.ms/MinecraftEULA/>).
-# %s
-eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
-	if err := os.MkdirAll(filepath.Join(lib.ServersDir, config.Name), 0o755); err != nil {
-		return err
-	}
-	EULAFile, err := os.Open(filepath.Join(lib.ServersDir, config.Name, "eula.txt"))
-	if err != nil {
-		return err
-	}
-	if _, err := EULAFile.WriteString(EULAFileData); err != nil {
-		return err
-	}
-	if err := EULAFile.Close(); err != nil {
-		return err
-	}
-
-	// 保存
-	srcFile, err := os.Open(configs.Cores[flags.core].FilePath)
-	if err != nil {
-		return err
-	}
-	dstFile, err := os.Create(filepath.Join(lib.ServersDir, config.Name, "server.jar"))
-	if err != nil {
-		return err
-	}
-	if _, err = io.Copy(dstFile, srcFile); err != nil {
-		return err
-	}
-	if err := os.Chmod(filepath.Join(lib.ServersDir, config.Name, "server.jar"), 0o755); err != nil {
-		return err
-	}
-	if err := srcFile.Close(); err != nil {
-		return err
-	}
-	if err := dstFile.Close(); err != nil {
-		return err
-	}
-	if err := configs.Save(); err != nil {
-		return err
-	}
-	log.Info("保存成功")
-	return nil
 }
 
 var (

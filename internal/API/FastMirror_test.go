@@ -31,7 +31,7 @@ func TestFastMirror(t *testing.T) {
 	if err := lib.Init(goversion.GetVersionInfo()); err != nil {
 		t.Fatal(err)
 	}
-	data, err := api.GetFastMirrorDatas()
+	data, err := api.GetFastMirrorData()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,12 +46,12 @@ func TestFastMirrorBuilds(t *testing.T) {
 	if err := lib.Init(goversion.GetVersionInfo()); err != nil {
 		t.Fatal(err)
 	}
-	data, err := api.GetFastMirrorDatas()
+	data, err := api.GetFastMirrorData()
 	if err != nil {
 		t.Fatal(err)
 	}
 	MinecraftVersion := data["Mohist"].MinecraftVersions[0]
-	builds, err := api.GetFastMirrorBuildsDatas("Mohist", MinecraftVersion)
+	builds, err := api.GetFastMirrorBuildsData("Mohist", MinecraftVersion)
 	if err != nil {
 		t.Fatal(err)
 	}

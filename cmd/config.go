@@ -42,9 +42,13 @@ type configCmdFlags struct {
 func newConfigCmd() *cobra.Command {
 	flags := &configCmdFlags{}
 	cmd := &cobra.Command{
-		Use:   "config",
-		Short: "配置服务器",
-		Long:  "配置服务器的各项参数",
+		Use:               "config",
+		Short:             "配置服务器",
+		Long:              "配置服务器的各项参数",
+		SilenceUsage:      true,
+		SilenceErrors:     true,
+		Args:              cobra.NoArgs,
+		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			configs, err := lib.LoadConfigs()
 			if err != nil {

@@ -29,9 +29,13 @@ import (
 
 func newListCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "list",
-		Short: "列出服务器",
-		Long:  "列出所有服务器的名称",
+		Use:               "list",
+		Short:             "列出服务器",
+		Long:              "列出所有服务器的名称",
+		SilenceUsage:      true,
+		SilenceErrors:     true,
+		Args:              cobra.NoArgs,
+		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			configs, err := lib.LoadConfigs()
 			if err != nil {

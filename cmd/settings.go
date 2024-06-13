@@ -20,14 +20,19 @@ package cmd
 
 import (
 	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )
 
 func newSettingsCmd() *cobra.Command {
 	var flags lib.Config
 	cmd := &cobra.Command{
-		Use:   "settings",
-		Short: "设置",
+		Use:               "settings",
+		Short:             "设置",
+		SilenceUsage:      true,
+		SilenceErrors:     true,
+		Args:              cobra.NoArgs,
+		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			configs, err := lib.LoadConfigs()
 			if err != nil {
@@ -48,7 +53,11 @@ func newSettingsCmd() *cobra.Command {
 			if cmd.Flags().Changed("auto-accept-eula") {
 				configs.AutoAcceptEULA = flags.AutoAcceptEULA
 			}
-			return configs.Save()
+			if err := configs.Save(); err != nil {
+				return err
+			}
+			log.Info("设置成功")
+			return nil
 		},
 	}
 	cmd.Flags().BoolVar(&flags.Aria2c.Enabled, "aria2-enabled", false, "Aria2c will be used for downloading of artifacts.")

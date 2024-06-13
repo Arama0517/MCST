@@ -27,6 +27,7 @@ import (
 )
 
 func Execute(exit func(int), args []string, version goversion.Info) error {
+	log.SetHandler(cli.Default)
 	cmd := newRootCmd(version)
 	cmd.SetArgs(args)
 	if err := cmd.Execute(); err != nil {
@@ -39,16 +40,17 @@ func Execute(exit func(int), args []string, version goversion.Info) error {
 func newRootCmd(version goversion.Info) *cobra.Command {
 	var verbose bool
 	cmd := &cobra.Command{
-		Use:           "MCST",
-		Long:          version.ASCIIName,
-		Version:       version.String(),
-		SilenceUsage:  true,
-		SilenceErrors: true,
-		PersistentPreRunE: func(_ *cobra.Command, args []string) error {
-			log.SetHandler(cli.Default)
+		Use:               "MCST",
+		Short:             "A command-line utility making Minecraft server creation quick and easy for beginners.",
+		Long:              version.ASCIIName,
+		Version:           version.String(),
+		SilenceUsage:      true,
+		SilenceErrors:     true,
+		Args:              cobra.NoArgs,
+		ValidArgsFunction: cobra.NoFileCompletions,
+		PersistentPreRunE: func(*cobra.Command, []string) error {
 			if verbose {
 				log.SetLevel(log.DebugLevel)
-				log.WithField("参数", args).Debug("调试模式开启")
 			}
 			return lib.Init(version)
 		},
@@ -62,6 +64,7 @@ func newRootCmd(version goversion.Info) *cobra.Command {
 		newStartCmd(),
 		newListCmd(),
 		newSettingsCmd(),
-		newManCmd())
+		newManCmd(),
+	)
 	return cmd
 }

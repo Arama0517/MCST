@@ -27,7 +27,7 @@
         <option value="gosimple" />
       </list>
     </option>
-    <option name="goLinterExe" value="\\wsl.localhost\Arch\home\arama\go\bin\golangci-lint" />
+    <option name="goLinterExe" value="\\wsl.localhost\Arch\usr\bin\golangci-lint" />
     <option name="linterSelected" value="true" />
   </component>
 </project>
