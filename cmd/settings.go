@@ -19,7 +19,7 @@
 package cmd
 
 import (
-	"github.com/Arama-Vanarana/MCServerTool/pkg/lib"
+	"github.com/Arama0517/MCServerTool/pkg/lib"
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )

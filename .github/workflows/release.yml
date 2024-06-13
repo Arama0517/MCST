@@ -17,6 +17,7 @@ jobs:
         with:
           go-version: stable
       - uses: anchore/sbom-action/download-syft@v0.16.0
+      - run: git fetch --prune --unshallow
       - name: release
         uses: goreleaser/goreleaser-action@v6
         with:
@@ -24,3 +25,4 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AUR_KEY: ${{ secrets.AUR_KEY }}

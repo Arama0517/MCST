@@ -1,4 +1,4 @@
-module github.com/Arama-Vanarana/MCServerTool
+module github.com/Arama0517/MCServerTool
 
 go 1.22.4
 
