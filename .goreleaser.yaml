@@ -178,6 +178,8 @@ scoops:
     directory: bucket
     homepage: https://github.com/Arama0517/MCServerTool
     description: A command-line utility making Minecraft server creation quick and easy for beginners.
+    depends:
+      - aria2
     license: GPL-v3
 
 sboms:
