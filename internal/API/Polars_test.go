@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	api "github.com/Arama0517/MCServerTool/internal/API"
 	"github.com/Arama0517/MCServerTool/pkg/lib"
 	goversion "github.com/caarlos0/go-version"
 )
