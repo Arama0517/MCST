@@ -27,7 +27,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/Arama0517/MCServerTool/pkg/lib"
+	"github.com/Arama0517/MCST/pkg/lib"
 	goversion "github.com/caarlos0/go-version"
 )
 

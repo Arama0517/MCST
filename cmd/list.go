@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Arama0517/MCServerTool/pkg/lib"
+	"github.com/Arama0517/MCST/pkg/lib"
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )

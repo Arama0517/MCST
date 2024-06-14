@@ -22,7 +22,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Arama0517/MCServerTool/pkg/lib"
+	"github.com/Arama0517/MCST/pkg/lib"
 	"github.com/apex/log"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/spf13/cobra"

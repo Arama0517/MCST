@@ -26,13 +26,34 @@ tasks:
 
   test:
     desc: 测试
+    env:
+      LC_ALL: C
+    vars:
+      TEST_OPTIONS: '{{default "" .TEST_OPTIONS}}'
+      SOURCE_FILES: '{{default "./..." .SOURCE_FILES}}'
+      TEST_PATTERN: '{{default "." .TEST_PATTERN}}'
     cmds:
-      - go test -failfast -race -parallel 2 -timeout=5m ./...
+      - go test {{.TEST_OPTIONS}} -failfast -race {{.SOURCE_FILES}} -run {{.TEST_PATTERN}} -timeout=5m
+
+  test:goreleaer:
+    desc: 测试发布
+    cmds:
+      - goreleaser release --skip publish --snapshot --clean
+
+  test:goreleaser:clean:
+    desc: 删除测试发布所产生的文件/文件夹
+    cmds:
+      - rm ./dist ./completions ./manpages -rf
 
   lint:
     desc: 使用golangci-lint检查代码
     cmds:
       - golangci-lint run --config ./.golangci.yaml {{.CLI_ARGS}} ./...
+
+  fmt:
+    desc: 使用 gofumpt 格式化全部代码
+    cmds:
+      - gofumpt -w -l .
 
   ci:
     desc: 运行所有CI步骤
@@ -55,13 +76,3 @@ tasks:
       - git tag {{.NEXT}}
       - echo {{.NEXT}}
       - git push origin --tags
-
-  test:goreleaer:
-    desc: 测试发布
-    cmds:
-      - goreleaser release --skip publish --snapshot --clean
-
-  test:goreleaser:clean:
-    desc: 删除测试发布所产生的文件/文件夹
-    cmds:
-      - rm ./dist ./completions ./manpages -rf
