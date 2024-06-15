@@ -170,6 +170,33 @@ brews:
       fish_completion.install "completions/MCST.fish"
       man1.install "manpages/MCST.1.gz"
 
+aurs:
+  - name: MCST
+    homepage: https://github.com/Arama0517/MCServerTool
+    description: A command-line utility making Minecraft server creation quick and easy for beginners.
+    maintainers:
+      - "Arama <arama0517 at foxmail dot com>"
+    license: GPL-v3
+    private_key: "${{ .Env.AUR_KEY }}"
+    git_url: "ssh://aur@aur.archlinux.org/mcst-bin.git"
+    package: |-
+      # bin
+      install -Dm755 "./MCST" "${pkgdir}/usr/bin/MCST"
+
+      # license
+      install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/MCST/LICENSE"
+
+      # completions
+      mkdir -p "${pkgdir}/usr/share/bash-completion/completions/"
+      mkdir -p "${pkgdir}/usr/share/zsh/site-functions/"
+      mkdir -p "${pkgdir}/usr/share/fish/vendor_completions.d/"
+      install -Dm644 "./completions/MCST.bash" "${pkgdir}/usr/share/bash-completion/completions/MCST"
+      install -Dm644 "./completions/MCST.zsh" "${pkgdir}/usr/share/zsh/site-functions/_MCST"
+      install -Dm644 "./completions/MCST.fish" "${pkgdir}/usr/share/fish/vendor_completions.d/MCST.fish"
+
+      # man pages
+      install -Dm644 "./manpages/MCST.1.gz" "${pkgdir}/usr/share/man/man1/MCST.1.gz"
+
 scoops:
   - name: MCST
     repository:
