@@ -26,5 +26,4 @@ jobs:
           version: latest
           args: release --clean
         env:
-          AUR_KEY: ${{ secrets.AUR_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
