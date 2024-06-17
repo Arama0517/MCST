@@ -118,6 +118,7 @@ func (d *Downloader) Download() (string, error) {
 	return path, nil
 }
 
+//nolint:tagliatelle // Aria2 jsonrpc返回
 type downloadStatus struct {
 	Status          string `json:"status"`
 	TotalLength     string `json:"totalLength"`

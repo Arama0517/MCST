@@ -26,7 +26,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func Execute(exit func(int), args []string, version goversion.Info) error {
+func Execute(args []string, version goversion.Info) error {
 	log.SetHandler(cli.Default)
 	cmd := newRootCmd(version)
 	cmd.SetArgs(args)

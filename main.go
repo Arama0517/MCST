@@ -25,7 +25,7 @@ import (
 
 	"github.com/Arama0517/MCST/cmd"
 	"github.com/apex/log"
-	"github.com/caarlos0/go-version"
+	goversion "github.com/caarlos0/go-version"
 )
 
 var (
@@ -37,11 +37,11 @@ var (
 )
 
 func main() {
-	if err := cmd.Execute(os.Exit, os.Args[1:], buildVersion(version, commit, treeState, date, builtBy)); err != nil {
+	if err := cmd.Execute(os.Args[1:], buildVersion(version, commit, treeState, date, builtBy)); err != nil {
 		log.WithError(err).Fatal("错误")
-	} else {
-		log.Info("成功")
+		os.Exit(1)
 	}
+	log.Info("成功")
 }
 
 //go:embed art.txt
