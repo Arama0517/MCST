@@ -18,6 +18,8 @@
 
 package lib
 
+import "C"
+
 import (
 	"errors"
 	"fmt"
@@ -49,24 +51,20 @@ func (d *Downloader) Download() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	d.getFileName(resp.Header, d.URL)
+	d.getFileName(resp.Header)
 	path := filepath.Join(DownloadsDir, d.FileName)
 	if _, err := os.Stat(path); err == nil {
 		return path, nil
 	}
 
-	if configs, err := LoadConfigs(); err == nil && configs.Aria2c.Enabled {
+	if Configs.Aria2c.Enabled {
 		aria2cName := "aria2c"
 		if runtime.GOOS == "windows" {
 			aria2cName = "aria2c.exe"
 		}
-		switch d.aria2Path, err = exec.LookPath(aria2cName); {
-		case errors.Is(err, nil), errors.Is(err, exec.ErrNotFound):
-			break
-		default:
+		if d.aria2Path, err = exec.LookPath(aria2cName); !errors.Is(err, exec.ErrNotFound) {
 			return "", err
-		}
-		if _, err = os.Stat(d.aria2Path); err == nil {
+		} else if err == nil {
 			if err := resp.Body.Close(); err != nil {
 				return "", err
 			}
@@ -143,20 +141,16 @@ func (d *Downloader) aria2cDownload() error {
 	defer func(name string) {
 		_ = os.Remove(name)
 	}(inputFilePath)
-	configs, err := LoadConfigs()
-	if err != nil {
-		return err
-	}
 	cmd := exec.Command(d.aria2Path)
 	cmd.Args = append(cmd.Args,
 		fmt.Sprintf("--input-file=%s", inputFilePath),
 		fmt.Sprintf("--user-agent=MCST/%s", version),
 		"--allow-overwrite=true",
 		"--auto-file-renaming=false",
-		fmt.Sprintf("--retry-wait=%d", configs.Aria2c.RetryWait),
-		fmt.Sprintf("--split=%d", configs.Aria2c.Split),
-		fmt.Sprintf("--max-connection-per-server==%d", configs.Aria2c.MaxConnectionPerServer),
-		fmt.Sprintf("--min-split-size=%s", configs.Aria2c.MinSplitSize),
+		fmt.Sprintf("--retry-wait=%d", Configs.Aria2c.RetryWait),
+		fmt.Sprintf("--split=%d", Configs.Aria2c.Split),
+		fmt.Sprintf("--max-connection-per-server==%d", Configs.Aria2c.MaxConnectionPerServer),
+		fmt.Sprintf("--min-split-size=%s", Configs.Aria2c.MinSplitSize),
 		"--console-log-level=warn",
 		"--no-conf=true",
 		"--follow-metalink=true",
@@ -167,13 +161,13 @@ func (d *Downloader) aria2cDownload() error {
 		"--summary-interval=0",
 		"--auto-save-interval=1",
 	)
-	cmd.Args = append(cmd.Args, configs.Aria2c.Option...)
+	cmd.Args = append(cmd.Args, Configs.Aria2c.Option...)
 	cmd.Stdout = os.Stderr
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
 
-func (d *Downloader) getFileName(header http.Header, url url.URL) {
+func (d *Downloader) getFileName(header http.Header) {
 	// 尝试从 Content-Disposition 头部获取文件名
 	if disposition := header.Get("Content-Disposition"); disposition != "" {
 		_, params, err := mime.ParseMediaType(disposition)
@@ -185,5 +179,5 @@ func (d *Downloader) getFileName(header http.Header, url url.URL) {
 		}
 	}
 	// 如果没有 Content-Disposition 头部，则从 URL 中获取文件名
-	d.FileName = filepath.Base(url.Path)
+	d.FileName = filepath.Base(d.URL.Path)
 }

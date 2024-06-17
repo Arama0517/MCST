@@ -19,12 +19,8 @@
 package lib_test
 
 import (
-	"encoding/json"
 	"net/url"
 	"os"
-	"os/exec"
-	"path/filepath"
-	"runtime"
 	"testing"
 
 	"github.com/Arama0517/MCST/pkg/lib"
@@ -44,36 +40,7 @@ func TestDownload(t *testing.T) {
 	if err := lib.Init(goversion.GetVersionInfo()); err != nil {
 		t.Fatal(err)
 	}
-	cwd, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	lib.ConfigsPath = filepath.Join(cwd, "test.json")
-	if file, err := os.Create(lib.ConfigsPath); err != nil {
-		t.Fatal(err)
-	} else {
-		jsonData, err := json.MarshalIndent(lib.Config{
-			Cores:   map[int]lib.Core{},
-			Servers: map[string]lib.Server{},
-			Aria2c: lib.Aria2c{
-				Enabled:                false,
-				RetryWait:              2,
-				Split:                  16,
-				MaxConnectionPerServer: 16,
-				MinSplitSize:           "1M",
-			},
-			AutoAcceptEULA: false,
-		}, "", "  ")
-		if err != nil {
-			t.Fatal(err)
-		}
-		if _, err := file.Write(jsonData); err != nil {
-			t.Fatal(err)
-		}
-		defer func(file *os.File) {
-			_ = file.Close()
-		}(file)
-	}
+	lib.Configs.Aria2c.Enabled = false
 	path, err := lib.NewDownloader(URL).Download()
 	if err != nil {
 		t.Fatal(err)
@@ -91,44 +58,7 @@ func TestAria2Download(t *testing.T) {
 	if err := lib.Init(goversion.GetVersionInfo()); err != nil {
 		t.Fatal(err)
 	}
-	cwd, err := os.Getwd()
-	if err != nil {
-		t.Fatal(err)
-	}
-	lib.ConfigsPath = filepath.Join(cwd, "test.json")
-	if file, err := os.Create(lib.ConfigsPath); err != nil {
-		t.Fatal(err)
-	} else {
-		aria2Name := "aria2c"
-		if runtime.GOOS == "windows" {
-			aria2Name = "aria2c.exe"
-		}
-		_, err := exec.LookPath(aria2Name)
-		if err != nil {
-			t.Fatal(err)
-		}
-		jsonData, err := json.MarshalIndent(lib.Config{
-			Cores:   map[int]lib.Core{},
-			Servers: map[string]lib.Server{},
-			Aria2c: lib.Aria2c{
-				Enabled:                false,
-				RetryWait:              2,
-				Split:                  16,
-				MaxConnectionPerServer: 16,
-				MinSplitSize:           "1M",
-			},
-			AutoAcceptEULA: false,
-		}, "", "  ")
-		if err != nil {
-			t.Fatal(err)
-		}
-		if _, err := file.Write(jsonData); err != nil {
-			t.Fatal(err)
-		}
-		defer func(file *os.File) {
-			_ = file.Close()
-		}(file)
-	}
+	lib.Configs.Aria2c.Enabled = true
 	path, err := lib.NewDownloader(URL).Download()
 	if err != nil {
 		t.Fatal(err)

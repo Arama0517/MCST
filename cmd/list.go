@@ -37,14 +37,10 @@ func newListCmd() *cobra.Command {
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			configs, err := lib.LoadConfigs()
-			if err != nil {
-				return err
-			}
 			if _, err := fmt.Fprintln(os.Stderr, "已创建的服务器:"); err != nil {
 				return err
 			}
-			for _, config := range configs.Servers {
+			for _, config := range lib.Configs.Servers {
 				log.WithFields(log.Fields{
 					"服务器编码":     config.Java.Encoding,
 					"JVM初始堆内存":  config.Java.Xms,

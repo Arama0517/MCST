@@ -60,13 +60,10 @@ func newCreateCmd() *cobra.Command {
 			if !flags.eula {
 				return ErrEulaRequired
 			}
-			configs, err := lib.LoadConfigs()
-			if err != nil {
-				return err
-			}
+			var err error
 			var config lib.Server
 			config.Name = flags.name
-			for name := range configs.Servers {
+			for name := range lib.Configs.Servers {
 				if name == flags.name {
 					return ErrServerExists
 				}
@@ -99,10 +96,10 @@ func newCreateCmd() *cobra.Command {
 			config.Java.Path = flags.java
 			config.Java.Args = flags.jvmArgs
 			config.ServerArgs = flags.serverArgs
-			if flags.core < 0 || flags.core > len(configs.Cores) {
+			if flags.core < 0 || flags.core > len(lib.Configs.Cores) {
 				return ErrCoreNotFound
 			}
-			configs.Servers[config.Name] = config
+			lib.Configs.Servers[config.Name] = config
 
 			// EULA 部分
 			EULAFileData := fmt.Sprintf(`# Create By Minecraft Server Tool
@@ -124,7 +121,7 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
 			}
 
 			// 保存
-			srcFile, err := os.Open(configs.Cores[flags.core].FilePath)
+			srcFile, err := os.Open(lib.Configs.Cores[flags.core].FilePath)
 			if err != nil {
 				return err
 			}
@@ -144,7 +141,7 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
 			if err := dstFile.Close(); err != nil {
 				return err
 			}
-			if err := configs.Save(); err != nil {
+			if err := lib.Configs.Save(); err != nil {
 				return err
 			}
 			log.Info("保存成功")
@@ -160,7 +157,7 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
 	cmd.Flags().StringSliceVar(&flags.serverArgs, "server_args", []string{"--nogui"}, "Minecraft服务器参数")
 	cmd.Flags().IntVarP(&flags.core, "core", "c", 0, "使用的核心ID")
 	cmd.Flags().BoolVar(&flags.eula, "eula", false, "是否同意EULA协议(https://aka.ms/MinecraftEULA/)")
-	if configs, err := lib.LoadConfigs(); err != nil || !configs.AutoAcceptEULA {
+	if !lib.Configs.AutoAcceptEULA {
 		_ = cmd.MarkFlagRequired("eula")
 	} else {
 		flags.eula = true

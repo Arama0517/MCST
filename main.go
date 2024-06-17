@@ -24,6 +24,7 @@ import (
 	"os"
 
 	"github.com/Arama0517/MCST/cmd"
+	"github.com/apex/log"
 	"github.com/caarlos0/go-version"
 )
 
@@ -37,6 +38,7 @@ var (
 
 func main() {
 	if err := cmd.Execute(os.Exit, os.Args[1:], buildVersion(version, commit, treeState, date, builtBy)); err != nil {
+		log.WithError(err).Fatal("错误")
 		return
 	}
 }

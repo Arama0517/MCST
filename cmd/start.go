@@ -39,11 +39,7 @@ func newStartCmd() *cobra.Command {
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(*cobra.Command, []string) error {
-			configs, err := lib.LoadConfigs()
-			if err != nil {
-				return err
-			}
-			config, exists := configs.Servers[name]
+			config, exists := lib.Configs.Servers[name]
 			if !exists {
 				return ErrServerNotFound
 			}

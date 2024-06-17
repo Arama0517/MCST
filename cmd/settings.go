@@ -34,26 +34,22 @@ func newSettingsCmd() *cobra.Command {
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			configs, err := lib.LoadConfigs()
-			if err != nil {
-				return err
-			}
 			if cmd.Flags().Changed("aria2-enabled") {
-				configs.Aria2c.Enabled = flags.Aria2c.Enabled
+				lib.Configs.Aria2c.Enabled = flags.Aria2c.Enabled
 			}
 			if cmd.Flags().Changed("aria2-retry-wait") {
-				configs.Aria2c.RetryWait = flags.Aria2c.RetryWait
+				lib.Configs.Aria2c.RetryWait = flags.Aria2c.RetryWait
 			}
 			if cmd.Flags().Changed("aria2-split") {
-				configs.Aria2c.Split = flags.Aria2c.Split
+				lib.Configs.Aria2c.Split = flags.Aria2c.Split
 			}
 			if cmd.Flags().Changed("aria2-max-connection-per-server") {
-				configs.Aria2c.MaxConnectionPerServer = flags.Aria2c.MaxConnectionPerServer
+				lib.Configs.Aria2c.MaxConnectionPerServer = flags.Aria2c.MaxConnectionPerServer
 			}
 			if cmd.Flags().Changed("auto-accept-eula") {
-				configs.AutoAcceptEULA = flags.AutoAcceptEULA
+				lib.Configs.AutoAcceptEULA = flags.AutoAcceptEULA
 			}
-			if err := configs.Save(); err != nil {
+			if err := lib.Configs.Save(); err != nil {
 				return err
 			}
 			log.Info("设置成功")

@@ -56,17 +56,13 @@ func newListCoreCmd() *cobra.Command {
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(*cobra.Command, []string) error {
-			configs, err := lib.LoadConfigs()
-			if err != nil {
-				return err
-			}
-			keys := make([]int, len(configs.Cores), 1)
-			for k := range configs.Cores {
-				keys = append(keys, k)
+			var keys []int
+			for _, v := range lib.Configs.Cores {
+				keys = append(keys, v.ID)
 			}
 			sort.Ints(keys)
 			for _, key := range keys {
-				data := configs.Cores[key]
+				data := lib.Configs.Cores[key]
 				log.WithFields(log.Fields{
 					"URL":  data.URL,
 					"文件名":  data.FileName,
@@ -93,16 +89,13 @@ func newLocalCmd() *cobra.Command {
 			if _, err := os.Stat(path); err != nil {
 				return err
 			}
-			configs, err := lib.LoadConfigs()
-			if err != nil {
-				return err
-			}
-			configs.Cores[len(configs.Cores)] = lib.Core{
+			lib.Configs.Cores[len(lib.Configs.Cores)] = lib.Core{
+				ID:       len(lib.Configs.Cores),
 				URL:      "unknown",
 				FileName: filepath.Base(path),
 				FilePath: path,
 			}
-			return configs.Save()
+			return lib.Configs.Save()
 		},
 	}
 	cmd.Flags().StringVarP(&path, "path", "p", "", "核心的路径")
@@ -130,16 +123,13 @@ func newRemoteCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			configs, err := lib.LoadConfigs()
-			if err != nil {
-				return err
-			}
-			configs.Cores[len(configs.Cores)] = lib.Core{
+			lib.Configs.Cores[len(lib.Configs.Cores)] = lib.Core{
+				ID:       len(lib.Configs.Cores),
 				URL:      URL.String(),
 				FileName: filepath.Base(path),
 				FilePath: path,
 			}
-			return configs.Save()
+			return lib.Configs.Save()
 		},
 	}
 	cmd.Flags().StringVarP(&URL, "url", "u", "", "核心的URL")
@@ -170,16 +160,18 @@ func newFastMirrorCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			configs, err := lib.LoadConfigs()
-			if err != nil {
-				return err
-			}
-			configs.Cores[len(configs.Cores)] = lib.Core{
+			lib.Configs.Cores[len(lib.Configs.Cores)] = lib.Core{
+				ID:       len(lib.Configs.Cores),
 				URL:      downloader.URL.String(),
 				FileName: downloader.FileName,
 				FilePath: path,
+				ExtrasData: map[string]any{
+					"core":          flags.core,
+					"mc_version":    flags.minecraftVersion,
+					"build_version": flags.buildVersion,
+				},
 			}
-			return configs.Save()
+			return lib.Configs.Save()
 		},
 	}
 	cmd.AddCommand(newListFastMirrorCmd())
@@ -285,11 +277,8 @@ func newPolarsCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			configs, err := lib.LoadConfigs()
-			if err != nil {
-				return err
-			}
-			configs.Cores[len(configs.Cores)] = lib.Core{
+			lib.Configs.Cores[len(lib.Configs.Cores)] = lib.Core{
+				ID:       len(lib.Configs.Cores),
 				URL:      URL.String(),
 				FileName: downloader.FileName,
 				FilePath: path,
@@ -298,7 +287,7 @@ func newPolarsCmd() *cobra.Command {
 					"core_id": coreID,
 				},
 			}
-			return configs.Save()
+			return lib.Configs.Save()
 		},
 	}
 	cmd.AddCommand(newListPolarsCmd())

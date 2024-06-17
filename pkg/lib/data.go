@@ -21,8 +21,9 @@ package lib
 import (
 	"encoding/json"
 	"os"
-	"path/filepath"
 )
+
+var Configs Config
 
 var (
 	DataDir      string
@@ -31,54 +32,8 @@ var (
 	ConfigsPath  string
 )
 
-func initData() error {
-	UserHomeDir, err := os.UserHomeDir()
-	if err != nil {
-		return err
-	}
-	DataDir = filepath.Join(UserHomeDir, ".config", "MCST")
-	ServersDir = filepath.Join(DataDir, "servers")
-	DownloadsDir = filepath.Join(DataDir, "downloads")
-	ConfigsPath = filepath.Join(DataDir, "configs.json")
-
-	switch _, err := os.Stat(DataDir); {
-	case err == nil: // 目录存在
-		break
-	case os.IsNotExist(err): // 第一次运行; 初始化
-		if err := os.MkdirAll(DataDir, 0o755); err != nil {
-			return err
-		}
-		if err := os.MkdirAll(ServersDir, 0o755); err != nil {
-			return err
-		}
-		if err := os.MkdirAll(DownloadsDir, 0o755); err != nil {
-			return err
-		}
-		jsonData, err := json.MarshalIndent(Config{
-			Cores:   map[int]Core{},
-			Servers: map[string]Server{},
-			Aria2c: Aria2c{
-				Enabled:                true,
-				RetryWait:              2,
-				Split:                  5,
-				MaxConnectionPerServer: 5,
-				MinSplitSize:           "5M",
-			},
-			AutoAcceptEULA: false,
-		}, "", "    ")
-		if err != nil {
-			return err
-		}
-		if err := os.WriteFile(ConfigsPath, jsonData, 0o644); err != nil {
-			return err
-		}
-	default: // 其他错误
-		return err
-	}
-	return nil
-}
-
 type Core struct {
+	ID         int    // 核心id
 	URL        string `json:"url"`         // 下载地址(如果不是本地的话)
 	FileName   string `json:"file_name"`   // 文件名
 	FilePath   string `json:"file_path"`   // 文件路径
@@ -114,27 +69,10 @@ type Config struct {
 	AutoAcceptEULA bool              `json:"auto_accept_eula"` // 是否自动同意EULA
 }
 
-func LoadConfigs() (Config, error) {
-	file, err := os.ReadFile(ConfigsPath)
-	if err != nil {
-		return Config{}, err
-	}
-	var config Config
-	err = json.Unmarshal(file, &config)
-	if err != nil {
-		return Config{}, err
-	}
-	return config, nil
-}
-
 func (c *Config) Save() error {
-	jsonConfig, err := json.MarshalIndent(c, "", "  ")
+	configs, err := json.MarshalIndent(c, "", "  ")
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(ConfigsPath, jsonConfig, 0o644)
-	if err != nil {
-		return err
-	}
-	return nil
+	return os.WriteFile(ConfigsPath, configs, 0o644)
 }

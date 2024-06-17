@@ -18,6 +18,8 @@
 
 package cmd
 
+import "C"
+
 import (
 	"os"
 	"path/filepath"
@@ -50,17 +52,13 @@ func newConfigCmd() *cobra.Command {
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			configs, err := lib.LoadConfigs()
-			if err != nil {
-				return err
-			}
-			config, exists := configs.Servers[flags.name]
+			config, exists := lib.Configs.Servers[flags.name]
 			if !exists {
 				return ErrServerNotFound
 			}
 			cmdFlags := cmd.Flags()
 			if flags.delete {
-				delete(configs.Servers, flags.name)
+				delete(lib.Configs.Servers, flags.name)
 				if err := os.RemoveAll(filepath.Join(lib.ServersDir, flags.name)); err != nil {
 					return err
 				}
