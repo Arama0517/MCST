@@ -39,7 +39,8 @@ var (
 func main() {
 	if err := cmd.Execute(os.Exit, os.Args[1:], buildVersion(version, commit, treeState, date, builtBy)); err != nil {
 		log.WithError(err).Fatal("错误")
-		return
+	} else {
+		log.Info("成功")
 	}
 }
 

@@ -21,6 +21,7 @@ package lib
 import "C"
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -31,9 +32,11 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/schollz/progressbar/v3"
+	"github.com/ybbus/jsonrpc/v3"
 )
 
 func NewDownloader(url url.URL) *Downloader {
@@ -47,33 +50,34 @@ type Downloader struct {
 }
 
 func (d *Downloader) Download() (string, error) {
+	// 检测是否已下载
 	resp, err := Request(d.URL, http.MethodGet, nil, nil)
 	if err != nil {
 		return "", err
 	}
-	d.getFileName(resp.Header)
 	path := filepath.Join(DownloadsDir, d.FileName)
 	if _, err := os.Stat(path); err == nil {
 		return path, nil
 	}
+	d.getFileName(resp.Header)
 
+	// Aria2 多线程下载
 	if Configs.Aria2c.Enabled {
 		aria2cName := "aria2c"
 		if runtime.GOOS == "windows" {
 			aria2cName = "aria2c.exe"
 		}
-		if d.aria2Path, err = exec.LookPath(aria2cName); !errors.Is(err, exec.ErrNotFound) {
+		var err error
+		if d.aria2Path, err = exec.LookPath(aria2cName); err != nil && !errors.Is(err, exec.ErrNotFound) {
 			return "", err
 		} else if err == nil {
-			if err := resp.Body.Close(); err != nil {
-				return "", err
-			}
 			return path, d.aria2cDownload()
 		}
 	}
 	// 单线程
 	bar := progressbar.NewOptions64(
 		resp.ContentLength,
+		progressbar.OptionSetDescription("[cyan]下载中...[reset]"),
 		progressbar.OptionEnableColorCodes(true),
 		progressbar.OptionFullWidth(),
 		progressbar.OptionSetRenderBlankState(true),
@@ -99,7 +103,6 @@ func (d *Downloader) Download() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	bar.Describe("[cyan]下载中...[reset]")
 	if _, err := io.Copy(io.MultiWriter(file, bar), resp.Body); err != nil {
 		return "", err
 	}
@@ -115,43 +118,29 @@ func (d *Downloader) Download() (string, error) {
 	return path, nil
 }
 
+type downloadStatus struct {
+	Status          string `json:"status"`
+	TotalLength     string `json:"totalLength"`
+	CompletedLength string `json:"completedLength"`
+	DownloadSpeed   string `json:"downloadSpeed"`
+	Connections     string `json:"connections"`
+	ErrorMessage    string `json:"errorMessage"`
+}
+
 func (d *Downloader) aria2cDownload() error {
-	inputFilePath := filepath.Join(DownloadsDir, fmt.Sprintf("%s.txt", d.FileName))
-	f, err := os.Create(inputFilePath)
-	if err != nil {
-		return err
-	}
-	if _, err := f.WriteString(d.URL.String() + "\n"); err != nil {
-		return err
-	}
-	if d.URL.Host != "sourceforge.net" {
-		if _, err := f.WriteString(fmt.Sprintf("\treferer=%s://%s%s\n", d.URL.Scheme, d.URL.Host, filepath.Dir(d.URL.Path))); err != nil {
-			return err
-		}
-	}
-	if _, err := f.WriteString(fmt.Sprintf("\tdir=%s\n", DownloadsDir)); err != nil {
-		return err
-	}
-	if _, err := f.WriteString(fmt.Sprintf("\tout=%s\n", d.FileName)); err != nil {
-		return err
-	}
-	if err = f.Close(); err != nil {
-		return err
-	}
-	defer func(name string) {
-		_ = os.Remove(name)
-	}(inputFilePath)
 	cmd := exec.Command(d.aria2Path)
 	cmd.Args = append(cmd.Args,
-		fmt.Sprintf("--input-file=%s", inputFilePath),
-		fmt.Sprintf("--user-agent=MCST/%s", version),
+		"--dir="+DownloadsDir,
+		fmt.Sprintf("--user-agent=MCST/%s", version.GitVersion),
 		"--allow-overwrite=true",
 		"--auto-file-renaming=false",
 		fmt.Sprintf("--retry-wait=%d", Configs.Aria2c.RetryWait),
 		fmt.Sprintf("--split=%d", Configs.Aria2c.Split),
-		fmt.Sprintf("--max-connection-per-server==%d", Configs.Aria2c.MaxConnectionPerServer),
+		fmt.Sprintf("--max-connection-per-server=%d", Configs.Aria2c.MaxConnectionPerServer),
 		fmt.Sprintf("--min-split-size=%s", Configs.Aria2c.MinSplitSize),
-		"--console-log-level=warn",
+		"--enable-rpc",
+		// "--console-log-level=error",
+		"--quiet",
 		"--no-conf=true",
 		"--follow-metalink=true",
 		"--metalink-preferred-protocol=https",
@@ -162,9 +151,85 @@ func (d *Downloader) aria2cDownload() error {
 		"--auto-save-interval=1",
 	)
 	cmd.Args = append(cmd.Args, Configs.Aria2c.Option...)
-	cmd.Stdout = os.Stderr
-	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+	defer func(Process *os.Process) {
+		_ = Process.Kill()
+	}(cmd.Process)
+	time.Sleep(500 * time.Millisecond)
+	ctx := context.Background()
+	client := jsonrpc.NewClient("http://127.0.0.1:6800/jsonrpc")
+	var gid string
+	if err := client.CallFor(ctx, &gid, "aria2.addUri", []any{[]string{d.URL.String()}}); err != nil {
+		return err
+	}
+	time.Sleep(500 * time.Millisecond)
+	var status downloadStatus
+	if err := client.CallFor(ctx, &status, "aria2.tellStatus", []any{gid, []string{
+		"status",
+		"totalLength",
+		"completedLength",
+		"downloadSpeed",
+		"connections",
+		"errorMessage",
+	}}); err != nil {
+		return err
+	}
+	totalLength, err := strconv.ParseInt(status.TotalLength, 10, 64)
+	if err != nil {
+		return err
+	}
+	completedLength, err := strconv.ParseInt(status.CompletedLength, 10, 64)
+	if err != nil {
+		return err
+	}
+	bar := progressbar.NewOptions64(
+		totalLength,
+		progressbar.OptionSetDescription("[cyan]下载中...[reset]"),
+		progressbar.OptionEnableColorCodes(true),
+		progressbar.OptionFullWidth(),
+		progressbar.OptionSetRenderBlankState(true),
+		progressbar.OptionSetTheme(progressbar.Theme{
+			Saucer:        "[green]=[reset]",
+			SaucerHead:    "[green]>[reset]",
+			SaucerPadding: " ",
+			BarStart:      "[black][[reset]",
+			BarEnd:        "[black]][reset]",
+		}),
+		progressbar.OptionSetWriter(os.Stderr),
+		progressbar.OptionShowBytes(true),
+		progressbar.OptionShowCount(),
+		progressbar.OptionSpinnerType(14),
+		progressbar.OptionThrottle(65*time.Millisecond),
+		progressbar.OptionOnCompletion(func() {
+			_, err := fmt.Fprint(os.Stderr, "\n")
+			if err != nil {
+				return
+			}
+		}))
+	for {
+		if err := client.CallFor(ctx, &status, "aria2.tellStatus", []any{gid, []string{
+			"status",
+			"totalLength",
+			"completedLength",
+			"downloadSpeed",
+			"connections",
+			"errorMessage",
+		}}); err != nil {
+			return err
+		}
+		if status.Status == "complete" {
+			return bar.Finish()
+		} else if status.Status == "error" {
+			return errors.New(status.ErrorMessage)
+		}
+		if err := bar.Set64(completedLength); err != nil {
+			return err
+		}
+		bar.Describe(fmt.Sprintf("[cyan]%s服务器同时下载中...[reset]", status.Connections))
+		time.Sleep(500 * time.Millisecond)
+	}
 }
 
 func (d *Downloader) getFileName(header http.Header) {

@@ -12,6 +12,7 @@ require (
 	github.com/schollz/progressbar/v3 v3.14.4
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/spf13/cobra v1.8.1
+	github.com/ybbus/jsonrpc/v3 v3.1.5
 )
 
 require (

@@ -30,11 +30,7 @@ func Execute(exit func(int), args []string, version goversion.Info) error {
 	log.SetHandler(cli.Default)
 	cmd := newRootCmd(version)
 	cmd.SetArgs(args)
-	if err := cmd.Execute(); err != nil {
-		log.WithError(err).Error("错误")
-		exit(1)
-	}
-	return nil
+	return cmd.Execute()
 }
 
 func newRootCmd(version goversion.Info) *cobra.Command {
