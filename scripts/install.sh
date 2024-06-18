@@ -23,12 +23,12 @@ set -e
 usage() {
   this=$1
   cat <<EOF
-$this: 下载 Arama-Vanarana/MCServerTool 的 可执行文件
+$this: 下载 Arama0517/MCST 的 可执行文件
 
 Usage: $this [-b <bindir>] [-d] [<tag>]
   -b 设置安装的目录, 默认: ./bin
   -d 开启调试日志
-   <tag> 是来自 <https://github.com/Arama-Vanarana/MCServerTool/releases/> 的一个标签
+   <tag> 是来自 <https://github.com/Arama0517/MCST/releases/> 的一个标签
    如果没有指定则使用最新的
 
 EOF
@@ -389,8 +389,8 @@ End of functions from https://github.com/client9/shlib
 EOF
 
 PROJECT_NAME="MCST"
-OWNER="Arama-Vanarana"
-REPO="MCServerTool"
+OWNER="Arama0517"
+REPO="MCST"
 BINARY=MCST
 FORMAT=tar.gz
 OS=$(uname_os)
