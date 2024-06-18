@@ -33,7 +33,7 @@ tasks:
       SOURCE_FILES: '{{default "./..." .SOURCE_FILES}}'
       TEST_PATTERN: '{{default "." .TEST_PATTERN}}'
     cmds:
-      - go test {{ .TEST_OPTIONS }} -failfast -race {{ .SOURCE_FILES }} -run {{ .TEST_PATTERN }} -timeout=5m
+      - go test {{ .TEST_OPTIONS }} -failfast {{ .SOURCE_FILES }} -run {{ .TEST_PATTERN }} -timeout=5m
 
   test:goreleaer:
     desc: 测试发布

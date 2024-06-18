@@ -18,8 +18,6 @@
 
 package cmd
 
-import "C"
-
 import (
 	"os"
 	"path/filepath"

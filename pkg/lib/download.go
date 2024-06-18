@@ -18,8 +18,6 @@
 
 package lib
 
-import "C"
-
 import (
 	"context"
 	"errors"
