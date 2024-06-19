@@ -51,7 +51,7 @@ func buildVersion(version, commit, date, builtBy, treeState string) goversion.In
 	URL := url.URL{
 		Scheme: "https",
 		Host:   "github.com",
-		Path:   "/Arama-Vanarana/MCServerTool",
+		Path:   "/Arama0517/MCST",
 	}
 	return goversion.GetVersionInfo(
 		goversion.WithAppDetails("MCServerTool", "A command-line utility making Minecraft server creation quick and easy for beginners.", URL.String()),
