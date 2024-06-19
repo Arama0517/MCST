@@ -37,16 +37,16 @@ func GetPolarsData() (map[string]PolarsData, error) {
 		Path:   "/api/query/minecraft/core",
 	}, http.MethodGet, nil, nil)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	var data []PolarsData
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	result := map[string]PolarsData{}
 	for i := 0; i < len(data); i++ {
