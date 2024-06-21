@@ -16,42 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package api_test
+package requests
 
 import (
-	"encoding/json"
-	"testing"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
 
-	api "github.com/Arama0517/MCST/internal/API"
-	"github.com/Arama0517/MCST/internal/configs"
+	"github.com/Arama0517/MCST/internal/build"
 )
 
-func TestPolars(t *testing.T) {
-	if err := configs.InitData(); err != nil {
-		t.Fatal(err)
-	}
-	data, err := api.GetPolarsData()
+// Request 请求URL, 返回响应; 运行成功后请添加`defer resp.Body.Close()`到你的代码内
+func Request(url url.URL, method string, header map[string]string, body io.Reader) (*http.Response, error) {
+	request, err := http.NewRequest(method, url.String(), body)
 	if err != nil {
-		t.Fatal(err)
+		return nil, err
 	}
-	jsonData, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		t.Fatal(err)
+	request.Header.Set("User-Agent", fmt.Sprintf("MCST/%s ", build.Version.GitVersion))
+	for key, value := range header {
+		request.Header.Set(key, value)
 	}
-	t.Log(string(jsonData))
-}
-
-func TestPolarsCore(t *testing.T) {
-	if err := configs.InitData(); err != nil {
-		t.Fatal(err)
-	}
-	data, err := api.GetPolarsCoresData(16)
-	if err != nil {
-		t.Fatal(err)
-	}
-	jsonData, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		t.Error(err)
-	}
-	t.Log(string(jsonData))
+	return http.DefaultClient.Do(request)
 }

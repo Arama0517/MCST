@@ -16,42 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package api_test
+package main
 
 import (
-	"encoding/json"
-	"testing"
+	_ "embed"
+	"os"
 
-	api "github.com/Arama0517/MCST/internal/API"
-	"github.com/Arama0517/MCST/internal/configs"
+	"github.com/Arama0517/MCST/pkg/cmd"
+	"github.com/apex/log"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/termenv"
+	"go.uber.org/automaxprocs/maxprocs"
 )
 
-func TestPolars(t *testing.T) {
-	if err := configs.InitData(); err != nil {
-		t.Fatal(err)
+func init() {
+	if os.Getenv("CI") != "" {
+		lipgloss.SetColorProfile(termenv.TrueColor)
 	}
-	data, err := api.GetPolarsData()
-	if err != nil {
-		t.Fatal(err)
+	if _, err := maxprocs.Set(); err != nil {
+		log.WithError(err).Warn("failed to set GOMAXPROCS")
 	}
-	jsonData, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(string(jsonData))
 }
 
-func TestPolarsCore(t *testing.T) {
-	if err := configs.InitData(); err != nil {
-		t.Fatal(err)
+func main() {
+	if err := cmd.Execute(os.Args[1:], os.Exit); err != nil {
+		log.WithError(err).Fatal("错误")
+		os.Exit(1)
 	}
-	data, err := api.GetPolarsCoresData(16)
-	if err != nil {
-		t.Fatal(err)
-	}
-	jsonData, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		t.Error(err)
-	}
-	t.Log(string(jsonData))
 }

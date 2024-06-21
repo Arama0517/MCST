@@ -19,27 +19,30 @@
 package cmd
 
 import (
-	"github.com/Arama0517/MCST/pkg/lib"
+	"github.com/Arama0517/MCST/internal/build"
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
-	goversion "github.com/caarlos0/go-version"
 	"github.com/spf13/cobra"
 )
 
-func Execute(args []string, version goversion.Info) error {
+func Execute(args []string, exit func(code int)) error {
 	log.SetHandler(cli.Default)
-	cmd := newRootCmd(version)
+	cmd := newRootCmd()
 	cmd.SetArgs(args)
-	return cmd.Execute()
+	if err := cmd.Execute(); err != nil {
+		log.WithError(err).Error("出现错误!")
+		exit(1)
+	}
+	return nil
 }
 
-func newRootCmd(version goversion.Info) *cobra.Command {
+func newRootCmd() *cobra.Command {
 	var verbose bool
 	cmd := &cobra.Command{
 		Use:               "MCST",
 		Short:             "A command-line utility making Minecraft server creation quick and easy for beginners.",
-		Long:              version.ASCIIName,
-		Version:           version.String(),
+		Long:              build.Version.ASCIIName,
+		Version:           build.Version.String(),
 		SilenceUsage:      true,
 		SilenceErrors:     true,
 		Args:              cobra.NoArgs,
@@ -48,7 +51,10 @@ func newRootCmd(version goversion.Info) *cobra.Command {
 			if verbose {
 				log.SetLevel(log.DebugLevel)
 			}
-			return lib.Init(version)
+			return nil
+		},
+		PostRun: func(*cobra.Command, []string) {
+			log.Info("运行成功")
 		},
 	}
 	cmd.SetVersionTemplate("{{.Version}}")

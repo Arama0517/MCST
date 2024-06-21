@@ -16,17 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package lib
+package configs
 
 import (
 	"encoding/json"
 	"os"
+	"path/filepath"
 )
 
 var Configs Config
 
 var (
-	DataDir      string
+	rootDir      string
 	ServersDir   string
 	DownloadsDir string
 	ConfigsPath  string
@@ -67,6 +68,59 @@ type Config struct {
 	Servers        map[string]Server `json:"servers"`          // 服务器列表, 如果服务器名称(key)为temp, CreatePage调用时会视为暂存配置而不是名为temp的服务器
 	Aria2c         Aria2c            `json:"aria2c"`           // aria2c配置
 	AutoAcceptEULA bool              `json:"auto_accept_eula"` // 是否自动同意EULA
+}
+
+func InitData() error {
+	UserHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	rootDir = filepath.Join(UserHomeDir, ".config", "MCST")
+	ServersDir = filepath.Join(rootDir, "servers")
+	DownloadsDir = filepath.Join(rootDir, "downloads")
+	ConfigsPath = filepath.Join(rootDir, "configs.json")
+
+	// 初始化
+	if _, err := os.Stat(rootDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(rootDir, 0o755); err != nil {
+			return err
+		}
+		if err := os.MkdirAll(ServersDir, 0o755); err != nil {
+			return err
+		}
+		if err := os.MkdirAll(DownloadsDir, 0o755); err != nil {
+			return err
+		}
+		jsonData, err := json.MarshalIndent(Config{
+			Cores:   map[int]Core{},
+			Servers: map[string]Server{},
+			Aria2c: Aria2c{
+				Enabled:                true,
+				RetryWait:              2,
+				Split:                  5,
+				MaxConnectionPerServer: 5,
+				MinSplitSize:           "5M",
+			},
+			AutoAcceptEULA: false,
+		}, "", "    ")
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(ConfigsPath, jsonData, 0o644); err != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
+	}
+
+	file, err := os.ReadFile(ConfigsPath)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(file, &Configs); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *Config) Save() error {

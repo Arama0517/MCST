@@ -27,7 +27,7 @@ import (
 	"time"
 
 	api "github.com/Arama0517/MCST/internal/API"
-	"github.com/Arama0517/MCST/pkg/lib"
+	"github.com/Arama0517/MCST/internal/configs"
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )
@@ -57,12 +57,12 @@ func newListCoreCmd() *cobra.Command {
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(*cobra.Command, []string) error {
 			var keys []int
-			for _, v := range lib.Configs.Cores {
+			for _, v := range configs.Configs.Cores {
 				keys = append(keys, v.ID)
 			}
 			sort.Ints(keys)
 			for _, key := range keys {
-				data := lib.Configs.Cores[key]
+				data := configs.Configs.Cores[key]
 				log.WithFields(log.Fields{
 					"URL":  data.URL,
 					"文件名":  data.FileName,
@@ -89,13 +89,13 @@ func newLocalCmd() *cobra.Command {
 			if _, err := os.Stat(path); err != nil {
 				return err
 			}
-			lib.Configs.Cores[len(lib.Configs.Cores)] = lib.Core{
-				ID:       len(lib.Configs.Cores),
+			configs.Configs.Cores[len(configs.Configs.Cores)] = configs.Core{
+				ID:       len(configs.Configs.Cores),
 				URL:      "unknown",
 				FileName: filepath.Base(path),
 				FilePath: path,
 			}
-			return lib.Configs.Save()
+			return configs.Configs.Save()
 		},
 	}
 	cmd.Flags().StringVarP(&path, "path", "p", "", "核心的路径")
@@ -119,17 +119,17 @@ func newRemoteCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			path, err := lib.NewDownloader(*URL).Download()
+			path, err := configs.NewDownloader(*URL).Download()
 			if err != nil {
 				return err
 			}
-			lib.Configs.Cores[len(lib.Configs.Cores)] = lib.Core{
-				ID:       len(lib.Configs.Cores),
+			configs.Configs.Cores[len(configs.Configs.Cores)] = configs.Core{
+				ID:       len(configs.Configs.Cores),
 				URL:      URL.String(),
 				FileName: filepath.Base(path),
 				FilePath: path,
 			}
-			return lib.Configs.Save()
+			return configs.Configs.Save()
 		},
 	}
 	cmd.Flags().StringVarP(&URL, "url", "u", "", "核心的URL")
@@ -160,8 +160,8 @@ func newFastMirrorCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			lib.Configs.Cores[len(lib.Configs.Cores)] = lib.Core{
-				ID:       len(lib.Configs.Cores),
+			configs.Configs.Cores[len(configs.Configs.Cores)] = configs.Core{
+				ID:       len(configs.Configs.Cores),
 				URL:      downloader.URL.String(),
 				FileName: downloader.FileName,
 				FilePath: path,
@@ -171,7 +171,7 @@ func newFastMirrorCmd() *cobra.Command {
 					"build_version": flags.buildVersion,
 				},
 			}
-			return lib.Configs.Save()
+			return configs.Configs.Save()
 		},
 	}
 	cmd.AddCommand(newListFastMirrorCmd())
@@ -272,13 +272,13 @@ func newPolarsCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			downloader := lib.NewDownloader(*URL)
+			downloader := configs.NewDownloader(*URL)
 			path, err := downloader.Download()
 			if err != nil {
 				return err
 			}
-			lib.Configs.Cores[len(lib.Configs.Cores)] = lib.Core{
-				ID:       len(lib.Configs.Cores),
+			configs.Configs.Cores[len(configs.Configs.Cores)] = configs.Core{
+				ID:       len(configs.Configs.Cores),
 				URL:      URL.String(),
 				FileName: downloader.FileName,
 				FilePath: path,
@@ -287,7 +287,7 @@ func newPolarsCmd() *cobra.Command {
 					"core_id": coreID,
 				},
 			}
-			return lib.Configs.Save()
+			return configs.Configs.Save()
 		},
 	}
 	cmd.AddCommand(newListPolarsCmd())

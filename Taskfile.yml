@@ -1,9 +1,5 @@
 version: 3
 
-env:
-  GO111MODULE: on
-  GOPROXY: https://proxy.golang.org,direct
-
 tasks:
   setup:
     desc: 下载依赖
@@ -13,7 +9,7 @@ tasks:
   run:
     desc: 构建
     cmds:
-      - go run . {{.CLI_ARGS}}
+      - go run ./cmd/MCST {{.CLI_ARGS}}
 
   build:
     desc: 构建

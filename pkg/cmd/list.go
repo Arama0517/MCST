@@ -21,44 +21,35 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"os/exec"
-	"path/filepath"
 
-	"github.com/Arama0517/MCST/pkg/lib"
+	"github.com/Arama0517/MCST/internal/configs"
+	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )
 
-func newStartCmd() *cobra.Command {
-	var name string
-	cmd := &cobra.Command{
-		Use:               "start",
-		Short:             "启动服务器",
-		Long:              "使用在 '.config/MCST/config.json' 存放的配置启动服务器",
+func newListCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:               "list",
+		Short:             "列出服务器",
+		Long:              "列出所有服务器的名称",
 		SilenceUsage:      true,
 		SilenceErrors:     true,
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(*cobra.Command, []string) error {
-			config, exists := lib.Configs.Servers[name]
-			if !exists {
-				return ErrServerNotFound
+			if _, err := fmt.Fprintln(os.Stderr, "已创建的服务器:"); err != nil {
+				return err
 			}
-			cmd := exec.Command(config.Java.Path)
-			cmd.Dir = filepath.Join(lib.ServersDir, config.Name)
-			cmd.Args = append(cmd.Args,
-				fmt.Sprintf("-Xms%d", config.Java.Xms),
-				fmt.Sprintf("-Xmx%d", config.Java.Xmx),
-				fmt.Sprintf("-Dfile.encoding=%s", config.Java.Encoding))
-			cmd.Args = append(cmd.Args, config.Java.Args...)
-			cmd.Args = append(cmd.Args, "-jar", "server.jar")
-			cmd.Args = append(cmd.Args, config.ServerArgs...)
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			cmd.Stdin = os.Stdin
-			return cmd.Run()
+			for _, config := range configs.Configs.Servers {
+				log.WithFields(log.Fields{
+					"服务器编码":     config.Java.Encoding,
+					"JVM初始堆内存":  config.Java.Xms,
+					"JVM最大堆内存":  config.Java.Xmx,
+					"Java虚拟机参数": config.Java.Args,
+					"服务器参数":     config.ServerArgs,
+				})
+			}
+			return nil
 		},
 	}
-	cmd.Flags().StringVarP(&name, "name", "n", "", "服务器名称")
-	_ = cmd.MarkFlagRequired("name")
-	return cmd
 }

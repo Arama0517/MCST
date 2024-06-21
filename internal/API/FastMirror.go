@@ -27,12 +27,13 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/Arama0517/MCST/pkg/lib"
+	"github.com/Arama0517/MCST/internal/configs"
+	"github.com/Arama0517/MCST/internal/requests"
 )
 
 func GetFastMirrorData() (map[string]FastMirrorData, error) {
 	var err error
-	resp, err := lib.Request(url.URL{
+	resp, err := requests.Request(url.URL{
 		Scheme: "https",
 		Host:   "download.fastmirror.net",
 		Path:   "/api/v3",
@@ -41,7 +42,7 @@ func GetFastMirrorData() (map[string]FastMirrorData, error) {
 		return nil, err
 	}
 	var data struct {
-		Data []FastMirrorData `json:"data"`
+		Data []FastMirrorData `json:"configs"`
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -61,7 +62,7 @@ func GetFastMirrorData() (map[string]FastMirrorData, error) {
 }
 
 func GetFastMirrorBuildsData(core string, minecraftVersion string) (map[string]FastMirrorBuilds, error) {
-	resp, err := lib.Request(url.URL{
+	resp, err := requests.Request(url.URL{
 		Scheme:   "https",
 		Host:     "download.fastmirror.net",
 		Path:     "/api/v3/" + core + "/" + minecraftVersion,
@@ -73,7 +74,7 @@ func GetFastMirrorBuildsData(core string, minecraftVersion string) (map[string]F
 	var data struct {
 		Data struct {
 			Builds []FastMirrorBuilds `json:"builds"`
-		} `json:"data"`
+		} `json:"configs"`
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -94,8 +95,8 @@ func GetFastMirrorBuildsData(core string, minecraftVersion string) (map[string]F
 	return parseData, nil
 }
 
-func GetFastMirrorDownloader(core, minecraftVersion, buildVersion string) *lib.Downloader {
-	return lib.NewDownloader(url.URL{
+func GetFastMirrorDownloader(core, minecraftVersion, buildVersion string) *configs.Downloader {
+	return configs.NewDownloader(url.URL{
 		Scheme: "https",
 		Host:   "download.fastmirror.net",
 		Path:   fmt.Sprintf("/download/%s/%s/%s", core, minecraftVersion, buildVersion),

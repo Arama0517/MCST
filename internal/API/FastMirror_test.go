@@ -23,12 +23,11 @@ import (
 	"testing"
 
 	api "github.com/Arama0517/MCST/internal/API"
-	"github.com/Arama0517/MCST/pkg/lib"
-	goversion "github.com/caarlos0/go-version"
+	"github.com/Arama0517/MCST/internal/configs"
 )
 
 func TestFastMirror(t *testing.T) {
-	if err := lib.Init(goversion.GetVersionInfo()); err != nil {
+	if err := configs.InitData(); err != nil {
 		t.Fatal(err)
 	}
 	data, err := api.GetFastMirrorData()
@@ -43,7 +42,7 @@ func TestFastMirror(t *testing.T) {
 }
 
 func TestFastMirrorBuilds(t *testing.T) {
-	if err := lib.Init(goversion.GetVersionInfo()); err != nil {
+	if err := configs.InitData(); err != nil {
 		t.Fatal(err)
 	}
 	data, err := api.GetFastMirrorData()

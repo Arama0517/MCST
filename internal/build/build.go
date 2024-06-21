@@ -16,15 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package main
+package build
 
 import (
 	_ "embed"
 	"net/url"
-	"os"
 
-	"github.com/Arama0517/MCST/cmd"
-	"github.com/apex/log"
 	goversion "github.com/caarlos0/go-version"
 )
 
@@ -36,24 +33,18 @@ var (
 	builtBy   = ""
 )
 
-func main() {
-	if err := cmd.Execute(os.Args[1:], buildVersion(version, commit, treeState, date, builtBy)); err != nil {
-		log.WithError(err).Fatal("错误")
-		os.Exit(1)
-	}
-	log.Info("成功")
-}
-
 //go:embed art.txt
 var asciiArt string
 
-func buildVersion(version, commit, date, builtBy, treeState string) goversion.Info {
+var Version goversion.Info
+
+func init() {
 	URL := url.URL{
 		Scheme: "https",
 		Host:   "github.com",
 		Path:   "/Arama0517/MCST",
 	}
-	return goversion.GetVersionInfo(
+	Version = goversion.GetVersionInfo(
 		goversion.WithAppDetails("MCServerTool", "A command-line utility making Minecraft server creation quick and easy for beginners.", URL.String()),
 		goversion.WithASCIIName(asciiArt),
 		func(i *goversion.Info) {

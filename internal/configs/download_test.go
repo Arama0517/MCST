@@ -16,15 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package lib_test
+package configs_test
 
 import (
 	"net/url"
 	"os"
 	"testing"
 
-	"github.com/Arama0517/MCST/pkg/lib"
-	goversion "github.com/caarlos0/go-version"
+	"github.com/Arama0517/MCST/internal/configs"
 )
 
 var URL = url.URL{ // https://ash-speed.hetzner.com/100MB.bin
@@ -37,11 +36,11 @@ func TestDownload(t *testing.T) {
 	if testing.Short() {
 		t.Skip("跳过下载")
 	}
-	if err := lib.Init(goversion.GetVersionInfo()); err != nil {
+	if err := configs.InitData(); err != nil {
 		t.Fatal(err)
 	}
-	lib.Configs.Aria2c.Enabled = false
-	path, err := lib.NewDownloader(URL).Download()
+	configs.Configs.Aria2c.Enabled = false
+	path, err := configs.NewDownloader(URL).Download()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,11 +54,11 @@ func TestAria2Download(t *testing.T) {
 	if testing.Short() {
 		t.Skip("跳过下载")
 	}
-	if err := lib.Init(goversion.GetVersionInfo()); err != nil {
+	if err := configs.InitData(); err != nil {
 		t.Fatal(err)
 	}
-	lib.Configs.Aria2c.Enabled = true
-	path, err := lib.NewDownloader(URL).Download()
+	configs.Configs.Aria2c.Enabled = true
+	path, err := configs.NewDownloader(URL).Download()
 	if err != nil {
 		t.Fatal(err)
 	}

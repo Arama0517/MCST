@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package lib
+package configs
 
 import (
 	"context"
@@ -33,6 +33,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Arama0517/MCST/internal/build"
+	"github.com/Arama0517/MCST/internal/requests"
 	"github.com/schollz/progressbar/v3"
 	"github.com/ybbus/jsonrpc/v3"
 )
@@ -49,7 +51,7 @@ type Downloader struct {
 
 func (d *Downloader) Download() (string, error) {
 	// 检测是否已下载
-	resp, err := Request(d.URL, http.MethodGet, nil, nil)
+	resp, err := requests.Request(d.URL, http.MethodGet, nil, nil)
 	if err != nil {
 		return "", err
 	}
@@ -130,7 +132,7 @@ func (d *Downloader) aria2cDownload() error {
 	cmd := exec.Command(d.aria2Path)
 	cmd.Args = append(cmd.Args,
 		"--dir="+DownloadsDir,
-		fmt.Sprintf("--user-agent=MCST/%s", version.GitVersion),
+		fmt.Sprintf("--user-agent=MCST/%s", build.Version.GitVersion),
 		"--allow-overwrite=true",
 		"--auto-file-renaming=false",
 		fmt.Sprintf("--retry-wait=%d", Configs.Aria2c.RetryWait),

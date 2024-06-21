@@ -19,13 +19,13 @@
 package cmd
 
 import (
-	"github.com/Arama0517/MCST/pkg/lib"
+	"github.com/Arama0517/MCST/internal/configs"
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )
 
 func newSettingsCmd() *cobra.Command {
-	var flags lib.Config
+	var flags configs.Config
 	cmd := &cobra.Command{
 		Use:               "settings",
 		Short:             "设置",
@@ -35,21 +35,21 @@ func newSettingsCmd() *cobra.Command {
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if cmd.Flags().Changed("aria2-enabled") {
-				lib.Configs.Aria2c.Enabled = flags.Aria2c.Enabled
+				configs.Configs.Aria2c.Enabled = flags.Aria2c.Enabled
 			}
 			if cmd.Flags().Changed("aria2-retry-wait") {
-				lib.Configs.Aria2c.RetryWait = flags.Aria2c.RetryWait
+				configs.Configs.Aria2c.RetryWait = flags.Aria2c.RetryWait
 			}
 			if cmd.Flags().Changed("aria2-split") {
-				lib.Configs.Aria2c.Split = flags.Aria2c.Split
+				configs.Configs.Aria2c.Split = flags.Aria2c.Split
 			}
 			if cmd.Flags().Changed("aria2-max-connection-per-server") {
-				lib.Configs.Aria2c.MaxConnectionPerServer = flags.Aria2c.MaxConnectionPerServer
+				configs.Configs.Aria2c.MaxConnectionPerServer = flags.Aria2c.MaxConnectionPerServer
 			}
 			if cmd.Flags().Changed("auto-accept-eula") {
-				lib.Configs.AutoAcceptEULA = flags.AutoAcceptEULA
+				configs.Configs.AutoAcceptEULA = flags.AutoAcceptEULA
 			}
-			if err := lib.Configs.Save(); err != nil {
+			if err := configs.Configs.Save(); err != nil {
 				return err
 			}
 			log.Info("设置成功")

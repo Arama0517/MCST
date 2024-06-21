@@ -22,7 +22,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Arama0517/MCST/pkg/lib"
+	"github.com/Arama0517/MCST/internal/configs"
 	"github.com/apex/log"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/spf13/cobra"
@@ -50,14 +50,14 @@ func newConfigCmd() *cobra.Command {
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			config, exists := lib.Configs.Servers[flags.name]
+			config, exists := configs.Configs.Servers[flags.name]
 			if !exists {
 				return ErrServerNotFound
 			}
 			cmdFlags := cmd.Flags()
 			if flags.delete {
-				delete(lib.Configs.Servers, flags.name)
-				if err := os.RemoveAll(filepath.Join(lib.ServersDir, flags.name)); err != nil {
+				delete(configs.Configs.Servers, flags.name)
+				if err := os.RemoveAll(filepath.Join(configs.ServersDir, flags.name)); err != nil {
 					return err
 				}
 				log.Info("删除服务器成功")

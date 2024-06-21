@@ -27,11 +27,11 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/Arama0517/MCST/pkg/lib"
+	"github.com/Arama0517/MCST/internal/requests"
 )
 
 func GetPolarsData() (map[string]PolarsData, error) {
-	resp, err := lib.Request(url.URL{
+	resp, err := requests.Request(url.URL{
 		Scheme: "https",
 		Host:   "mirror.polars.cc",
 		Path:   "/api/query/minecraft/core",
@@ -60,7 +60,7 @@ func GetPolarsData() (map[string]PolarsData, error) {
 }
 
 func GetPolarsCoresData(id int) (map[int]PolarsCores, error) {
-	resp, err := lib.Request(url.URL{
+	resp, err := requests.Request(url.URL{
 		Scheme: "https",
 		Host:   "mirror.polars.cc",
 		Path:   fmt.Sprintf("/api/query/minecraft/core/%d", id),

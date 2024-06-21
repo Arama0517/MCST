@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Arama0517/MCST/pkg/lib"
+	"github.com/Arama0517/MCST/internal/configs"
 	"github.com/apex/log"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/spf13/cobra"
@@ -61,9 +61,9 @@ func newCreateCmd() *cobra.Command {
 				return ErrEulaRequired
 			}
 			var err error
-			var config lib.Server
+			var config configs.Server
 			config.Name = flags.name
-			for name := range lib.Configs.Servers {
+			for name := range configs.Configs.Servers {
 				if name == flags.name {
 					return ErrServerExists
 				}
@@ -96,20 +96,20 @@ func newCreateCmd() *cobra.Command {
 			config.Java.Path = flags.java
 			config.Java.Args = flags.jvmArgs
 			config.ServerArgs = flags.serverArgs
-			if flags.core < 0 || flags.core > len(lib.Configs.Cores) {
+			if flags.core < 0 || flags.core > len(configs.Configs.Cores) {
 				return ErrCoreNotFound
 			}
-			lib.Configs.Servers[config.Name] = config
+			configs.Configs.Servers[config.Name] = config
 
 			// EULA 部分
 			EULAFileData := fmt.Sprintf(`# Create By Minecraft Server Tool
 # By changing the setting below to TRUE you are indicating your agreement to Minecraft EULA(<https://aka.ms/MinecraftEULA/>).
 # %s
 eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
-			if err := os.MkdirAll(filepath.Join(lib.ServersDir, config.Name), 0o755); err != nil {
+			if err := os.MkdirAll(filepath.Join(configs.ServersDir, config.Name), 0o755); err != nil {
 				return err
 			}
-			EULAFile, err := os.Open(filepath.Join(lib.ServersDir, config.Name, "eula.txt"))
+			EULAFile, err := os.Open(filepath.Join(configs.ServersDir, config.Name, "eula.txt"))
 			if err != nil {
 				return err
 			}
@@ -121,18 +121,18 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
 			}
 
 			// 保存
-			srcFile, err := os.Open(lib.Configs.Cores[flags.core].FilePath)
+			srcFile, err := os.Open(configs.Configs.Cores[flags.core].FilePath)
 			if err != nil {
 				return err
 			}
-			dstFile, err := os.Create(filepath.Join(lib.ServersDir, config.Name, "server.jar"))
+			dstFile, err := os.Create(filepath.Join(configs.ServersDir, config.Name, "server.jar"))
 			if err != nil {
 				return err
 			}
 			if _, err = io.Copy(dstFile, srcFile); err != nil {
 				return err
 			}
-			if err := os.Chmod(filepath.Join(lib.ServersDir, config.Name, "server.jar"), 0o755); err != nil {
+			if err := os.Chmod(filepath.Join(configs.ServersDir, config.Name, "server.jar"), 0o755); err != nil {
 				return err
 			}
 			if err := srcFile.Close(); err != nil {
@@ -141,7 +141,7 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
 			if err := dstFile.Close(); err != nil {
 				return err
 			}
-			if err := lib.Configs.Save(); err != nil {
+			if err := configs.Configs.Save(); err != nil {
 				return err
 			}
 			log.Info("保存成功")
@@ -157,7 +157,7 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
 	cmd.Flags().StringSliceVar(&flags.serverArgs, "server_args", []string{"--nogui"}, "Minecraft服务器参数")
 	cmd.Flags().IntVarP(&flags.core, "core", "c", 0, "使用的核心ID")
 	cmd.Flags().BoolVar(&flags.eula, "eula", false, "是否同意EULA协议(https://aka.ms/MinecraftEULA/)")
-	if !lib.Configs.AutoAcceptEULA {
+	if !configs.Configs.AutoAcceptEULA {
 		_ = cmd.MarkFlagRequired("eula")
 	} else {
 		flags.eula = true
