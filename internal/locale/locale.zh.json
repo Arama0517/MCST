@@ -1,0 +1,35 @@
+{
+  "create.short": {
+    "other": "创建服务器"
+  },
+  "create.long": {
+    "other": "如果你还未下载任何核心, 请使用 'MCST download' 下载核心"
+  },
+  "create.flags.name": {
+    "other": "服务器名称"
+  },
+  "create.flags.xms": {
+    "other": "Java虚拟机(JVM)初始堆内存"
+  },
+  "create.flags.xmx": {
+    "other": "Java虚拟机(JVM)最大堆内存"
+  },
+  "create.flags.encoding": {
+    "other": "输出编码"
+  } ,
+  "create.flags.java": {
+    "other": "Java可执行文件的路径"
+  },
+  "create.flags.jvm_args": {
+    "other": "Java虚拟机(JVM)其他参数"
+  },
+  "create.flags.server_args": {
+    "other": "Minecraft服务器参数"
+  },
+  "create.flags.core": {
+    "other": "核心ID, 使用'MCST download list'查看所有核心的ID"
+  },
+  "create.flags.eula": {
+    "other": "是否同意EULA协议 <https://aka.ms/MinecraftEULA/>"
+  }
+}

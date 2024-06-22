@@ -20,20 +20,26 @@ package cmd
 
 import (
 	"github.com/Arama0517/MCST/internal/build"
+	"github.com/Arama0517/MCST/internal/configs"
+	"github.com/Arama0517/MCST/internal/locale"
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
 	"github.com/spf13/cobra"
 )
 
-func Execute(args []string, exit func(code int)) error {
+func Execute(args []string, exit func(code int)) {
 	log.SetHandler(cli.Default)
+	if err := configs.InitData(); err != nil {
+		log.WithError(err).Fatal("初始化失败")
+		exit(1)
+	}
+	locale.InitLocale()
 	cmd := newRootCmd()
 	cmd.SetArgs(args)
 	if err := cmd.Execute(); err != nil {
 		log.WithError(err).Error("出现错误!")
-		exit(1)
+		exit(2)
 	}
-	return nil
 }
 
 func newRootCmd() *cobra.Command {

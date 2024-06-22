@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package configs
+package requests
 
 import (
 	"context"
@@ -34,7 +34,7 @@ import (
 	"time"
 
 	"github.com/Arama0517/MCST/internal/build"
-	"github.com/Arama0517/MCST/internal/requests"
+	"github.com/Arama0517/MCST/internal/configs"
 	"github.com/schollz/progressbar/v3"
 	"github.com/ybbus/jsonrpc/v3"
 )
@@ -51,18 +51,18 @@ type Downloader struct {
 
 func (d *Downloader) Download() (string, error) {
 	// 检测是否已下载
-	resp, err := requests.Request(d.URL, http.MethodGet, nil, nil)
+	resp, err := Request(d.URL, http.MethodGet, nil, nil)
 	if err != nil {
 		return "", err
 	}
-	path := filepath.Join(DownloadsDir, d.FileName)
+	path := filepath.Join(configs.DownloadsDir, d.FileName)
 	if _, err := os.Stat(path); err == nil {
 		return path, nil
 	}
 	d.getFileName(resp.Header)
 
 	// Aria2 多线程下载
-	if Configs.Aria2c.Enabled {
+	if configs.Configs.Aria2c.Enabled {
 		aria2cName := "aria2c"
 		if runtime.GOOS == "windows" {
 			aria2cName = "aria2c.exe"
@@ -99,7 +99,7 @@ func (d *Downloader) Download() (string, error) {
 				return
 			}
 		}))
-	file, err := os.Create(filepath.Join(DownloadsDir, d.FileName))
+	file, err := os.Create(filepath.Join(configs.DownloadsDir, d.FileName))
 	if err != nil {
 		return "", err
 	}
@@ -131,14 +131,14 @@ type downloadStatus struct {
 func (d *Downloader) aria2cDownload() error {
 	cmd := exec.Command(d.aria2Path)
 	cmd.Args = append(cmd.Args,
-		"--dir="+DownloadsDir,
+		"--dir="+configs.DownloadsDir,
 		fmt.Sprintf("--user-agent=MCST/%s", build.Version.GitVersion),
 		"--allow-overwrite=true",
 		"--auto-file-renaming=false",
-		fmt.Sprintf("--retry-wait=%d", Configs.Aria2c.RetryWait),
-		fmt.Sprintf("--split=%d", Configs.Aria2c.Split),
-		fmt.Sprintf("--max-connection-per-server=%d", Configs.Aria2c.MaxConnectionPerServer),
-		fmt.Sprintf("--min-split-size=%s", Configs.Aria2c.MinSplitSize),
+		fmt.Sprintf("--retry-wait=%d", configs.Configs.Aria2c.RetryWait),
+		fmt.Sprintf("--split=%d", configs.Configs.Aria2c.Split),
+		fmt.Sprintf("--max-connection-per-server=%d", configs.Configs.Aria2c.MaxConnectionPerServer),
+		fmt.Sprintf("--min-split-size=%s", configs.Configs.Aria2c.MinSplitSize),
 		"--enable-rpc",
 		// "--console-log-level=error",
 		"--quiet",
@@ -151,7 +151,7 @@ func (d *Downloader) aria2cDownload() error {
 		"--summary-interval=0",
 		"--auto-save-interval=1",
 	)
-	cmd.Args = append(cmd.Args, Configs.Aria2c.Option...)
+	cmd.Args = append(cmd.Args, configs.Configs.Aria2c.Option...)
 	if err := cmd.Start(); err != nil {
 		return err
 	}

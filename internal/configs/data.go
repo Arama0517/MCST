@@ -22,6 +22,8 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+
+	"golang.org/x/text/language"
 )
 
 var Configs Config
@@ -30,7 +32,7 @@ var (
 	rootDir      string
 	ServersDir   string
 	DownloadsDir string
-	ConfigsPath  string
+	configsPath  string
 )
 
 type Core struct {
@@ -68,6 +70,7 @@ type Config struct {
 	Servers        map[string]Server `json:"servers"`          // 服务器列表, 如果服务器名称(key)为temp, CreatePage调用时会视为暂存配置而不是名为temp的服务器
 	Aria2c         Aria2c            `json:"aria2c"`           // aria2c配置
 	AutoAcceptEULA bool              `json:"auto_accept_eula"` // 是否自动同意EULA
+	Language       language.Tag      `json:"language"`
 }
 
 func InitData() error {
@@ -78,7 +81,7 @@ func InitData() error {
 	rootDir = filepath.Join(UserHomeDir, ".config", "MCST")
 	ServersDir = filepath.Join(rootDir, "servers")
 	DownloadsDir = filepath.Join(rootDir, "downloads")
-	ConfigsPath = filepath.Join(rootDir, "configs.json")
+	configsPath = filepath.Join(rootDir, "configs.json")
 
 	// 初始化
 	if _, err := os.Stat(rootDir); os.IsNotExist(err) {
@@ -102,18 +105,19 @@ func InitData() error {
 				MinSplitSize:           "5M",
 			},
 			AutoAcceptEULA: false,
+			Language:       language.English,
 		}, "", "    ")
 		if err != nil {
 			return err
 		}
-		if err := os.WriteFile(ConfigsPath, jsonData, 0o644); err != nil {
+		if err := os.WriteFile(configsPath, jsonData, 0o644); err != nil {
 			return err
 		}
 	} else if err != nil {
 		return err
 	}
 
-	file, err := os.ReadFile(ConfigsPath)
+	file, err := os.ReadFile(configsPath)
 	if err != nil {
 		return err
 	}
@@ -128,5 +132,5 @@ func (c *Config) Save() error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(ConfigsPath, configs, 0o644)
+	return os.WriteFile(configsPath, configs, 0o644)
 }

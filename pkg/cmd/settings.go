@@ -19,13 +19,17 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/Arama0517/MCST/internal/configs"
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
+	"golang.org/x/text/language"
 )
 
 func newSettingsCmd() *cobra.Command {
 	var flags configs.Config
+	var Language string
 	cmd := &cobra.Command{
 		Use:               "settings",
 		Short:             "设置",
@@ -49,6 +53,16 @@ func newSettingsCmd() *cobra.Command {
 			if cmd.Flags().Changed("auto-accept-eula") {
 				configs.Configs.AutoAcceptEULA = flags.AutoAcceptEULA
 			}
+			if cmd.Flags().Changed("Language") {
+				switch Language {
+				case "en":
+					configs.Configs.Language = language.English
+				case "zh":
+					configs.Configs.Language = language.Chinese
+				default:
+					fmt.Println("尚未支持该语言...")
+				}
+			}
 			if err := configs.Configs.Save(); err != nil {
 				return err
 			}
@@ -61,5 +75,6 @@ func newSettingsCmd() *cobra.Command {
 	cmd.Flags().IntVar(&flags.Aria2c.Split, "aria2-split", 0, "Number of connections used for download.")
 	cmd.Flags().IntVar(&flags.Aria2c.MaxConnectionPerServer, "aria2-max-connection-per-server", 0, "The maximum number of connections to one server for each download.")
 	cmd.Flags().BoolVar(&flags.AutoAcceptEULA, "auto-accept-eula", false, "自动同意EULA")
+	cmd.Flags().StringVar(&Language, "Language", "", "语言")
 	return cmd
 }

@@ -27,7 +27,6 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/Arama0517/MCST/internal/configs"
 	"github.com/Arama0517/MCST/internal/requests"
 )
 
@@ -95,8 +94,8 @@ func GetFastMirrorBuildsData(core string, minecraftVersion string) (map[string]F
 	return parseData, nil
 }
 
-func GetFastMirrorDownloader(core, minecraftVersion, buildVersion string) *configs.Downloader {
-	return configs.NewDownloader(url.URL{
+func GetFastMirrorDownloader(core, minecraftVersion, buildVersion string) *requests.Downloader {
+	return requests.NewDownloader(url.URL{
 		Scheme: "https",
 		Host:   "download.fastmirror.net",
 		Path:   fmt.Sprintf("/download/%s/%s/%s", core, minecraftVersion, buildVersion),

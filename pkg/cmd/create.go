@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/Arama0517/MCST/internal/configs"
+	"github.com/Arama0517/MCST/internal/locale"
 	"github.com/apex/log"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/spf13/cobra"
@@ -48,10 +49,9 @@ type createCmdFlags struct {
 func newCreateCmd() *cobra.Command {
 	flags := createCmdFlags{}
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "创建服务器",
-		Long: `如果你还未下载任何核心, 请使用 'MCST download' 下载核心
-必须指定--name, --java, --core`,
+		Use:               "create",
+		Short:             locale.GetLocaleMessage("create.short"),
+		Long:              locale.GetLocaleMessage("create.long"),
 		SilenceUsage:      true,
 		SilenceErrors:     true,
 		Args:              cobra.NoArgs,
@@ -148,16 +148,16 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
 			return nil
 		},
 	}
-	cmd.Flags().StringVarP(&flags.name, "name", "n", "", "服务器名称")
-	cmd.Flags().StringVar(&flags.xms, "xms", "1G", "Java虚拟机初始堆内存")
-	cmd.Flags().StringVar(&flags.xmx, "xmx", "1G", "Java虚拟机最大堆内存")
-	cmd.Flags().StringVarP(&flags.encoding, "encoding", "e", "UTF-8", "输出编码")
-	cmd.Flags().StringVarP(&flags.java, "java", "j", "", "使用的Java")
-	cmd.Flags().StringSliceVar(&flags.jvmArgs, "jvm_args", []string{"-Dlog4j2.formatMsgNoLookups=true"}, "Java虚拟机其他参数")
-	cmd.Flags().StringSliceVar(&flags.serverArgs, "server_args", []string{"--nogui"}, "Minecraft服务器参数")
-	cmd.Flags().IntVarP(&flags.core, "core", "c", 0, "使用的核心ID")
-	cmd.Flags().BoolVar(&flags.eula, "eula", false, "是否同意EULA协议(https://aka.ms/MinecraftEULA/)")
+	cmd.Flags().StringVarP(&flags.name, "name", "n", "", locale.GetLocaleMessage("create.flags.name"))
+	cmd.Flags().StringVar(&flags.xms, "xms", "1G", locale.GetLocaleMessage("create.flags.xms"))
+	cmd.Flags().StringVar(&flags.xmx, "xmx", "1G", locale.GetLocaleMessage("create.flags.xmx"))
+	cmd.Flags().StringVarP(&flags.encoding, "encoding", "e", "UTF-8", locale.GetLocaleMessage("create.flags.encoding"))
+	cmd.Flags().StringVarP(&flags.java, "java", "j", "", locale.GetLocaleMessage("create.flags.java"))
+	cmd.Flags().StringSliceVar(&flags.jvmArgs, "jvm_args", []string{"-Dlog4j2.formatMsgNoLookups=true"}, locale.GetLocaleMessage("create.flags.jvm_args"))
+	cmd.Flags().StringSliceVar(&flags.serverArgs, "server_args", []string{"--nogui"}, locale.GetLocaleMessage("create.flags.server_args"))
+	cmd.Flags().IntVarP(&flags.core, "core", "c", 0, locale.GetLocaleMessage("create.flags.core"))
 	if !configs.Configs.AutoAcceptEULA {
+		cmd.Flags().BoolVar(&flags.eula, "eula", false, locale.GetLocaleMessage("create.flags.eula"))
 		_ = cmd.MarkFlagRequired("eula")
 	} else {
 		flags.eula = true

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package configs_test
+package requests_test
 
 import (
 	"net/url"
@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/Arama0517/MCST/internal/configs"
+	"github.com/Arama0517/MCST/internal/requests"
 )
 
 var URL = url.URL{ // https://ash-speed.hetzner.com/100MB.bin
@@ -40,7 +41,7 @@ func TestDownload(t *testing.T) {
 		t.Fatal(err)
 	}
 	configs.Configs.Aria2c.Enabled = false
-	path, err := configs.NewDownloader(URL).Download()
+	path, err := requests.NewDownloader(URL).Download()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +59,7 @@ func TestAria2Download(t *testing.T) {
 		t.Fatal(err)
 	}
 	configs.Configs.Aria2c.Enabled = true
-	path, err := configs.NewDownloader(URL).Download()
+	path, err := requests.NewDownloader(URL).Download()
 	if err != nil {
 		t.Fatal(err)
 	}

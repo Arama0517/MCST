@@ -16,28 +16,38 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package main
+package locale
 
 import (
-	_ "embed"
-	"os"
+	"embed"
+	"encoding/json"
 
-	"github.com/Arama0517/MCST/pkg/cmd"
-	"github.com/apex/log"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/muesli/termenv"
-	"go.uber.org/automaxprocs/maxprocs"
+	"github.com/Arama0517/MCST/internal/configs"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 
-func init() {
-	if os.Getenv("CI") != "" {
-		lipgloss.SetColorProfile(termenv.TrueColor)
-	}
-	if _, err := maxprocs.Set(); err != nil {
-		log.WithError(err).Warn("failed to set GOMAXPROCS")
-	}
+var (
+	Bundle    *i18n.Bundle
+	Localizer *i18n.Localizer
+)
+
+//go:embed locale.*.json
+var localeFS embed.FS
+
+func InitLocale() {
+	Bundle = i18n.NewBundle(configs.Configs.Language)
+	Bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
+	_, _ = Bundle.LoadMessageFileFS(localeFS, "locale.en.json")
+	_, _ = Bundle.LoadMessageFileFS(localeFS, "locale.zh.json")
+	Localizer = i18n.NewLocalizer(Bundle)
 }
 
-func main() {
-	cmd.Execute(os.Args[1:], os.Exit)
+func GetLocaleMessage(messageID string) string {
+	str, err := Localizer.Localize(&i18n.LocalizeConfig{
+		MessageID: messageID,
+	})
+	if err != nil {
+		panic(err)
+	}
+	return str
 }

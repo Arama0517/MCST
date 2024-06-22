@@ -28,6 +28,7 @@ import (
 
 	api "github.com/Arama0517/MCST/internal/API"
 	"github.com/Arama0517/MCST/internal/configs"
+	"github.com/Arama0517/MCST/internal/requests"
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )
@@ -119,7 +120,7 @@ func newRemoteCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			path, err := configs.NewDownloader(*URL).Download()
+			path, err := requests.NewDownloader(*URL).Download()
 			if err != nil {
 				return err
 			}
@@ -272,7 +273,7 @@ func newPolarsCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			downloader := configs.NewDownloader(*URL)
+			downloader := requests.NewDownloader(*URL)
 			path, err := downloader.Download()
 			if err != nil {
 				return err

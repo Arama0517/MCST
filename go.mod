@@ -11,11 +11,13 @@ require (
 	github.com/muesli/mango-cobra v1.2.0
 	github.com/muesli/roff v0.1.0
 	github.com/muesli/termenv v0.15.2
+	github.com/nicksnyder/go-i18n/v2 v2.4.0
 	github.com/schollz/progressbar/v3 v3.14.4
 	github.com/shirou/gopsutil/v3 v3.24.5
 	github.com/spf13/cobra v1.8.1
 	github.com/ybbus/jsonrpc/v3 v3.1.5
 	go.uber.org/automaxprocs v1.5.3
+	golang.org/x/text v0.14.0
 )
 
 require (
