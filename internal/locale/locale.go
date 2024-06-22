@@ -20,10 +20,10 @@ package locale
 
 import (
 	"embed"
-	"encoding/json"
 
 	"github.com/Arama0517/MCST/internal/configs"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -31,23 +31,26 @@ var (
 	Localizer *i18n.Localizer
 )
 
-//go:embed locale.*.json
+//go:embed locale.*.yaml
 var localeFS embed.FS
 
 func InitLocale() {
 	Bundle = i18n.NewBundle(configs.Configs.Language)
-	Bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
-	_, _ = Bundle.LoadMessageFileFS(localeFS, "locale.en.json")
-	_, _ = Bundle.LoadMessageFileFS(localeFS, "locale.zh.json")
+	Bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
+	files, err := localeFS.ReadDir(".")
+	if err != nil {
+		panic(err)
+	}
+	for _, f := range files {
+		_, _ = Bundle.LoadMessageFileFS(localeFS, f.Name())
+	}
 	Localizer = i18n.NewLocalizer(Bundle)
 }
 
 func GetLocaleMessage(messageID string) string {
-	str, err := Localizer.Localize(&i18n.LocalizeConfig{
-		MessageID: messageID,
-	})
+	msg, err := Localizer.Localize(&i18n.LocalizeConfig{MessageID: messageID})
 	if err != nil {
 		panic(err)
 	}
-	return str
+	return msg
 }

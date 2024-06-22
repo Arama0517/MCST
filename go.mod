@@ -18,6 +18,7 @@ require (
 	github.com/ybbus/jsonrpc/v3 v3.1.5
 	go.uber.org/automaxprocs v1.5.3
 	golang.org/x/text v0.14.0
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (

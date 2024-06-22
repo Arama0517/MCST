@@ -53,7 +53,7 @@ func newSettingsCmd() *cobra.Command {
 			if cmd.Flags().Changed("auto-accept-eula") {
 				configs.Configs.AutoAcceptEULA = flags.AutoAcceptEULA
 			}
-			if cmd.Flags().Changed("Language") {
+			if cmd.Flags().Changed("language") {
 				switch Language {
 				case "en":
 					configs.Configs.Language = language.English
@@ -75,6 +75,6 @@ func newSettingsCmd() *cobra.Command {
 	cmd.Flags().IntVar(&flags.Aria2c.Split, "aria2-split", 0, "Number of connections used for download.")
 	cmd.Flags().IntVar(&flags.Aria2c.MaxConnectionPerServer, "aria2-max-connection-per-server", 0, "The maximum number of connections to one server for each download.")
 	cmd.Flags().BoolVar(&flags.AutoAcceptEULA, "auto-accept-eula", false, "自动同意EULA")
-	cmd.Flags().StringVar(&Language, "Language", "", "语言")
+	cmd.Flags().StringVar(&Language, "language", "", "语言")
 	return cmd
 }

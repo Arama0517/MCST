@@ -1,0 +1,104 @@
+# 创建服务器页面
+create.short:
+  other: 创建服务器
+create.long:
+  other: 如果你还未下载任何核心, 请使用 'MCST download' 下载核心
+create.flags.name:
+  other: 服务器名称
+create.flags.xms:
+  other: Java虚拟机(JVM)初始堆内存
+create.flags.xmx:
+  other: Java虚拟机(JVM)最大堆内存
+create.flags.encoding:
+  other: 输出编码
+create.flags.java:
+  other: Java可执行文件的路径
+create.flags.jvm_args:
+  other: Java虚拟机(JVM)其他参数
+create.flags.server_args:
+  other: Minecraft服务器参数
+create.flags.core:
+  other: 核心ID, 使用'MCST download list'查看所有核心的ID
+create.flags.eula:
+  other: 是否同意EULA协议 <https://aka.ms/MinecraftEULA/>
+
+# 下载核心页面
+download.short:
+  other: 下载核心
+download.long:
+  other: 从本地, 远程, 无极镜像或极星云镜像获取核心
+download.list:
+  other: 列出所有核心
+download.list.output.url:
+  other: URL
+download.list.output.filename:
+  other: 文件名
+download.list.output.filepath:
+  other: 文件路径
+download.local.short:
+  other: 本地
+download.local.long:
+  other: 从本地获取核心
+download.local.flags.path:
+  other: 核心的文件路径
+download.remote.short:
+  other: 远程
+download.remote.long:
+  other: 从指定的URL获取核心
+download.remote.flags.url:
+  other: 核心的下载URL
+download.fastmirror.short:
+  other: 无极镜像 <https://www.fastmirror.net/>
+download.fastmirror.long:
+  other: |-
+    从无极镜像获取核心
+    使用 'MCST download fastmirror list' 获取参数中所需的信息
+download.fastmirror.flags.core:
+  other: '核心的类别, 例如: "Mohist"'
+download.fastmirror.flags.mc_version:
+  other: '核心的Minecraft版本, 例如: "1.20.1"'
+download.fastmirror.flags.build_version:
+  other: '核心的构建版本, 例如: "build738"'
+download.fastmirror.list.short:
+  other: 获取无极镜像的核心信息
+download.fastmirror.list.long:
+  other: |-
+    使用此命令时拥有3种情况:
+    1. 不使用任何参数: 输出所有核心的名称
+    2. 仅使用 '--core': 输出在 '--core' 核心的支持的所有Minecraft版本
+    3. 使用 '--core' 和 '--mc_version': 输出此版本的所有构建版本
+download.fastmirror.list.output.recommend:
+  other: 推荐
+download.fastmirror.list.output.tag:
+  other: 标签
+download.fastmirror.list.output.homepage:
+  other: 主页
+download.fastmirror.list.output.sha1:
+  other: SHA1
+download.fastmirror.list.output.update_time:
+  other: 更新时间
+download.polars.short:
+  other: 极星云镜像 <https://mirror.polars.cc/>
+download.polars.long:
+  other: |-
+    从极星云镜像获取核心
+    使用 'MCST download polars list' 获取参数中所需的信息
+download.polars.flags.type_id:
+  other: 核心类型ID
+download.polars.flags.core_id:
+  other: 核心ID
+download.polars.output.file_name:
+  other: 核心文件名
+download.polars.output.download_url:
+  other: 核心下载链接
+download.polars.output.name:
+  other: 核心名称
+download.polars.output.description:
+  other: 核心描述
+download.polars.list.short:
+  other: 获取极星云镜像的核心信息
+download.polars.list.long:
+  other: |-
+    使用此命令时拥有2种情况:
+    1. 不使用任何参数: 输出所有核心的类型id
+    2. 使用 '--id': 输出此核心的所有核心ID(用于下载)

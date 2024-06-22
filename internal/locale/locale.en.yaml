@@ -1,0 +1,104 @@
+# Create server page
+create.short:
+  other: Create Server
+create.long:
+  other: If you haven't downloaded any core yet, use 'MCST download' to download a core.
+create.flags.name:
+  other: Server Name
+create.flags.xms:
+  other: Initial Java Virtual Machine (JVM) heap memory
+create.flags.xmx:
+  other: Maximum Java Virtual Machine (JVM) heap memory
+create.flags.encoding:
+  other: Output encoding
+create.flags.java:
+  other: Path to the Java executable
+create.flags.jvm_args:
+  other: Additional Java Virtual Machine (JVM) arguments
+create.flags.server_args:
+  other: Minecraft server arguments
+create.flags.core:
+  other: Core ID, use 'MCST download list' to see all core IDs
+create.flags.eula:
+  other: Agree to EULA <https://aka.ms/MinecraftEULA/>
+
+# Download core page
+download.short:
+  other: Download Core
+download.long:
+  other: Get a core from local, remote, FastMirror, or Polars
+download.list:
+  other: List all cores
+download.list.output.url:
+  other: URL
+download.list.output.filename:
+  other: Filename
+download.list.output.filepath:
+  other: File path
+download.local.short:
+  other: Local
+download.local.long:
+  other: Get core from local
+download.local.flags.path:
+  other: Path to the core file
+download.remote.short:
+  other: Remote
+download.remote.long:
+  other: Get core from specified URL
+download.remote.flags.url:
+  other: URL for core download
+download.fastmirror.short:
+  other: FastMirror <https://www.fastmirror.net/>
+download.fastmirror.long:
+  other: |
+    Get core from FastMirror
+    Use 'MCST download fastmirror list' to get required information for parameters
+download.fastmirror.flags.core:
+  other: 'Core category, e.g., "Mohist"'
+download.fastmirror.flags.mc_version:
+  other: 'Minecraft version of the core, e.g., "1.20.1"'
+download.fastmirror.flags.build_version:
+  other: 'Build version of the core, e.g., "build738"'
+download.fastmirror.list.short:
+  other: Get FastMirror core information
+download.fastmirror.list.long:
+  other: |
+    When using this command, you have 3 options:
+    1. Without any parameters: Output names of all cores
+    2. Only with '--core': Output all Minecraft versions supported by the '--core' core
+    3. With '--core' and '--mc_version': Output all build versions for this version
+download.fastmirror.list.output.recommend:
+  other: Recommend
+download.fastmirror.list.output.tag:
+  other: Tag
+download.fastmirror.list.output.homepage:
+  other: Homepage
+download.fastmirror.list.output.sha1:
+  other: SHA1
+download.fastmirror.list.output.update_time:
+  other: Update time
+download.polars.short:
+  other: Polars
+download.polars.long:
+  other: |
+    Get core from Polars
+    Use 'MCST download polars list' to get required information for parameters
+download.polars.flags.type_id:
+  other: Core type ID
+download.polars.flags.core_id:
+  other: Core ID
+download.polars.output.file_name:
+  other: Core filename
+download.polars.output.download_url:
+  other: Core download URL
+download.polars.output.name:
+  other: Core name
+download.polars.output.description:
+  other: Core description
+download.polars.list.short:
+  other: Get Polars core information
+download.polars.list.long:
+  other: |
+    When using this command, you have 2 options:
+    1. Without any parameters: Output type IDs of all cores
+    2. With '--id': Output all core IDs for this core (used for download)
