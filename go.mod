@@ -17,7 +17,7 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/ybbus/jsonrpc/v3 v3.1.5
 	go.uber.org/automaxprocs v1.5.3
-	golang.org/x/text v0.14.0
+	golang.org/x/text v0.16.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 

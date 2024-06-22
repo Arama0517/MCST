@@ -1,3 +1,9 @@
+root.short:
+  other: 一个命令行工具, 使初学者可以快速简便地创建 Minecraft 服务器.
+
+root.flags.debug:
+  other: 调试模式(更多的日志)
+
 # 创建服务器页面
 create.short:
   other: 创建服务器

@@ -1,3 +1,9 @@
+root.short:
+  other: A command-line utility making Minecraft server creation quick and easy for beginners.
+
+root.flags.debug:
+  other: Debug mode (more logs)
+
 # Create server page
 create.short:
   other: Create Server

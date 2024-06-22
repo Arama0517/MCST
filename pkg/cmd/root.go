@@ -46,7 +46,7 @@ func newRootCmd() *cobra.Command {
 	var verbose bool
 	cmd := &cobra.Command{
 		Use:               "MCST",
-		Short:             "A command-line utility making Minecraft server creation quick and easy for beginners.",
+		Short:             locale.GetLocaleMessage("root.short"),
 		Long:              build.Version.ASCIIName,
 		Version:           build.Version.String(),
 		SilenceUsage:      true,
@@ -64,7 +64,7 @@ func newRootCmd() *cobra.Command {
 		},
 	}
 	cmd.SetVersionTemplate("{{.Version}}")
-	cmd.PersistentFlags().BoolVar(&verbose, "debug", false, "调试模式(更多的日志)")
+	cmd.PersistentFlags().BoolVar(&verbose, "debug", false, locale.GetLocaleMessage("root.flags.debug"))
 	cmd.AddCommand(
 		newCreateCmd(),
 		newDownloadCmd(),
