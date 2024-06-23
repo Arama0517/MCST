@@ -23,6 +23,7 @@ import (
 	"os"
 
 	"github.com/Arama0517/MCST/internal/configs"
+	"github.com/Arama0517/MCST/internal/locale"
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )
@@ -30,8 +31,7 @@ import (
 func newListCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:               "list",
-		Short:             "列出服务器",
-		Long:              "列出所有服务器的名称",
+		Short:             locale.GetLocaleMessage("list"),
 		SilenceUsage:      true,
 		SilenceErrors:     true,
 		Args:              cobra.NoArgs,
@@ -42,12 +42,13 @@ func newListCmd() *cobra.Command {
 			}
 			for _, config := range configs.Configs.Servers {
 				log.WithFields(log.Fields{
-					"服务器编码":     config.Java.Encoding,
-					"JVM初始堆内存":  config.Java.Xms,
-					"JVM最大堆内存":  config.Java.Xmx,
-					"Java虚拟机参数": config.Java.Args,
-					"服务器参数":     config.ServerArgs,
-				})
+					locale.GetLocaleMessage("create.flags.xms"):         config.Java.Xms,
+					locale.GetLocaleMessage("create.flags.xmx"):         config.Java.Xmx,
+					locale.GetLocaleMessage("create.flags.encoding"):    config.Java.Encoding,
+					locale.GetLocaleMessage("create.flags.java"):        config.Java.Path,
+					locale.GetLocaleMessage("create.flags.jvm_args"):    config.Java.Args,
+					locale.GetLocaleMessage("create.flags.server_args"): config.ServerArgs,
+				}).Info(config.Name)
 			}
 			return nil
 		},

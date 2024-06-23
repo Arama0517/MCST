@@ -19,9 +19,8 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/Arama0517/MCST/internal/configs"
+	"github.com/Arama0517/MCST/internal/locale"
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/language"
@@ -32,7 +31,7 @@ func newSettingsCmd() *cobra.Command {
 	var Language string
 	cmd := &cobra.Command{
 		Use:               "settings",
-		Short:             "设置",
+		Short:             locale.GetLocaleMessage("settings"),
 		SilenceUsage:      true,
 		SilenceErrors:     true,
 		Args:              cobra.NoArgs,
@@ -60,21 +59,20 @@ func newSettingsCmd() *cobra.Command {
 				case "zh":
 					configs.Configs.Language = language.Chinese
 				default:
-					fmt.Println("尚未支持该语言...")
+					log.Warn(locale.GetLocaleMessage("settings.language.warning"))
 				}
 			}
 			if err := configs.Configs.Save(); err != nil {
 				return err
 			}
-			log.Info("设置成功")
 			return nil
 		},
 	}
-	cmd.Flags().BoolVar(&flags.Aria2c.Enabled, "aria2-enabled", false, "Aria2c will be used for downloading of artifacts.")
-	cmd.Flags().IntVar(&flags.Aria2c.RetryWait, "aria2-retry-wait", 0, "Number of seconds to wait between retries.")
-	cmd.Flags().IntVar(&flags.Aria2c.Split, "aria2-split", 0, "Number of connections used for download.")
-	cmd.Flags().IntVar(&flags.Aria2c.MaxConnectionPerServer, "aria2-max-connection-per-server", 0, "The maximum number of connections to one server for each download.")
-	cmd.Flags().BoolVar(&flags.AutoAcceptEULA, "auto-accept-eula", false, "自动同意EULA")
-	cmd.Flags().StringVar(&Language, "language", "", "语言")
+	cmd.Flags().BoolVar(&flags.Aria2c.Enabled, "aria2-enabled", false, locale.GetLocaleMessage("settings.aria2-enabled"))
+	cmd.Flags().IntVar(&flags.Aria2c.RetryWait, "aria2-retry-wait", 0, locale.GetLocaleMessage("settings.aria2-retry-wait"))
+	cmd.Flags().IntVar(&flags.Aria2c.Split, "aria2-split", 0, locale.GetLocaleMessage("settings.aria2-split"))
+	cmd.Flags().IntVar(&flags.Aria2c.MaxConnectionPerServer, "aria2-max-connection-per-server", 0, locale.GetLocaleMessage("settings.aria2-max-connection-per-server"))
+	cmd.Flags().BoolVar(&flags.AutoAcceptEULA, "auto-accept-eula", false, locale.GetLocaleMessage("settings.auto-accept-eula"))
+	cmd.Flags().StringVar(&Language, "language", "", locale.GetLocaleMessage("settings.language"))
 	return cmd
 }

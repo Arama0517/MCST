@@ -118,3 +118,43 @@ config.flags.name:
   other: Server Name (not a configuration option)
 config.flags.delete:
   other: Delete Server (Irreversible)
+
+# Start Server Page
+start.short:
+  other: Start Server
+start.long:
+  other: If you haven't created a server yet, please use 'MCST create' to create one
+start.flags.name:
+  other: Server Name
+
+# List Servers Page
+list:
+  other: List all server configurations
+
+# Settings Page
+settings:
+  other: MCST Settings
+
+settings.aria2-enabled:
+  other: Aria2c will be used for downloading of artifacts
+
+settings.aria2-retry-wait:
+  other: Number of seconds to wait between retries
+
+settings.aria2-split:
+  other: Number of connections used for download.
+
+settings.aria2-max-connection-per-server:
+  other: The maximum number of connections to one server for each download.
+
+settings.auto-accept-eula:
+  other: Automatically accept the EULA <https://aka.ms/MinecraftEULA/>
+
+settings.language:
+  other: Language
+
+settings.language.warning:
+  other: >- 
+    The language is not supported yet. Currently supported languages are: 
+    en (English), 
+    zh (Simplified Chinese).

@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 
 	"github.com/Arama0517/MCST/internal/configs"
+	"github.com/Arama0517/MCST/internal/locale"
 	"github.com/spf13/cobra"
 )
 
@@ -32,8 +33,8 @@ func newStartCmd() *cobra.Command {
 	var name string
 	cmd := &cobra.Command{
 		Use:               "start",
-		Short:             "启动服务器",
-		Long:              "使用在 '.config/MCST/config.json' 存放的配置启动服务器",
+		Short:             locale.GetLocaleMessage("start.short"),
+		Long:              locale.GetLocaleMessage("start.long"),
 		SilenceUsage:      true,
 		SilenceErrors:     true,
 		Args:              cobra.NoArgs,
@@ -58,7 +59,7 @@ func newStartCmd() *cobra.Command {
 			return cmd.Run()
 		},
 	}
-	cmd.Flags().StringVarP(&name, "name", "n", "", "服务器名称")
+	cmd.Flags().StringVarP(&name, "name", "n", "", locale.GetLocaleMessage("start.flags.name"))
 	_ = cmd.MarkFlagRequired("name")
 	return cmd
 }

@@ -118,3 +118,43 @@ config.flags.name:
   other: 服务器名称(非配置项)
 config.flags.delete:
   other: 删除服务器(不可逆)
+
+# 启动服务器页面
+start.short:
+  other: 启动服务器
+start.long:
+  other: 如果你还未创建服务器, 请使用 'MCST create' 创建服务器
+start.flags.name:
+  other: 服务器名称
+
+# 列出服务器页面
+list:
+  other: 列出所有服务器的配置
+
+# 设置页面
+settings:
+  other: MCST 设置
+
+settings.aria2-enabled:
+  other: Aria2c 将用于下载文件
+
+settings.aria2-retry-wait:
+  other: 重试之间等待的秒数
+
+settings.aria2-split:
+  other: 下载使用的连接数
+
+settings.aria2-max-connection-per-server:
+  other: 每次下载一个服务器的最大连接数
+
+settings.auto-accept-eula:
+  other: 自动同意EULA <https://aka.ms/MinecraftEULA/>
+
+settings.language:
+  other: 语言
+
+settings.language.warning:
+  other: >-
+    尚未支持该语言, 当前支持的语言有: 
+    en(英语), 
+    zh(简体中文)
