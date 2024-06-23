@@ -21,20 +21,33 @@ builds:
     env:
       - CGO_ENABLED=0
     goos:
-      - linux
       - darwin
       - windows
+      - linux
+      - freebsd
+      - netbsd
+      - illumos
     goarch:
-      - "386"
       - amd64
-      - arm
       - arm64
-      - ppc64
+      - arm
+      - "386"
+      - ppc64le
+      - s390x
+      - mips64
+      - mips64le
+      - riscv64
+      - loong64
     goarm:
+      - "6"
       - "7"
+    gomips:
+      - hardfloat
     ignore:
-      - goos: windows
-        goarch: arm
+      - goos: darwin
+        goarch: "386"
+      - goos: freebsd
+        goarch: arm64
     mod_timestamp: "{{ .CommitTimestamp }}"
     flags:
       - -trimpath
@@ -48,13 +61,9 @@ builds:
       - -X github.com/Arama0517/MCST/internal/build.treeState={{ .IsGitDirty }}
 
 archives:
-  - name_template: >-
-      {{- .ProjectName }}_
-      {{- title .Os }}_
-      {{- if eq .Arch "amd64" }}x86_64
-      {{- else if eq .Arch "386" }}i386
-      {{- else }}{{ .Arch }}{{ end }}
-      {{- if .Arm }}v{{ .Arm }}{{ end -}}
+  - format: tar.gz
+    wrap_in_directory: true
+    name_template: '{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     format_overrides:
       - goos: windows
         format: zip
@@ -66,6 +75,10 @@ archives:
       - LICENSE
       - completions/*
       - manpages/*
+
+source:
+  enabled: true
+  name_template: '{{ .ProjectName }}-{{ .Version }}-source'
 
 checksum:
   name_template: 'checksums.txt'
@@ -182,6 +195,3 @@ scoops:
     depends:
       - aria2
     license: GPL-v3
-
-sboms:
-  - artifacts: archive
