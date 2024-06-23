@@ -20,4 +20,4 @@
 set -e
 rm -rf manpages
 mkdir manpages
-task run -- man | gzip -c -9 > manpages/MCST.1.gz
+go run ./cmd/MCST man | gzip -c -9 > manpages/MCST.1.gz

@@ -21,5 +21,5 @@ set -e
 rm -rf completions
 mkdir completions
 for sh in bash zsh fish; do
-	task run -- completion "$sh" > "./completions/MCST.$sh"
+	go run ./cmd/MCST completion "$sh" > "./completions/MCST.$sh"
 done
