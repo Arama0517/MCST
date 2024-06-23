@@ -107,12 +107,12 @@ changelog:
 release:
   name_template: "v{{ .Version }}"
   footer: |
-    **Full Changelog**: https://github.com/Arama-Vanarana/MCServerTool/compare/{{ .PreviousTag }}...{{ if .IsNightly }}nightly{{ else }}{{ .Tag }}{{ end }}
+    **Full Changelog**: https://github.com/Arama-Vanarana/MCST/compare/{{ .PreviousTag }}...{{ if .IsNightly }}nightly{{ else }}{{ .Tag }}{{ end }}
 
 nfpms:
   - file_name_template: "{{ .ConventionalFileName }}"
     id: packages
-    homepage: https://github.com/Arama0517/MCServerTool
+    homepage: https://github.com/Arama0517/MCST
     description: A command-line utility making Minecraft server creation quick and easy for beginners.
     maintainer: Arama <arama0517@foxmail.com>
     license: GPL-v3
@@ -158,7 +158,7 @@ brews:
       name: homebrew-tab
     directory: Formula
     goarm: "7"
-    homepage: https://github.com/Arama0517/MCServerTool
+    homepage: https://github.com/Arama0517/MCST
     description: A command-line utility making Minecraft server creation quick and easy for beginners.
     license: GPL-v3
     test: |
@@ -177,8 +177,36 @@ scoops:
       owner: Arama0517
       name: scoop-bucket
     directory: bucket
-    homepage: https://github.com/Arama0517/MCServerTool
+    homepage: https://github.com/Arama0517/MCST
     description: A command-line utility making Minecraft server creation quick and easy for beginners.
+    license: GPL-v3
     depends:
       - aria2
+
+aurs:
+  - homepage: https://github.com/Arama0517/MCST
+    description: A command-line utility making Minecraft server creation quick and easy for beginners.
+    maintainers:
+      - "Arama <arama0517 at foxmail dot com>"
     license: GPL-v3
+    depends:
+      - aria2
+    private_key: "{{ .Env.AUR_KEY }}"
+    git_url: "ssh://aur@aur.archlinux.org/mc_server_tool-bin.git"
+    package: |-
+      # bin
+      install -Dm755 "./MCST" "${pkgdir}/usr/bin/MCST"
+
+      # license
+      install -Dm644 "./LICENSE.md" "${pkgdir}/usr/share/licenses/MCST/LICENSE"
+
+      # completions
+      mkdir -p "${pkgdir}/usr/share/bash-completion/completions/"
+      mkdir -p "${pkgdir}/usr/share/zsh/site-functions/"
+      mkdir -p "${pkgdir}/usr/share/fish/vendor_completions.d/"
+      install -Dm644 "./completions/MCST.bash" "${pkgdir}/usr/share/bash-completion/completions/MCST"
+      install -Dm644 "./completions/MCST.zsh" "${pkgdir}/usr/share/zsh/site-functions/_MCST"
+      install -Dm644 "./completions/MCST.fish" "${pkgdir}/usr/share/fish/vendor_completions.d/MCST.fish"
+
+      # man pages
+      install -Dm644 "./manpages/MCST.1.gz" "${pkgdir}/usr/share/man/man1/MCST.1.gz"
