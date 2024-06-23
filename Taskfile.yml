@@ -18,7 +18,7 @@ tasks:
     generates:
       - ./MCST
     cmds:
-      - go build ./cmd/MCST -o MCST
+      - go build -o MCST ./cmd/MCST
 
   test:
     desc: 测试
