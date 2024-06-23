@@ -9,7 +9,7 @@ tasks:
   run:
     desc: 构建
     cmds:
-      - go run ./cmd/MCST {{.CLI_ARGS}}
+      - go run ./cmd/MCST {{ .CLI_ARGS }}
 
   build:
     desc: 构建
@@ -18,18 +18,17 @@ tasks:
     generates:
       - ./MCST
     cmds:
-      - go build -o MCST
+      - go build ./cmd/MCST -o MCST
 
   test:
     desc: 测试
     env:
       LC_ALL: C
     vars:
-      TEST_OPTIONS: '{{default "" .TEST_OPTIONS}}'
       SOURCE_FILES: '{{default "./..." .SOURCE_FILES}}'
       TEST_PATTERN: '{{default "." .TEST_PATTERN}}'
     cmds:
-      - go test {{ .TEST_OPTIONS }} -failfast {{ .SOURCE_FILES }} -run {{ .TEST_PATTERN }} -timeout=5m
+      - go test {{ .CLI_ARGS }} -failfast {{ .SOURCE_FILES }} -run {{ .TEST_PATTERN }} -timeout=5m
 
   test:goreleaer:
     desc: 测试发布

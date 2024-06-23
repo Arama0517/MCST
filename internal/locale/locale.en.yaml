@@ -108,3 +108,13 @@ download.polars.list.long:
     When using this command, you have 2 options:
     1. Without any parameters: Output type IDs of all cores
     2. With '--id': Output all core IDs for this core (used for download)
+
+# Configure Server Page
+config.short:
+  other: Configure Server
+config.long:
+  other: If you haven't created a server yet, please use 'MCST create' to create one
+config.flags.name:
+  other: Server Name (not a configuration option)
+config.flags.delete:
+  other: Delete Server (Irreversible)

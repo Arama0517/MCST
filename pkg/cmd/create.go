@@ -170,13 +170,13 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
 
 var (
 	TiB uint64 = 1099511627776 // Tebibyte: 1024 * 1024 * 1024 * 1024
-	TB  uint64 = 1000000000000 // Terabyte: 1000 * 1000 * 1000 * 1000
-	GiB uint64 = 1073741824    // Gibibyte: 1024 * 1024 * 1024
-	GB  uint64 = 1000000000    // Gigabyte: 1000 * 1000 * 1000
-	MiB uint64 = 1048576       // Mebibyte: 1024 * 1024
-	MB  uint64 = 1000000       // Megabyte: 1000 * 1000
-	KiB uint64 = 1024          // Kibibyte
-	KB  uint64 = 1000          // Kilobyte
+	TB         = TiB
+	GiB uint64 = 1073741824 // Gibibyte: 1024 * 1024 * 1024
+	GB         = GiB
+	MiB uint64 = 1048576 // Mebibyte: 1024 * 1024
+	MB         = MiB
+	KiB uint64 = 1024 // Kibibyte
+	KB         = KiB
 )
 
 func toBytes(byteStr string) (uint64, error) {

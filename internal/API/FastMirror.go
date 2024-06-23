@@ -41,7 +41,7 @@ func GetFastMirrorData() (map[string]FastMirrorData, error) {
 		return nil, err
 	}
 	var data struct {
-		Data []FastMirrorData `json:"configs"`
+		Data []FastMirrorData `json:"data"`
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -73,7 +73,7 @@ func GetFastMirrorBuildsData(core string, minecraftVersion string) (map[string]F
 	var data struct {
 		Data struct {
 			Builds []FastMirrorBuilds `json:"builds"`
-		} `json:"configs"`
+		} `json:"data"`
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

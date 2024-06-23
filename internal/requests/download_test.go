@@ -43,7 +43,7 @@ func TestDownload(t *testing.T) {
 	configs.Configs.Aria2c.Enabled = false
 	path, err := requests.NewDownloader(URL).Download()
 	if err != nil {
-		t.Fatal(err)
+		panic(err)
 	}
 	t.Log(path)
 	if err := os.Remove(path); err != nil {

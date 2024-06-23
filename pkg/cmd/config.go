@@ -23,7 +23,7 @@ import (
 	"path/filepath"
 
 	"github.com/Arama0517/MCST/internal/configs"
-	"github.com/apex/log"
+	"github.com/Arama0517/MCST/internal/locale"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/spf13/cobra"
 )
@@ -43,8 +43,8 @@ func newConfigCmd() *cobra.Command {
 	flags := &configCmdFlags{}
 	cmd := &cobra.Command{
 		Use:               "config",
-		Short:             "配置服务器",
-		Long:              "配置服务器的各项参数",
+		Short:             locale.GetLocaleMessage("config.short"),
+		Long:              locale.GetLocaleMessage("config.long"),
 		SilenceUsage:      true,
 		SilenceErrors:     true,
 		Args:              cobra.NoArgs,
@@ -60,7 +60,6 @@ func newConfigCmd() *cobra.Command {
 				if err := os.RemoveAll(filepath.Join(configs.ServersDir, flags.name)); err != nil {
 					return err
 				}
-				log.Info("删除服务器成功")
 				return nil
 			}
 			memInfo, err := mem.VirtualMemory()
@@ -112,18 +111,17 @@ func newConfigCmd() *cobra.Command {
 			if cmdFlags.Changed("server_args") {
 				config.Java.Args = flags.serverArgs
 			}
-			log.Info("设置完成")
 			return nil
 		},
 	}
-	cmd.Flags().StringVarP(&flags.name, "name", "n", "", "服务器名称")
-	cmd.Flags().StringVar(&flags.xms, "xms", "", "Java虚拟机初始堆内存")
-	cmd.Flags().StringVar(&flags.xmx, "xmx", "", "Java虚拟机最大堆内存")
-	cmd.Flags().StringVarP(&flags.encoding, "encoding", "e", "", "输出编码")
-	cmd.Flags().StringVarP(&flags.java, "java", "j", "", "使用的Java")
-	cmd.Flags().StringSliceVar(&flags.jvmArgs, "jvm_args", []string{}, "Java虚拟机其他参数")
-	cmd.Flags().StringSliceVar(&flags.serverArgs, "server_args", []string{}, "Minecraft服务器参数")
-	cmd.Flags().BoolVar(&flags.delete, "delete", false, "删除服务器(慎重, 无法复原)")
+	cmd.Flags().StringVarP(&flags.name, "name", "n", "", locale.GetLocaleMessage("config.flags.name"))
+	cmd.Flags().StringVar(&flags.xms, "xms", "", locale.GetLocaleMessage("create.flags.xms"))
+	cmd.Flags().StringVar(&flags.xmx, "xmx", "", locale.GetLocaleMessage("create.flags.xmx"))
+	cmd.Flags().StringVarP(&flags.encoding, "encoding", "e", "", locale.GetLocaleMessage("create.flags.encoding"))
+	cmd.Flags().StringVarP(&flags.java, "java", "j", "", locale.GetLocaleMessage("create.flags.java"))
+	cmd.Flags().StringSliceVar(&flags.jvmArgs, "jvm_args", []string{}, locale.GetLocaleMessage("create.flags.jvm_args"))
+	cmd.Flags().StringSliceVar(&flags.serverArgs, "server_args", []string{}, locale.GetLocaleMessage("create.flags.server_args"))
+	cmd.Flags().BoolVar(&flags.delete, "delete", false, locale.GetLocaleMessage("config.flags.delete"))
 	_ = cmd.MarkFlagRequired("name")
 	return cmd
 }

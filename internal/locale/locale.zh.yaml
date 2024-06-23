@@ -108,3 +108,13 @@ download.polars.list.long:
     使用此命令时拥有2种情况:
     1. 不使用任何参数: 输出所有核心的类型id
     2. 使用 '--id': 输出此核心的所有核心ID(用于下载)
+
+# 配置服务器页面
+config.short:
+  other: 配置服务器
+config.long:
+  other: 如果你还未创建服务器, 请使用 'MCST create' 创建服务器
+config.flags.name:
+  other: 服务器名称(非配置项)
+config.flags.delete:
+  other: 删除服务器(不可逆)

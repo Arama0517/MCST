@@ -23,7 +23,7 @@ import (
 
 	"github.com/Arama0517/MCST/internal/configs"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 var (

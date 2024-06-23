@@ -19,11 +19,11 @@
 package configs
 
 import (
-	"encoding/json"
 	"os"
 	"path/filepath"
 
 	"golang.org/x/text/language"
+	"gopkg.in/yaml.v3"
 )
 
 var Configs Config
@@ -81,20 +81,22 @@ func InitData() error {
 	rootDir = filepath.Join(UserHomeDir, ".config", "MCST")
 	ServersDir = filepath.Join(rootDir, "servers")
 	DownloadsDir = filepath.Join(rootDir, "downloads")
-	configsPath = filepath.Join(rootDir, "configs.json")
+	configsPath = filepath.Join(rootDir, "configs.yaml")
+
+	if err := os.MkdirAll(rootDir, 0o755); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(ServersDir, 0o755); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(DownloadsDir, 0o755); err != nil {
+		return err
+	}
 
 	// 初始化
-	if _, err := os.Stat(rootDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(rootDir, 0o755); err != nil {
-			return err
-		}
-		if err := os.MkdirAll(ServersDir, 0o755); err != nil {
-			return err
-		}
-		if err := os.MkdirAll(DownloadsDir, 0o755); err != nil {
-			return err
-		}
-		jsonData, err := json.MarshalIndent(Config{
+
+	if _, err := os.Stat(configsPath); os.IsNotExist(err) {
+		data, err := yaml.Marshal(Config{
 			Cores:   map[int]Core{},
 			Servers: map[string]Server{},
 			Aria2c: Aria2c{
@@ -106,11 +108,11 @@ func InitData() error {
 			},
 			AutoAcceptEULA: false,
 			Language:       language.English,
-		}, "", "    ")
+		})
 		if err != nil {
 			return err
 		}
-		if err := os.WriteFile(configsPath, jsonData, 0o644); err != nil {
+		if err := os.WriteFile(configsPath, data, 0o644); err != nil {
 			return err
 		}
 	} else if err != nil {
@@ -121,16 +123,16 @@ func InitData() error {
 	if err != nil {
 		return err
 	}
-	if err = json.Unmarshal(file, &Configs); err != nil {
+	if err = yaml.Unmarshal(file, &Configs); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (c *Config) Save() error {
-	configs, err := json.MarshalIndent(c, "", "  ")
+	data, err := yaml.Marshal(c)
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(configsPath, configs, 0o644)
+	return os.WriteFile(configsPath, data, 0o644)
 }
