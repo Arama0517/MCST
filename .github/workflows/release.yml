@@ -18,6 +18,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
+      - uses: arduino/setup-task@v2
       - uses: anchore/sbom-action/download-syft@v0.16.0
       - run: git fetch --prune --unshallow
       - name: release
