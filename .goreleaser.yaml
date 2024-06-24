@@ -114,7 +114,7 @@ nfpms:
     id: packages
     homepage: https://github.com/Arama0517/MCST
     description: A command-line utility making Minecraft server creation quick and easy for beginners.
-    maintainer: Arama <arama0517@foxmail.com>
+    maintainer: Arama <arama.dev@outlook.com>
     license: GPL-v3
     vendor: MCST
     bindir: /usr/bin
@@ -153,18 +153,18 @@ nfpms:
 
 brews:
   - name: MCST
+    description: A command-line utility making Minecraft server creation quick and easy for beginners.
+    license: GPL-v3
+    dependencies:
+      - name: aria2
     repository:
       owner: Arama0517
       name: homebrew-tab
     directory: Formula
     goarm: "7"
     homepage: https://github.com/Arama0517/MCST
-    description: A command-line utility making Minecraft server creation quick and easy for beginners.
-    license: GPL-v3
     test: |
       system "#{bin}/MCST -v"
-    dependencies:
-      - name: aria2
     extra_install: |-
       bash_completion.install "completions/MCST.bash" => "MCST"
       zsh_completion.install "completions/MCST.zsh" => "_MCST"
@@ -173,21 +173,21 @@ brews:
 
 scoops:
   - name: MCST
-    repository:
-      owner: Arama0517
-      name: scoop-bucket
-    directory: bucket
     homepage: https://github.com/Arama0517/MCST
     description: A command-line utility making Minecraft server creation quick and easy for beginners.
     license: GPL-v3
     depends:
       - aria2
+    repository:
+      owner: Arama0517
+      name: scoop-bucket
+    directory: bucket
 
 aurs:
   - homepage: https://github.com/Arama0517/MCST
     description: A command-line utility making Minecraft server creation quick and easy for beginners.
     maintainers:
-      - "Arama <arama0517 at foxmail dot com>"
+      - "Arama <arama dot dev at outlook dot com>"
     license: GPL-v3
     depends:
       - aria2
