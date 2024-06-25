@@ -30,16 +30,20 @@ import (
 func Execute(args []string, exit func(code int)) {
 	log.SetHandler(cli.Default)
 	if err := configs.InitData(); err != nil {
-		log.WithError(err).Fatal("初始化失败")
-		exit(1)
+		log.WithError(err).Fatal("初始化配置失败")
+		exit(InitConfigFail)
 	}
-	locale.InitLocale()
+	if err := locale.InitLocale(); err != nil {
+		log.WithError(err).Error("初始化语言失败")
+		exit(InitLocaleFail)
+	}
 	cmd := newRootCmd()
 	cmd.SetArgs(args)
 	if err := cmd.Execute(); err != nil {
 		log.WithError(err).Error("出现错误!")
-		exit(2)
+		exit(RunFail)
 	}
+	exit(OK)
 }
 
 func newRootCmd() *cobra.Command {

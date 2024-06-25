@@ -34,17 +34,20 @@ var (
 //go:embed locale.*.yaml
 var localeFS embed.FS
 
-func InitLocale() {
+func InitLocale() error {
 	Bundle = i18n.NewBundle(configs.Configs.Language)
 	Bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
 	files, err := localeFS.ReadDir(".")
 	if err != nil {
-		panic(err)
+		return err
 	}
 	for _, f := range files {
-		_, _ = Bundle.LoadMessageFileFS(localeFS, f.Name())
+		if _, err = Bundle.LoadMessageFileFS(localeFS, f.Name()); err != nil {
+			return err
+		}
 	}
 	Localizer = i18n.NewLocalizer(Bundle)
+	return nil
 }
 
 func GetLocaleMessage(messageID string) string {

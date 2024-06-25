@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Arama0517/MCST/internal/locale"
 	mcoral "github.com/muesli/mango-cobra"
 	"github.com/muesli/roff"
 	"github.com/spf13/cobra"
@@ -30,7 +31,7 @@ import (
 func newManCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:                   "man",
-		Short:                 "生成man手册",
+		Short:                 locale.GetLocaleMessage("man"),
 		SilenceUsage:          true,
 		DisableFlagsInUseLine: true,
 		Hidden:                true,

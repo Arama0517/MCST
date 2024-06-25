@@ -38,3 +38,8 @@ var ErrInvalidUnit = errors.New("这不是一个有效的单位")
 var ErrEulaRequired = errors.New("微软要求必须同意EULA协议(https://aka.ms/MinecraftEULA/)")
 
 var ErrCoreNotFound = errors.New("核心不存在")
+
+var OK = 0
+var InitConfigFail = 1
+var InitLocaleFail = 2
+var RunFail = -1
