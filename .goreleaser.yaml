@@ -109,7 +109,6 @@ sboms:
 
 signs:
   - cmd: cosign
-    output: true
     artifacts: all
     args:
       - sign-blob
