@@ -107,9 +107,8 @@ changelog:
 signs:
   - cmd: cosign
     certificate: "${artifact}.pem"
-#    output: true
     stdin: "{{ .Env.COSIGN_PWD }}"
-    artifacts: checksum
+    artifacts: all
     args:
       - sign-blob
       - "--key=cosign.key"
@@ -122,6 +121,8 @@ release:
   name_template: "v{{ .Version }}"
   footer: |
     **Full Changelog**: https://github.com/Arama-Vanarana/MCST/compare/{{ .PreviousTag }}...{{ if .IsNightly }}nightly{{ else }}{{ .Tag }}{{ end }}
+  extra_files:
+    - glob: cosign.pub
 
 nfpms:
   - file_name_template: "{{ .ConventionalFileName }}"
