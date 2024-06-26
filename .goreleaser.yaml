@@ -110,7 +110,7 @@ sboms:
 signs:
   - cmd: cosign
     output: true
-    artifacts: checksum
+    artifacts: all
     args:
       - sign-blob
       - "--key=cosign.key"
