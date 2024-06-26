@@ -110,7 +110,6 @@ sboms:
 signs:
   - cmd: cosign
     certificate: "${artifact}.pem"
-    stdin: "{{ .Env.COSIGN_PWD }}"
     output: true
     artifacts: checksum
     args:
