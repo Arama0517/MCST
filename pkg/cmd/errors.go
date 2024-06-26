@@ -39,7 +39,9 @@ var ErrEulaRequired = errors.New("微软要求必须同意EULA协议(https://aka
 
 var ErrCoreNotFound = errors.New("核心不存在")
 
-var OK = 0
-var InitConfigFail = 1
-var InitLocaleFail = 2
-var RunFail = -1
+const (
+	OK = iota
+	InitConfigFail
+	InitLocaleFail
+	RunFail
+)

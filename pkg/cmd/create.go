@@ -168,15 +168,12 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
 	return cmd
 }
 
-var (
-	TiB uint64 = 1099511627776 // Tebibyte: 1024 * 1024 * 1024 * 1024
-	TB         = TiB
-	GiB uint64 = 1073741824 // Gibibyte: 1024 * 1024 * 1024
-	GB         = GiB
-	MiB uint64 = 1048576 // Mebibyte: 1024 * 1024
-	MB         = MiB
-	KiB uint64 = 1024 // Kibibyte
-	KB         = KiB
+const (
+	Bytes uint64 = 1 << (10 * iota)
+	KiB
+	MiB
+	GiB
+	TiB
 )
 
 func toBytes(byteStr string) (uint64, error) {
@@ -190,7 +187,7 @@ func toBytes(byteStr string) (uint64, error) {
 		case (char >= 'A' && char <= 'Z') || (char >= 'a' && char <= 'z'):
 			unit += strings.ToUpper(string(char))
 		default:
-			return 0, nil
+			return 0, ErrInvalidUnit
 		}
 	}
 
@@ -198,25 +195,17 @@ func toBytes(byteStr string) (uint64, error) {
 	if err != nil {
 		return 0, err
 	}
-	switch unit {
-	case "T", "TIB":
+	switch {
+	case strings.Contains(unit, "T"):
 		return parsedNum * TiB, nil
-	case "TB":
-		return parsedNum * TB, nil
-	case "G", "GIB":
+	case strings.Contains(unit, "G"):
 		return parsedNum * GiB, nil
-	case "GB":
-		return parsedNum * GB, nil
-	case "M", "MIB":
+	case strings.Contains(unit, "M"):
 		return parsedNum * MiB, nil
-	case "MB":
-		return parsedNum * MB, nil
-	case "K", "KIB":
+	case strings.Contains(unit, "K"):
 		return parsedNum * KiB, nil
-	case "KB":
-		return parsedNum * KB, nil
-	case "B", "BYTES", "":
-		return parsedNum, nil
+	case strings.Contains(unit, "B"), unit == "":
+		return parsedNum * Bytes, nil
 	default:
 		return 0, ErrInvalidUnit
 	}

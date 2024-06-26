@@ -19,7 +19,9 @@ jobs:
         with:
           go-version: stable
       - uses: anchore/sbom-action/download-syft@v0.16.0
+      - uses: sigstore/cosign-installer@v3.5.0
       - run: git fetch --prune --unshallow
+      - run: echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > ${{ github.workspace }}/cosign.key
       - name: release
         uses: goreleaser/goreleaser-action@v6
         with:
@@ -28,3 +30,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           AUR_KEY: ${{ secrets.AUR_LEY }}
+          COSIGN_PWD: ${{ secrets.COSIGN_PWD }}

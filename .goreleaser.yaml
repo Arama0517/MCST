@@ -104,6 +104,20 @@ changelog:
     - title: Other work
       order: 9999
 
+signs:
+  - cmd: cosign
+    certificate: "${artifact}.pem"
+#    output: true
+    stdin: "{{ .Env.COSIGN_PWD }}"
+    artifacts: checksum
+    args:
+      - sign-blob
+      - "--key=cosign.key"
+      - "--output-certificate=${certificate}"
+      - "--output-signature=${signature}"
+      - "${artifact}"
+      - --yes
+
 release:
   name_template: "v{{ .Version }}"
   footer: |
@@ -141,6 +155,7 @@ nfpms:
         file_info:
           mode: 0644
     formats:
+      - apk
       - deb
       - rpm
       - archlinux
