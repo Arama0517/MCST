@@ -104,11 +104,15 @@ changelog:
     - title: Other work
       order: 9999
 
+sboms:
+  - artifacts: archive
+
 signs:
   - cmd: cosign
     certificate: "${artifact}.pem"
     stdin: "{{ .Env.COSIGN_PWD }}"
-    artifacts: all
+    output: true
+    artifacts: checksum
     args:
       - sign-blob
       - "--key=cosign.key"
