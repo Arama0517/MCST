@@ -209,7 +209,7 @@ aurs:
       - aria2
     private_key: "{{ .Env.AUR_KEY }}"
     name: mc_server_tool
-    git_url: "ssh://aur@aur.archlinux.org/mc_server_tool.git"
+    git_url: "ssh://aur@aur.archlinux.org/mc_server_tool-bin.git"
     package: |-
       # bin
       install -Dm755 "./MCST" "${pkgdir}/usr/bin/MCST"
