@@ -1,18 +1,22 @@
-name: golangci-lint
+name: ci
 
 on:
   push:
-    tags:
-      - v*
     branches:
-      - main
+      - "main"
   pull_request:
+    paths:
+      - "go.*"
+      - "**/*.go"
+      - "Taskfile.yml"
+      - "Dockerfile"
+      - ".github/workflows/*.yml"
 
 permissions:
   contents: read
 
 jobs:
-  golangci:
+  lint:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     permissions:
       contents: read # for actions/checkout to fetch code
@@ -23,9 +27,18 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
-          cache: false
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6.0.1
         with:
           args: --timeout=5m
           version: latest
+  ci:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - uses: arduino/setup-task@v2
+      - run: task ci

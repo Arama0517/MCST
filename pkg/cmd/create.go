@@ -23,11 +23,11 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
 	"time"
 
+	"github.com/Arama0517/MCST/internal/bytes"
 	"github.com/Arama0517/MCST/internal/configs"
+	MCSTErrors "github.com/Arama0517/MCST/internal/errors"
 	"github.com/Arama0517/MCST/internal/locale"
 	"github.com/apex/log"
 	"github.com/shirou/gopsutil/v3/mem"
@@ -58,21 +58,21 @@ func newCreateCmd() *cobra.Command {
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			if !flags.eula {
-				return ErrEulaRequired
+				return MCSTErrors.ErrEulaRequired
 			}
 			var err error
 			var config configs.Server
 			config.Name = flags.name
 			for name := range configs.Configs.Servers {
 				if name == flags.name {
-					return ErrServerExists
+					return MCSTErrors.ErrServerExists
 				}
 			}
-			config.Java.Xms, err = toBytes(flags.xms)
+			config.Java.Xms, err = bytes.ToBytes(flags.xms)
 			if err != nil {
 				return err
 			}
-			config.Java.Xmx, err = toBytes(flags.xmx)
+			config.Java.Xmx, err = bytes.ToBytes(flags.xmx)
 			if err != nil {
 				return err
 			}
@@ -81,23 +81,23 @@ func newCreateCmd() *cobra.Command {
 				return err
 			}
 			switch {
-			case config.Java.Xms < MiB:
-				return ErrXmsToLow
-			case config.Java.Xmx < MiB:
-				return ErrXmxTooLow
+			case config.Java.Xms < bytes.MiB:
+				return MCSTErrors.ErrXmsToLow
+			case config.Java.Xmx < bytes.MiB:
+				return MCSTErrors.ErrXmxTooLow
 			case config.Java.Xmx < config.Java.Xms:
-				return ErrXmxLessThanXms
+				return MCSTErrors.ErrXmxLessThanXms
 			case config.Java.Xms > memInfo.Total:
-				return ErrXmsExceedsPhysicalMemory
+				return MCSTErrors.ErrXmsExceedsPhysicalMemory
 			case config.Java.Xmx > memInfo.Total:
-				return ErrXmxExceedsPhysicalMemory
+				return MCSTErrors.ErrXmxExceedsPhysicalMemory
 			}
 			config.Java.Encoding = flags.encoding
 			config.Java.Path = flags.java
 			config.Java.Args = flags.jvmArgs
 			config.ServerArgs = flags.serverArgs
 			if flags.core < 0 || flags.core > len(configs.Configs.Cores) {
-				return ErrCoreNotFound
+				return MCSTErrors.ErrCoreNotFound
 			}
 			configs.Configs.Servers[config.Name] = config
 
@@ -166,47 +166,4 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
 	_ = cmd.MarkFlagRequired("java")
 	_ = cmd.MarkFlagRequired("core")
 	return cmd
-}
-
-const (
-	Bytes uint64 = 1 << (10 * iota)
-	KiB
-	MiB
-	GiB
-	TiB
-)
-
-func toBytes(byteStr string) (uint64, error) {
-	var num, unit string
-
-	// 分离数字部分和单位部分
-	for _, char := range byteStr {
-		switch {
-		case char >= '0' && char <= '9':
-			num += string(char)
-		case (char >= 'A' && char <= 'Z') || (char >= 'a' && char <= 'z'):
-			unit += strings.ToUpper(string(char))
-		default:
-			return 0, ErrInvalidUnit
-		}
-	}
-
-	parsedNum, err := strconv.ParseUint(num, 10, 64)
-	if err != nil {
-		return 0, err
-	}
-	switch {
-	case strings.Contains(unit, "T"):
-		return parsedNum * TiB, nil
-	case strings.Contains(unit, "G"):
-		return parsedNum * GiB, nil
-	case strings.Contains(unit, "M"):
-		return parsedNum * MiB, nil
-	case strings.Contains(unit, "K"):
-		return parsedNum * KiB, nil
-	case strings.Contains(unit, "B"), unit == "":
-		return parsedNum * Bytes, nil
-	default:
-		return 0, ErrInvalidUnit
-	}
 }

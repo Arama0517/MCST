@@ -21,6 +21,7 @@ package cmd
 import (
 	"github.com/Arama0517/MCST/internal/build"
 	"github.com/Arama0517/MCST/internal/configs"
+	MCSTErrors "github.com/Arama0517/MCST/internal/errors"
 	"github.com/Arama0517/MCST/internal/locale"
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
@@ -31,19 +32,19 @@ func Execute(args []string, exit func(code int)) {
 	log.SetHandler(cli.Default)
 	if err := configs.InitData(); err != nil {
 		log.WithError(err).Fatal("初始化配置失败")
-		exit(InitConfigFail)
+		exit(MCSTErrors.InitConfigFail)
 	}
 	if err := locale.InitLocale(); err != nil {
 		log.WithError(err).Error("初始化语言失败")
-		exit(InitLocaleFail)
+		exit(MCSTErrors.InitLocaleFail)
 	}
 	cmd := newRootCmd()
 	cmd.SetArgs(args)
 	if err := cmd.Execute(); err != nil {
 		log.WithError(err).Error("出现错误!")
-		exit(RunFail)
+		exit(MCSTErrors.RunFail)
 	}
-	exit(OK)
+	exit(MCSTErrors.OK)
 }
 
 func newRootCmd() *cobra.Command {

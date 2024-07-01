@@ -1,3 +1,5 @@
+//go:build windows
+
 /*
  * Minecraft Server Tool(MCST) is a command-line utility making Minecraft server creation quick and easy for beginners.
  * Copyright (c) 2024-2024 Arama.
@@ -16,4 +18,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package survey
+package files
+
+import (
+	"github.com/ncruces/zenity"
+)
+
+func Run(fileName string) (string, error) {
+	return zenity.SelectFile(zenity.FileFilter{
+		Name:     fileName,
+		Patterns: []string{"文件"},
+		CaseFold: false,
+	})
+}

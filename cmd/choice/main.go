@@ -16,29 +16,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package requests
+package main
 
 import (
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-	"time"
 
-	"github.com/Arama0517/MCST/internal/build"
+	"github.com/Arama0517/MCST/internal/dialog/files"
+	"github.com/spf13/cobra"
 )
 
-// Request 请求URL, 返回响应; 运行成功后请添加`defer resp.Body.Close()`到你的代码内
-func Request(url url.URL, method string, header map[string]string, body io.Reader) (*http.Response, error) {
-	request, err := http.NewRequest(method, url.String(), body)
-	if err != nil {
-		return nil, err
+func main() {
+	var fileName string
+	cmd := &cobra.Command{
+		Use:   "choice",
+		Short: "测试选择文件",
+		RunE: func(*cobra.Command, []string) error {
+			path, err := files.Run(fileName)
+			if err != nil {
+				return err
+			}
+			fmt.Println(path)
+			return nil
+		},
 	}
-	request.Header.Set("User-Agent", fmt.Sprintf("MCST/%s ", build.Version.GitVersion))
-	for key, value := range header {
-		request.Header.Set(key, value)
+	cmd.Flags().StringVarP(&fileName, "file-name", "n", "", "文件名")
+	_ = cmd.MarkFlagRequired("file-name")
+	if err := cmd.Execute(); err != nil {
+		panic(err)
 	}
-	return (&http.Client{
-		Timeout: 10 * time.Second, // 10秒
-	}).Do(request)
 }

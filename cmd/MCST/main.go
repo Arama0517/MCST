@@ -19,7 +19,6 @@
 package main
 
 import (
-	_ "embed"
 	"os"
 
 	"github.com/Arama0517/MCST/pkg/cmd"

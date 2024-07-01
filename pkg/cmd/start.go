@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 
 	"github.com/Arama0517/MCST/internal/configs"
+	MCSTErrors "github.com/Arama0517/MCST/internal/errors"
 	"github.com/Arama0517/MCST/internal/locale"
 	"github.com/spf13/cobra"
 )
@@ -42,7 +43,7 @@ func newStartCmd() *cobra.Command {
 		RunE: func(*cobra.Command, []string) error {
 			config, exists := configs.Configs.Servers[name]
 			if !exists {
-				return ErrServerNotFound
+				return MCSTErrors.ErrServerNotFound
 			}
 			cmd := exec.Command(config.Java.Path)
 			cmd.Dir = filepath.Join(configs.ServersDir, config.Name)

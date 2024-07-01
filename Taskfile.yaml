@@ -1,7 +1,5 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: 3
-
-env:
-  SKIP_INIT: 1
 
 tasks:
   setup:
@@ -10,9 +8,15 @@ tasks:
       - go mod tidy
 
   run:
-    desc: 构建
+    desc: 运行
+    env:
+      LANG: C.UTF-8
+    vars:
+      CMD_ROOT: '{{ default "./cmd" .CMD_ROOT }}'
+      PROGRAM: '{{default "MCST" .PROGRAM}}'
+      MAIN: '{{default "main.go" .MAIN}}'
     cmds:
-      - go run ./cmd/MCST {{ .CLI_ARGS }}
+      - go run {{ .CMD_ROOT }}/{{ .PROGRAM }}/{{ .MAIN }} {{ .CLI_ARGS }}
 
   build:
     desc: 构建
@@ -33,18 +37,8 @@ tasks:
     cmds:
       - go test {{ .CLI_ARGS }} -failfast {{ .SOURCE_FILES }} -run {{ .TEST_PATTERN }} -timeout=5m
 
-  test:goreleaer:
-    desc: 测试发布
-    cmds:
-      - goreleaser release --skip publish --snapshot --clean
-
-  test:goreleaser:clean:
-    desc: 删除测试发布所产生的文件/文件夹
-    cmds:
-      - rm ./dist ./completions ./manpages -rf
-
   lint:
-    desc: 使用golangci-lint检查代码
+    desc: 使用 golangci-lint 检查代码
     cmds:
       - golangci-lint run --config ./.golangci.yaml {{.CLI_ARGS}} ./...
 
