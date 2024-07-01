@@ -22,7 +22,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Arama0517/MCST/internal/bytes"
 	"github.com/Arama0517/MCST/internal/configs"
+	MCSTErrors "github.com/Arama0517/MCST/internal/errors"
 	"github.com/Arama0517/MCST/internal/locale"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/spf13/cobra"
@@ -52,7 +54,7 @@ func newConfigCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			config, exists := configs.Configs.Servers[flags.name]
 			if !exists {
-				return ErrServerNotFound
+				return MCSTErrors.ErrServerNotFound
 			}
 			cmdFlags := cmd.Flags()
 			if flags.delete {
@@ -67,32 +69,32 @@ func newConfigCmd() *cobra.Command {
 				return err
 			}
 			if cmdFlags.Changed("xms") {
-				ram, err := toBytes(flags.xms)
+				ram, err := bytes.ToBytes(flags.xms)
 				if err != nil {
 					return err
 				}
 				switch {
 				case ram > config.Java.Xmx:
-					return ErrXmxLessThanXms
-				case ram < MiB:
-					return ErrXmsToLow
+					return MCSTErrors.ErrXmxLessThanXms
+				case ram < bytes.MiB:
+					return MCSTErrors.ErrXmsToLow
 				case ram > memInfo.Total:
-					return ErrXmsExceedsPhysicalMemory
+					return MCSTErrors.ErrXmsExceedsPhysicalMemory
 				}
 				config.Java.Xms = ram
 			}
 			if cmdFlags.Changed("xmx") {
-				ram, err := toBytes(flags.xmx)
+				ram, err := bytes.ToBytes(flags.xmx)
 				if err != nil {
 					return err
 				}
 				switch {
 				case ram < config.Java.Xms:
-					return ErrXmxLessThanXms
-				case ram < MiB:
-					return ErrXmxTooLow
+					return MCSTErrors.ErrXmxLessThanXms
+				case ram < bytes.MiB:
+					return MCSTErrors.ErrXmxTooLow
 				case ram > memInfo.Total:
-					return ErrXmxExceedsPhysicalMemory
+					return MCSTErrors.ErrXmxExceedsPhysicalMemory
 				}
 				config.Java.Xmx = ram
 			}

@@ -1,3 +1,5 @@
+//go:build darwin
+
 /*
  * Minecraft Server Tool(MCST) is a command-line utility making Minecraft server creation quick and easy for beginners.
  * Copyright (c) 2024-2024 Arama.
@@ -16,29 +18,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package requests
+package files
 
-import (
-	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-	"time"
-
-	"github.com/Arama0517/MCST/internal/build"
-)
-
-// Request 请求URL, 返回响应; 运行成功后请添加`defer resp.Body.Close()`到你的代码内
-func Request(url url.URL, method string, header map[string]string, body io.Reader) (*http.Response, error) {
-	request, err := http.NewRequest(method, url.String(), body)
-	if err != nil {
-		return nil, err
-	}
-	request.Header.Set("User-Agent", fmt.Sprintf("MCST/%s ", build.Version.GitVersion))
-	for key, value := range header {
-		request.Header.Set(key, value)
-	}
-	return (&http.Client{
-		Timeout: 10 * time.Second, // 10秒
-	}).Do(request)
+func Run(fileName string) (string, error) {
+	return zenity.SelectFile(zenity.FileFilter{
+		Name:     fileName,
+		Patterns: []string{"文件"},
+		CaseFold: false,
+	})
 }

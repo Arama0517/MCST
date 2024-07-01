@@ -140,7 +140,7 @@ func (d *Downloader) aria2cDownload() error {
 		fmt.Sprintf("--max-connection-per-server=%d", configs.Configs.Aria2c.MaxConnectionPerServer),
 		fmt.Sprintf("--min-split-size=%s", configs.Configs.Aria2c.MinSplitSize),
 		"--enable-rpc",
-		// "--console-log-level=error",
+		// "--console-log-level=errors",
 		"--quiet",
 		"--no-conf=true",
 		"--follow-metalink=true",
@@ -222,7 +222,7 @@ func (d *Downloader) aria2cDownload() error {
 		}
 		if status.Status == "complete" {
 			return bar.Finish()
-		} else if status.Status == "error" {
+		} else if status.Status == "errors" {
 			return errors.New(status.ErrorMessage)
 		}
 		if err := bar.Set64(completedLength); err != nil {
