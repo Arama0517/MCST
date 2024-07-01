@@ -20,7 +20,6 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/ybbus/jsonrpc/v3 v3.1.5
 	go.uber.org/automaxprocs v1.5.3
-	golang.org/x/sys v0.21.0
 	golang.org/x/text v0.16.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -61,7 +60,8 @@ require (
 	github.com/tklauser/numcpus v0.8.0 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
-	golang.org/x/image v0.15.0 // indirect
+	golang.org/x/image v0.18.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
+	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/term v0.21.0 // indirect
 )
