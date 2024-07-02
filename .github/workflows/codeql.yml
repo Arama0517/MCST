@@ -1,5 +1,5 @@
 # copied from https://github.com/goreleaser/goreleaser/blob/main/.github/workflows/codeql.yml
-name: "codeql"
+name: codeql
 
 on:
   push:

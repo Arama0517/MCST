@@ -1,5 +1,5 @@
 # copied from https://github.com/goreleaser/goreleaser/blob/main/.github/workflows/grype.yml
-name: "grype"
+name: grype
 
 on:
   push:
