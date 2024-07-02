@@ -44,7 +44,6 @@ func Execute(args []string, exit func(code int)) {
 		log.WithError(err).Error("出现错误!")
 		exit(MCSTErrors.RunFail)
 	}
-	exit(MCSTErrors.OK)
 }
 
 func newRootCmd() *cobra.Command {
