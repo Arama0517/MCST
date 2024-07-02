@@ -1,8 +1,12 @@
-### GoReleaser template
+### User template
+#### GoReleaser
 dist/
 completions/
 manpages/
 cosign.key
+
+#### Task
+.task/
 
 ### VisualStudioCode template
 .vscode/*
