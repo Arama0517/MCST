@@ -1,0 +1,42 @@
+# copied from
+name: build
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    paths:
+      - "go.*"
+      - "**/*.go"
+      - "Taskfile.yml"
+      - "Dockerfile"
+      - ".github/workflows/*.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  govulncheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - uses: golang/govulncheck-action@v1
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - uses: arduino/setup-task@v2
+      - name: setup
+        run: |
+          task setup
+          task build
+      - name: test
+        run: |
+          task test

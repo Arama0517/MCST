@@ -1,8 +1,4 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
+# copied from https://github.com/goreleaser/goreleaser/blob/main/.github/dependabot.yml
 version: 2
 updates:
   - package-ecosystem: "gomod"
@@ -10,7 +6,6 @@ updates:
     schedule:
       interval: "daily"
       time: "08:00"
-      timezone: Asia/Shanghai
     labels:
       - "dependencies"
     commit-message:
@@ -21,7 +16,16 @@ updates:
     schedule:
       interval: "daily"
       time: "08:00"
-      timezone: Asia/Shanghai
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "08:00"
     labels:
       - "dependencies"
     commit-message:
