@@ -15,15 +15,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-go@v5
         with:
           go-version: stable
-      - uses: anchore/sbom-action/download-syft@v0.16.0
-      - uses: sigstore/cosign-installer@v3.5.0
-      - run: git fetch --prune --unshallow
-      - name: 写入私钥
+      - uses: sigstore/cosign-installer@v3
+      - uses: anchore/sbom-action/download-syft@v0.16
+      - name: Unshallow
+        run: git fetch --prune --unshallow
+      - name: Write in private key
         run: echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > ${{ github.workspace }}/cosign.key
-      - name: 创建发行版
+      - name: release
         uses: goreleaser/goreleaser-action@v6
         with:
           version: latest
