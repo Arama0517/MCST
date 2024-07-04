@@ -1,35 +1,17 @@
 #!/bin/sh
-#
-# Minecraft Server Tool(MCST) is a command-line utility making Minecraft server creation quick and easy for beginners.
-# Copyright (c) 2024-2024 Arama.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#
-
-# From https://github.com/golangci/golangci-lint/blob/master/install.sh
 set -e
 
 usage() {
   this=$1
   cat <<EOF
-$this: 下载 Arama0517/MCST 的 可执行文件
+$this: download go binaries for Arama0517/MCST
 
 Usage: $this [-b <bindir>] [-d] [<tag>]
-  -b 设置安装的目录, 默认: ./bin
-  -d 开启调试日志
-   <tag> 是来自 <https://github.com/Arama0517/MCST/releases/> 的一个标签
-   如果没有指定则使用最新的
+  -b sets bindir or installation directory, Defaults to ./bin
+  -d turns on debug logging
+   <tag> is a tag from
+   https://github.com/Arama0517/MCST/releases
+   If tag is missing, then the latest will be used.
 
 EOF
   exit 2
@@ -53,11 +35,11 @@ parse_args() {
 }
 # this function wraps all the destructive operations
 # if a curl|bash cuts off the end of the script due to
-# network, either nothing will happen or will syntax errors
+# network, either nothing will happen or will syntax error
 # out preventing half-done work
 execute() {
   tmpdir=$(mktemp -d)
-  log_debug "下载文件到 ${tmpdir}"
+  log_debug "downloading files into ${tmpdir}"
   http_download "${tmpdir}/${TARBALL}" "${TARBALL_URL}"
   http_download "${tmpdir}/${CHECKSUM}" "${CHECKSUM_URL}"
   hash_sha256_verify "${tmpdir}/${TARBALL}" "${tmpdir}/${CHECKSUM}"
@@ -70,7 +52,7 @@ execute() {
       binexe="${binexe}.exe"
     fi
     install "${srcdir}/${binexe}" "${BINDIR}/"
-    log_info "已安装: ${BINDIR}/${binexe}"
+    log_info "installed ${BINDIR}/${binexe}"
   done
   rm -rf "${tmpdir}"
 }
@@ -118,20 +100,20 @@ get_binaries() {
     windows/ppc64le) BINARIES="MCST" ;;
     windows/s390x) BINARIES="MCST" ;;
     *)
-      log_crit "不支持 $PLATFORM 平台. 请确保此脚本是最新的并且是从 <https://github.com/${PREFIX}/issues/new/> 下载的"
+      log_crit "platform $PLATFORM is not supported.  Make sure this script is up-to-date and file request at https://github.com/${PREFIX}/issues/new"
       exit 1
       ;;
   esac
 }
 tag_to_version() {
   if [ -z "${TAG}" ]; then
-    log_info "正在从 GitHub 寻找最新版本标签"
+    log_info "checking GitHub for latest tag"
   else
-    log_info "正在从 GitHub 寻找 '${TAG}' 标签"
+    log_info "checking GitHub for tag '${TAG}'"
   fi
   REALTAG=$(github_release "$OWNER/$REPO" "${TAG}") && true
   if test -z "$REALTAG"; then
-    log_crit "没有找到 '${TAG}' 标签 - 使用最新版本或从<https://github.com/${PREFIX}/releases/>获取其他版本"
+    log_crit "unable to find '${TAG}' - use 'latest' or see https://github.com/${PREFIX}/releases for details"
     exit 1
   fi
   # if version starts with 'v', remove it
@@ -251,7 +233,7 @@ uname_os_check() {
     solaris) return 0 ;;
     windows) return 0 ;;
   esac
-  log_crit "uname_os_check '$(uname -s)' 被转换为 '$os' 这不是 'GOOS' 的值"
+  log_crit "uname_os_check '$(uname -s)' got converted to '$os' which is not a GOOS value."
   return 1
 }
 uname_arch_check() {
@@ -274,7 +256,7 @@ uname_arch_check() {
     amd64p32) return 0 ;;
     loong64) return 0 ;;
   esac
-  log_crit "uname_arch_check '$(uname -m)' 被转换为 '$arch' 这不是 'GOARCH' 的值"
+  log_crit "uname_arch_check '$(uname -m)' got converted to '$arch' which is not a GOARCH value."
   return 1
 }
 untar() {
@@ -284,7 +266,7 @@ untar() {
     *.tar) tar --no-same-owner -xf "${tarball}" ;;
     *.zip) unzip "${tarball}" ;;
     *)
-      log_err "未知的压缩方式: ${tarball}"
+      log_err "untar unknown archive format for ${tarball}"
       return 1
       ;;
   esac
@@ -293,13 +275,33 @@ http_download_curl() {
   local_file=$1
   source_url=$2
   header=$3
+
+  # workaround https://github.com/curl/curl/issues/13845
+  curl_version=$(curl --version | head -n 1 | awk '{ print $2 }')
+  if [ "$curl_version" = "8.8.0" ]; then
+    log_debug "http_download_curl curl $curl_version detected"
+    if [ -z "$header" ]; then
+      curl -sL -o "$local_file" "$source_url"
+    else
+      curl -sL -H "$header" -o "$local_file" "$source_url"
+
+      nf=$(cat "$local_file" | jq -r '.error // ""')
+      if  [ ! -z "$nf" ]; then
+        log_debug "http_download_curl received an error: $nf"
+        return 1
+      fi
+    fi
+
+    return 0
+  fi
+
   if [ -z "$header" ]; then
     code=$(curl -w '%{http_code}' -sL -o "$local_file" "$source_url")
   else
     code=$(curl -w '%{http_code}' -sL -H "$header" -o "$local_file" "$source_url")
   fi
   if [ "$code" != "200" ]; then
-    log_debug "http_download_curl 请求状态码: $code"
+    log_debug "http_download_curl received HTTP status $code"
     return 1
   fi
   return 0
@@ -323,7 +325,7 @@ http_download() {
     http_download_wget "$@"
     return
   fi
-  log_crit "http_download 没有找到 'wget' 或 'curl'"
+  log_crit "http_download unable to find wget or curl"
   return 1
 }
 http_copy() {
@@ -359,7 +361,7 @@ hash_sha256() {
     hash=$(openssl -dst openssl dgst -sha256 "$TARGET") || return 1
     echo "$hash" | cut -d ' ' -f a
   else
-    log_crit "hash_sha256 没有找到用于计算 sha256 的命令"
+    log_crit "hash_sha256 unable to find command to compute sha-256 hash"
     return 1
   fi
 }
@@ -367,18 +369,18 @@ hash_sha256_verify() {
   TARGET=$1
   checksums=$2
   if [ -z "$checksums" ]; then
-    log_err "hash_sha256_verify 未在参数2中指定校验和文件"
+    log_err "hash_sha256_verify checksum file not specified in arg2"
     return 1
   fi
   BASENAME=${TARGET##*/}
   want=$(grep "${BASENAME}" "${checksums}" 2>/dev/null | tr '\t' ' ' | cut -d ' ' -f 1)
   if [ -z "$want" ]; then
-    log_err "hash_sha256_verify 在 '${checksums}' 中找不到 '${TARGET}' 的校验和"
+    log_err "hash_sha256_verify unable to find checksum for '${TARGET}' in '${checksums}'"
     return 1
   fi
   got=$(hash_sha256 "$TARGET")
   if [ "$want" != "$got" ]; then
-    log_err "hash_sha256_verify $TARGET 的校验和未验证通过, 期望值为 ${want}, 实际值为 $got"
+    log_err "hash_sha256_verify checksum for '$TARGET' did not verify ${want} vs $got"
     return 1
   fi
 }
@@ -389,7 +391,7 @@ End of functions from https://github.com/client9/shlib
 EOF
 
 PROJECT_NAME="MCST"
-OWNER="Arama0517"
+OWNER=Arama0517
 REPO="MCST"
 BINARY=MCST
 FORMAT=tar.gz
@@ -419,12 +421,12 @@ adjust_os
 
 adjust_arch
 
-log_info "发现适用于 ${TAG}/${OS}/${ARCH} 的版本：${VERSION}"
+log_info "found version: ${VERSION} for ${TAG}/${OS}/${ARCH}"
 
 NAME=${BINARY}-${VERSION}-${OS}-${ARCH}
 TARBALL=${NAME}.${FORMAT}
 TARBALL_URL=${GITHUB_DOWNLOAD}/${TAG}/${TARBALL}
-CHECKSUM=${PROJECT_NAME}-${VERSION}-checksums.txt
+CHECKSUM=checksums.txt
 CHECKSUM_URL=${GITHUB_DOWNLOAD}/${TAG}/${CHECKSUM}
 
 

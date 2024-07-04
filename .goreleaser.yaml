@@ -19,8 +19,6 @@ metadata:
 builds:
   - binary: "MCST"
     main: "./cmd/MCST"
-    env:
-      - CGO_ENABLED=0
     goos:
       - linux
       - darwin
@@ -105,19 +103,6 @@ changelog:
     - title: Other work
       order: 9999
 
-sboms:
-  - artifacts: archive
-
-signs:
-  - cmd: cosign
-    artifacts: all
-    args:
-      - sign-blob
-      - "--key=cosign.key"
-      - "--output-signature=${signature}"
-      - "${artifact}"
-      - --yes
-
 release:
   name_template: "v{{ .Version }}"
   footer: |
@@ -174,6 +159,8 @@ brews:
     license: GPL-v3
     dependencies:
       - name: aria2
+      - name: osascript
+        os: mac
     repository:
       owner: Arama0517
       name: homebrew-tab

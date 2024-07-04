@@ -1,4 +1,4 @@
-//go:build !windows
+//go:build unix
 
 /*
  * Minecraft Server Tool(MCST) is a command-line utility making Minecraft server creation quick and easy for beginners.

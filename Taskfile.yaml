@@ -68,3 +68,11 @@ tasks:
       - git tag {{.NEXT}}
       - echo {{.NEXT}}
       - git push origin --tags
+  
+  install:
+    desc: 安装到系统
+    cmds:
+     - task: build
+     - sudo cp MCST /usr/local/bin/MCST
+     - sudo chmod +x /usr/local/bin/MCST
+     - ./scrips/install.sh

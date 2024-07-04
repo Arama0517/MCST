@@ -21,13 +21,26 @@
 package files
 
 import (
+	"github.com/lxn/win"
 	"github.com/ncruces/zenity"
 )
 
+// Run 使用资源管理器原生API
 func Run(fileName string) (string, error) {
-	return zenity.SelectFile(zenity.FileFilter{
-		Name:     fileName,
-		Patterns: []string{"文件"},
-		CaseFold: false,
-	})
+	return zenity.SelectFile(
+		zenity.Title("请选择文件"),
+		zenity.Attach(win.GetForegroundWindow()),
+		zenity.FileFilters{
+			zenity.FileFilter{
+				Name:     "需要的文件",
+				Patterns: []string{fileName},
+				CaseFold: false,
+			},
+			zenity.FileFilter{
+				Name:     "任意文件",
+				Patterns: []string{"*"},
+				CaseFold: false,
+			},
+		},
+	)
 }

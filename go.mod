@@ -2,14 +2,13 @@ module github.com/Arama0517/MCST
 
 go 1.22
 
-toolchain go1.22.1
-
 require (
 	github.com/apex/log v1.9.0
 	github.com/caarlos0/go-version v0.1.1
 	github.com/charmbracelet/bubbles v0.18.0
 	github.com/charmbracelet/bubbletea v0.26.6
 	github.com/charmbracelet/lipgloss v0.11.0
+	github.com/lxn/win v0.0.0-20210218163916-a377121e959e
 	github.com/muesli/mango-cobra v1.2.0
 	github.com/muesli/roff v0.1.0
 	github.com/muesli/termenv v0.15.2
