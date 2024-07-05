@@ -154,7 +154,7 @@ settings.language:
   other: Language
 
 settings.language.warning:
-  other: >- 
+  other: >-
     The language is not supported yet. Currently supported languages are: 
     en (English), 
     zh (Simplified Chinese).

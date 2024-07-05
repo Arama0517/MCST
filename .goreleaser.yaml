@@ -49,7 +49,7 @@ builds:
 archives:
   - format: tar.gz
     wrap_in_directory: true
-    name_template: '{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
     format_overrides:
       - goos: windows
         format: zip
@@ -64,10 +64,10 @@ archives:
 
 source:
   enabled: true
-  name_template: '{{ .ProjectName }}-{{ .Version }}-source'
+  name_template: "{{ .ProjectName }}-{{ .Version }}-source"
 
 checksum:
-  name_template: 'checksums.txt'
+  name_template: "checksums.txt"
 
 changelog:
   sort: asc

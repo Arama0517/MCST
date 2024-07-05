@@ -15,8 +15,7 @@ tasks:
       CMD_ROOT: '{{ default "./cmd" .CMD_ROOT }}'
       PROGRAM: '{{default "MCST" .PROGRAM}}'
       MAIN: '{{default "main.go" .MAIN}}'
-    cmds:
-      - go run {{ .CMD_ROOT }}/{{ .PROGRAM }}/{{ .MAIN }} {{ .CLI_ARGS }}
+    cmd: go run {{ .CMD_ROOT }}/{{ .PROGRAM }}/{{ .MAIN }} {{ .CLI_ARGS }}
 
   build:
     desc: 构建
@@ -24,8 +23,7 @@ tasks:
       - ./**/*.go
     generates:
       - ./MCST
-    cmds:
-      - go build -o MCST ./cmd/MCST
+    cmd: go build -o MCST ./cmd/MCST
 
   test:
     desc: 测试
@@ -34,18 +32,25 @@ tasks:
     vars:
       SOURCE_FILES: '{{default "./..." .SOURCE_FILES}}'
       TEST_PATTERN: '{{default "." .TEST_PATTERN}}'
-    cmds:
-      - go test {{ .CLI_ARGS }} -failfast {{ .SOURCE_FILES }} -run {{ .TEST_PATTERN }} -timeout=5m
+    cmd: go test {{ .CLI_ARGS }} -failfast {{ .SOURCE_FILES }} -run {{ .TEST_PATTERN }} -timeout=5m
 
   lint:
     desc: 使用 golangci-lint 检查代码
-    cmds:
-      - golangci-lint run --config ./.golangci.yaml {{.CLI_ARGS}} ./...
+    cmd: golangci-lint run --config ./.golangci.yaml {{.CLI_ARGS}} ./...
 
   fmt:
-    desc: 使用 gofumpt 格式化全部代码
+    desc: 运行格式化
     cmds:
-      - gofumpt -w -l .
+      - task: fmt:gofumpt
+      - task: fmt:prettier
+
+  fmt:gofumpt:
+    desc: 使用 gofumpt 格式化代码
+    cmd: gofumpt -w -l .
+
+  fmt:prettier:
+    desc: 使用 prettier 格式化代码
+    cmd: prettier -w --log-level=warn .
 
   ci:
     desc: 运行所有CI步骤
@@ -68,11 +73,11 @@ tasks:
       - git tag {{.NEXT}}
       - echo {{.NEXT}}
       - git push origin --tags
-  
+
   install:
     desc: 安装到系统
     cmds:
-     - task: build
-     - sudo cp MCST /usr/local/bin/MCST
-     - sudo chmod +x /usr/local/bin/MCST
-     - ./scrips/install.sh
+      - task: build
+      - sudo cp MCST /usr/local/bin/MCST
+      - sudo chmod +x /usr/local/bin/MCST
+      - ./scrips/install.sh

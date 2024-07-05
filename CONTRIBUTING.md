@@ -4,6 +4,7 @@
 [行为准则](https://github.com/Arama0517/MCST/blob/main/CODE_OF_CONDUCT.md)
 
 ## 设置你的环境
+
 `MCST` 是用[Go](https://go.dev)编写的.
 
 前提条件:
@@ -45,6 +46,7 @@ task build
 ```shell
 task ci
 ```
+
 在提交更改之前, 我们还建议你运行:
 
 > 此操作需要安装[gofumpt](https://github.com/mvdan/gofumpt)

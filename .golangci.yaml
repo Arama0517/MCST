@@ -1,6 +1,5 @@
 # yaml-language-server: $schema=https://golangci-lint.run/jsonschema/golangci.jsonschema.json
 run:
-  go: "1.22"
   timeout: 5m
 linters:
   enable:
