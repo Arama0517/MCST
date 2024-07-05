@@ -20,8 +20,6 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
-      - uses: sigstore/cosign-installer@v3
-      - uses: anchore/sbom-action/download-syft@v0.16
       - name: Unshallow
         run: git fetch --prune --unshallow
       - name: Write in private key
