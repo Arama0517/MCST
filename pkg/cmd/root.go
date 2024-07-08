@@ -19,6 +19,9 @@
 package cmd
 
 import (
+	"os"
+	"reflect"
+
 	"github.com/Arama0517/MCST/internal/build"
 	"github.com/Arama0517/MCST/internal/configs"
 	MCSTErrors "github.com/Arama0517/MCST/internal/errors"
@@ -28,26 +31,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func Execute(args []string, exit func(code int)) {
+var ExitFunc = os.Exit
+
+func init() {
 	log.SetHandler(cli.Default)
 	if err := configs.InitData(); err != nil {
 		log.WithError(err).Fatal("初始化配置失败")
-		exit(MCSTErrors.InitConfigFail)
+		ExitFunc(MCSTErrors.InitConfigFail)
 	}
 	if err := locale.InitLocale(); err != nil {
 		log.WithError(err).Error("初始化语言失败")
-		exit(MCSTErrors.InitLocaleFail)
+		ExitFunc(MCSTErrors.InitLocaleFail)
 	}
+}
+
+func Execute(args []string) {
 	cmd := newRootCmd()
 	cmd.SetArgs(args)
 	if err := cmd.Execute(); err != nil {
 		log.WithError(err).Error("出现错误!")
-		exit(MCSTErrors.RunFail)
+		ExitFunc(MCSTErrors.RunFail)
 	}
 }
 
 func newRootCmd() *cobra.Command {
-	var verbose bool
+	var debug bool
 	cmd := &cobra.Command{
 		Use:               "MCST",
 		Short:             locale.GetLocaleMessage("root.short"),
@@ -57,18 +65,17 @@ func newRootCmd() *cobra.Command {
 		SilenceErrors:     true,
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions,
-		PersistentPreRunE: func(*cobra.Command, []string) error {
-			if verbose {
+		PersistentPreRun: func(*cobra.Command, []string) {
+			if debug {
 				log.SetLevel(log.DebugLevel)
 			}
-			return nil
 		},
 		PostRun: func(*cobra.Command, []string) {
 			log.Info("运行成功")
 		},
 	}
 	cmd.SetVersionTemplate("{{.Version}}")
-	cmd.PersistentFlags().BoolVar(&verbose, "debug", false, locale.GetLocaleMessage("root.flags.debug"))
+	cmd.PersistentFlags().BoolVar(&debug, "debug", false, locale.GetLocaleMessage("root.flags.debug"))
 	cmd.AddCommand(
 		newCreateCmd(),
 		newDownloadCmd(),
@@ -79,4 +86,33 @@ func newRootCmd() *cobra.Command {
 		newManCmd(),
 	)
 	return cmd
+}
+
+func structToMap(obj any, parentKey string, result map[string]any) {
+	v := reflect.ValueOf(obj)
+	t := reflect.TypeOf(obj)
+
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		value := v.Field(i)
+
+		// 构建完整的键
+		tag := field.Tag.Get("yaml")
+		if tag == "" {
+			tag = field.Name
+		}
+		key := tag
+		if parentKey != "" {
+			key = parentKey + "." + tag
+		}
+
+		switch value.Kind() {
+		case reflect.Struct:
+			structToMap(value.Interface(), key, result)
+		case reflect.Map:
+			continue
+		default:
+			result[key] = value.Interface()
+		}
+	}
 }

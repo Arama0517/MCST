@@ -135,16 +135,16 @@ list:
 settings:
   other: MCST Settings
 
-settings.aria2-enabled:
+settings.aria2.enabled:
   other: Aria2c will be used for downloading of artifacts
 
-settings.aria2-retry-wait:
+settings.aria2.retry-wait:
   other: Number of seconds to wait between retries
 
-settings.aria2-split:
+settings.aria2.split:
   other: Number of connections used for download.
 
-settings.aria2-max-connection-per-server:
+settings.aria2.max-connection-per-server:
   other: The maximum number of connections to one server for each download.
 
 settings.auto-accept-eula:
@@ -153,7 +153,10 @@ settings.auto-accept-eula:
 settings.language:
   other: Language
 
-settings.language.warning:
+settings.reset:
+  other: Reset Settings
+
+errors.language:
   other: >-
     The language is not supported yet. Currently supported languages are: 
     en (English), 

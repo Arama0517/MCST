@@ -26,7 +26,21 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var Configs Config
+var (
+	Configs         Config
+	DefaultSettings = Settings{
+		Aria2: Aria2{
+			Enabled:                true,
+			RetryWait:              2,
+			Split:                  5,
+			MaxConnectionPerServer: 5,
+			MinSplitSize:           "5M",
+			Options:                []string{},
+		},
+		AutoAcceptEULA: false,
+		Language:       language.English.String(),
+	}
+)
 
 var (
 	rootDir      string
@@ -36,41 +50,45 @@ var (
 )
 
 type Core struct {
-	ID         int    // 核心id
-	URL        string `json:"url"`         // 下载地址(如果不是本地的话)
-	FileName   string `json:"file_name"`   // 文件名
-	FilePath   string `json:"file_path"`   // 文件路径
-	ExtrasData any    `json:"extras_data"` // 其他数据
+	ID         int    `yaml:"id"`          // 核心id
+	URL        string `yaml:"url"`         // 下载地址(如果不是本地的话)
+	FileName   string `yaml:"file_name"`   // 文件名
+	FilePath   string `yaml:"file_path"`   // 文件路径
+	ExtrasData any    `yaml:"extras_data"` // 其他数据
 }
 
 type Java struct {
-	Path     string   `json:"path"`     // Java路径
-	Args     []string `json:"args"`     // Java虚拟机参数
-	Xmx      uint64   `json:"xmx"`      // Java虚拟机最大堆内存
-	Xms      uint64   `json:"xms"`      // Java虚拟机初始堆内存
-	Encoding string   `json:"encoding"` // 编码
+	Path      string   `yaml:"path"`       // Java路径
+	Args      []string `yaml:"args"`       // Java虚拟机参数
+	MaxMemory uint64   `yaml:"max_memory"` // Java虚拟机最大堆内存
+	MinMemory uint64   `yaml:"min_memory"` // Java虚拟机初始堆内存
+	Encoding  string   `yaml:"encoding"`   // 编码
 }
 type Server struct {
-	Name       string   `json:"name"`        // 服务器名称
-	Java       Java     `json:"java"`        // Java
-	ServerArgs []string `json:"server_args"` // Minecraft服务器参数
+	Name       string   `yaml:"name"`        // 服务器名称
+	Java       Java     `yaml:"java"`        // Java
+	ServerArgs []string `yaml:"server_args"` // Minecraft服务器参数
 }
 
-type Aria2c struct {
-	Enabled                bool     `json:"enabled"`
-	RetryWait              int      `json:"retry_wait"`
-	Split                  int      `json:"split"`
-	MaxConnectionPerServer int      `json:"max_connection_per_server"`
-	MinSplitSize           string   `json:"min_split_size"`
-	Option                 []string `json:"option"`
+type Aria2 struct {
+	Enabled                bool     `yaml:"enabled"`
+	RetryWait              int      `yaml:"retry_wait"`
+	Split                  int      `yaml:"split"`
+	MaxConnectionPerServer int      `yaml:"max_connection_per_server"`
+	MinSplitSize           string   `yaml:"min_split_size"`
+	Options                []string `yaml:"options"`
+}
+
+type Settings struct {
+	Aria2          Aria2  `yaml:"aria2"`
+	AutoAcceptEULA bool   `yaml:"auto_accept_eula"`
+	Language       string `yaml:"language"`
 }
 
 type Config struct {
-	Cores          map[int]Core      `json:"cores"`            // 核心列表
-	Servers        map[string]Server `json:"servers"`          // 服务器列表, 如果服务器名称(key)为temp, CreatePage调用时会视为暂存配置而不是名为temp的服务器
-	Aria2c         Aria2c            `json:"aria2c"`           // aria2c配置
-	AutoAcceptEULA bool              `json:"auto_accept_eula"` // 是否自动同意EULA
-	Language       language.Tag      `json:"language"`
+	Cores    map[int]Core      `yaml:"cores"`   // 核心列表
+	Servers  map[string]Server `yaml:"servers"` // 服务器列表, 如果服务器名称(key)为temp, CreatePage调用时会视为暂存配置而不是名为temp的服务器
+	Settings Settings          `yaml:"settings"`
 }
 
 func InitData() error {
@@ -97,17 +115,7 @@ func InitData() error {
 
 	if _, err := os.Stat(configsPath); os.IsNotExist(err) {
 		data, err := yaml.Marshal(Config{
-			Cores:   map[int]Core{},
-			Servers: map[string]Server{},
-			Aria2c: Aria2c{
-				Enabled:                true,
-				RetryWait:              2,
-				Split:                  5,
-				MaxConnectionPerServer: 5,
-				MinSplitSize:           "5M",
-			},
-			AutoAcceptEULA: false,
-			Language:       language.English,
+			Settings: DefaultSettings,
 		})
 		if err != nil {
 			return err

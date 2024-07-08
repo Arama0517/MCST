@@ -26,7 +26,8 @@ import (
 
 func TestGetVersion(t *testing.T) {
 	args := []string{"--version"}
-	cmd.Execute(args, func(code int) {
+	cmd.ExitFunc = func(code int) {
 		t.Logf("退出代码: %d", code)
-	})
+	}
+	cmd.Execute(args)
 }

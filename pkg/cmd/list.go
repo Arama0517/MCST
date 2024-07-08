@@ -42,8 +42,8 @@ func newListCmd() *cobra.Command {
 			}
 			for _, config := range configs.Configs.Servers {
 				log.WithFields(log.Fields{
-					locale.GetLocaleMessage("create.flags.xms"):         config.Java.Xms,
-					locale.GetLocaleMessage("create.flags.xmx"):         config.Java.Xmx,
+					locale.GetLocaleMessage("create.flags.xms"):         config.Java.MinMemory,
+					locale.GetLocaleMessage("create.flags.xmx"):         config.Java.MaxMemory,
 					locale.GetLocaleMessage("create.flags.encoding"):    config.Java.Encoding,
 					locale.GetLocaleMessage("create.flags.java"):        config.Java.Path,
 					locale.GetLocaleMessage("create.flags.jvm_args"):    config.Java.Args,

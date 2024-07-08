@@ -135,16 +135,16 @@ list:
 settings:
   other: MCST 设置
 
-settings.aria2-enabled:
+settings.aria2.enabled:
   other: Aria2c 将用于下载文件
 
-settings.aria2-retry-wait:
+settings.aria2.retry-wait:
   other: 重试之间等待的秒数
 
-settings.aria2-split:
+settings.aria2.split:
   other: 下载使用的连接数
 
-settings.aria2-max-connection-per-server:
+settings.aria2.max-connection-per-server:
   other: 每次下载一个服务器的最大连接数
 
 settings.auto-accept-eula:
@@ -153,7 +153,10 @@ settings.auto-accept-eula:
 settings.language:
   other: 语言
 
-settings.language.warning:
+settings.reset:
+  other: 重置设置
+
+errors.language:
   other: >-
     尚未支持该语言, 当前支持的语言有: 
     en(英语), 

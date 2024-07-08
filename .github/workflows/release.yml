@@ -5,11 +5,6 @@ on:
     tags:
       - "v*"
 
-permissions:
-  contents: write
-  id-token: write
-  packages: write
-
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -22,9 +17,8 @@ jobs:
           go-version: stable
       - name: Unshallow
         run: git fetch --prune --unshallow
-      - name: Write in private key
-        run: echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > ${{ github.workspace }}/cosign.key
-      - name: release
+
+      - name: Create release
         uses: goreleaser/goreleaser-action@v6
         with:
           version: latest
@@ -32,4 +26,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           AUR_KEY: ${{ secrets.AUR_KEY }}
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PWD }}

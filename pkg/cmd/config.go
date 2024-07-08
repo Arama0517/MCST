@@ -26,8 +26,10 @@ import (
 	"github.com/Arama0517/MCST/internal/configs"
 	MCSTErrors "github.com/Arama0517/MCST/internal/errors"
 	"github.com/Arama0517/MCST/internal/locale"
+	"github.com/apex/log"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 type configCmdFlags struct {
@@ -52,11 +54,25 @@ func newConfigCmd() *cobra.Command {
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(cmd *cobra.Command, _ []string) error {
+			isCheckConfig := true
+			cmdFlags := cmd.Flags()
+			cmdFlags.VisitAll(func(flag *pflag.Flag) {
+				if flag.Changed {
+					isCheckConfig = false
+				}
+			})
 			config, exists := configs.Configs.Servers[flags.name]
 			if !exists {
 				return MCSTErrors.ErrServerNotFound
 			}
-			cmdFlags := cmd.Flags()
+			if isCheckConfig {
+				result := make(map[string]any)
+				structToMap(config, "", result)
+				for k, v := range result {
+					log.WithField("value", v).Info(k)
+				}
+				return nil
+			}
 			if flags.delete {
 				delete(configs.Configs.Servers, flags.name)
 				if err := os.RemoveAll(filepath.Join(configs.ServersDir, flags.name)); err != nil {
@@ -74,14 +90,14 @@ func newConfigCmd() *cobra.Command {
 					return err
 				}
 				switch {
-				case ram > config.Java.Xmx:
+				case ram > config.Java.MaxMemory:
 					return MCSTErrors.ErrXmxLessThanXms
 				case ram < bytes.MiB:
 					return MCSTErrors.ErrXmsToLow
 				case ram > memInfo.Total:
 					return MCSTErrors.ErrXmsExceedsPhysicalMemory
 				}
-				config.Java.Xms = ram
+				config.Java.MinMemory = ram
 			}
 			if cmdFlags.Changed("xmx") {
 				ram, err := bytes.ToBytes(flags.xmx)
@@ -89,14 +105,14 @@ func newConfigCmd() *cobra.Command {
 					return err
 				}
 				switch {
-				case ram < config.Java.Xms:
+				case ram < config.Java.MinMemory:
 					return MCSTErrors.ErrXmxLessThanXms
 				case ram < bytes.MiB:
 					return MCSTErrors.ErrXmxTooLow
 				case ram > memInfo.Total:
 					return MCSTErrors.ErrXmxExceedsPhysicalMemory
 				}
-				config.Java.Xmx = ram
+				config.Java.MaxMemory = ram
 			}
 			if cmdFlags.Changed("encoding") {
 				config.Java.Encoding = flags.encoding

@@ -18,7 +18,9 @@
 
 package errors
 
-import "errors"
+import (
+	"errors"
+)
 
 var (
 	ErrServerNotFound = errors.New("服务器不存在, 你可以使用 'MCST list' 命令查看所有已创建的服务器")
@@ -40,8 +42,7 @@ var ErrEulaRequired = errors.New("微软要求必须同意EULA协议(https://aka
 var ErrCoreNotFound = errors.New("核心不存在")
 
 const (
-	OK = iota
-	InitConfigFail
+	InitConfigFail = iota + 1
 	InitLocaleFail
 	RunFail
 )

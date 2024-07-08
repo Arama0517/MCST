@@ -48,8 +48,8 @@ func newStartCmd() *cobra.Command {
 			cmd := exec.Command(config.Java.Path)
 			cmd.Dir = filepath.Join(configs.ServersDir, config.Name)
 			cmd.Args = append(cmd.Args,
-				fmt.Sprintf("-Xms%d", config.Java.Xms),
-				fmt.Sprintf("-Xmx%d", config.Java.Xmx),
+				fmt.Sprintf("-Xms%d", config.Java.MinMemory),
+				fmt.Sprintf("-Xmx%d", config.Java.MaxMemory),
 				fmt.Sprintf("-Dfile.encoding=%s", config.Java.Encoding))
 			cmd.Args = append(cmd.Args, config.Java.Args...)
 			cmd.Args = append(cmd.Args, "-jar", "server.jar")

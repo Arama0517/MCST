@@ -62,7 +62,7 @@ func (d *Downloader) Download() (string, error) {
 	d.getFileName(resp.Header)
 
 	// Aria2 多线程下载
-	if configs.Configs.Aria2c.Enabled {
+	if configs.Configs.Settings.Aria2.Enabled {
 		aria2cName := "aria2c"
 		if runtime.GOOS == "windows" {
 			aria2cName = "aria2c.exe"
@@ -135,10 +135,10 @@ func (d *Downloader) aria2cDownload() error {
 		fmt.Sprintf("--user-agent=MCST/%s", build.Version.GitVersion),
 		"--allow-overwrite=true",
 		"--auto-file-renaming=false",
-		fmt.Sprintf("--retry-wait=%d", configs.Configs.Aria2c.RetryWait),
-		fmt.Sprintf("--split=%d", configs.Configs.Aria2c.Split),
-		fmt.Sprintf("--max-connection-per-server=%d", configs.Configs.Aria2c.MaxConnectionPerServer),
-		fmt.Sprintf("--min-split-size=%s", configs.Configs.Aria2c.MinSplitSize),
+		fmt.Sprintf("--retry-wait=%d", configs.Configs.Settings.Aria2.RetryWait),
+		fmt.Sprintf("--split=%d", configs.Configs.Settings.Aria2.Split),
+		fmt.Sprintf("--max-connection-per-server=%d", configs.Configs.Settings.Aria2.MaxConnectionPerServer),
+		fmt.Sprintf("--min-split-size=%s", configs.Configs.Settings.Aria2.MinSplitSize),
 		"--enable-rpc",
 		// "--console-log-level=errors",
 		"--quiet",
@@ -151,7 +151,7 @@ func (d *Downloader) aria2cDownload() error {
 		"--summary-interval=0",
 		"--auto-save-interval=1",
 	)
-	cmd.Args = append(cmd.Args, configs.Configs.Aria2c.Option...)
+	cmd.Args = append(cmd.Args, configs.Configs.Settings.Aria2.Options...)
 	if err := cmd.Start(); err != nil {
 		return err
 	}

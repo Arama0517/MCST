@@ -38,5 +38,5 @@ func init() {
 }
 
 func main() {
-	cmd.Execute(os.Args[1:], os.Exit)
+	cmd.Execute(os.Args[1:])
 }

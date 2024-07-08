@@ -68,11 +68,11 @@ func newCreateCmd() *cobra.Command {
 					return MCSTErrors.ErrServerExists
 				}
 			}
-			config.Java.Xms, err = bytes.ToBytes(flags.xms)
+			config.Java.MinMemory, err = bytes.ToBytes(flags.xms)
 			if err != nil {
 				return err
 			}
-			config.Java.Xmx, err = bytes.ToBytes(flags.xmx)
+			config.Java.MaxMemory, err = bytes.ToBytes(flags.xmx)
 			if err != nil {
 				return err
 			}
@@ -81,15 +81,15 @@ func newCreateCmd() *cobra.Command {
 				return err
 			}
 			switch {
-			case config.Java.Xms < bytes.MiB:
+			case config.Java.MinMemory < bytes.MiB:
 				return MCSTErrors.ErrXmsToLow
-			case config.Java.Xmx < bytes.MiB:
+			case config.Java.MaxMemory < bytes.MiB:
 				return MCSTErrors.ErrXmxTooLow
-			case config.Java.Xmx < config.Java.Xms:
+			case config.Java.MaxMemory < config.Java.MinMemory:
 				return MCSTErrors.ErrXmxLessThanXms
-			case config.Java.Xms > memInfo.Total:
+			case config.Java.MinMemory > memInfo.Total:
 				return MCSTErrors.ErrXmsExceedsPhysicalMemory
-			case config.Java.Xmx > memInfo.Total:
+			case config.Java.MaxMemory > memInfo.Total:
 				return MCSTErrors.ErrXmxExceedsPhysicalMemory
 			}
 			config.Java.Encoding = flags.encoding
@@ -156,7 +156,7 @@ eula=true`, time.Now().Format("Mon Jan 02 15:04:05 MST 2006"))
 	cmd.Flags().StringSliceVar(&flags.jvmArgs, "jvm_args", []string{"-Dlog4j2.formatMsgNoLookups=true"}, locale.GetLocaleMessage("create.flags.jvm_args"))
 	cmd.Flags().StringSliceVar(&flags.serverArgs, "server_args", []string{"--nogui"}, locale.GetLocaleMessage("create.flags.server_args"))
 	cmd.Flags().IntVarP(&flags.core, "core", "c", 0, locale.GetLocaleMessage("create.flags.core"))
-	if !configs.Configs.AutoAcceptEULA {
+	if !configs.Configs.Settings.AutoAcceptEULA {
 		cmd.Flags().BoolVar(&flags.eula, "eula", false, locale.GetLocaleMessage("create.flags.eula"))
 		_ = cmd.MarkFlagRequired("eula")
 	} else {

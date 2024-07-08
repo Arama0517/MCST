@@ -23,6 +23,7 @@ import (
 
 	"github.com/Arama0517/MCST/internal/configs"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
+	"golang.org/x/text/language"
 	"gopkg.in/yaml.v3"
 )
 
@@ -35,7 +36,7 @@ var (
 var localeFS embed.FS
 
 func InitLocale() error {
-	Bundle = i18n.NewBundle(configs.Configs.Language)
+	Bundle = i18n.NewBundle(language.English)
 	Bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
 	files, err := localeFS.ReadDir(".")
 	if err != nil {
@@ -46,7 +47,7 @@ func InitLocale() error {
 			return err
 		}
 	}
-	Localizer = i18n.NewLocalizer(Bundle)
+	Localizer = i18n.NewLocalizer(Bundle, configs.Configs.Settings.Language)
 	return nil
 }
 

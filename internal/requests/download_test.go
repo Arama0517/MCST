@@ -40,7 +40,7 @@ func TestDownload(t *testing.T) {
 	if err := configs.InitData(); err != nil {
 		t.Fatal(err)
 	}
-	configs.Configs.Aria2c.Enabled = false
+	configs.Configs.Settings.Aria2.Enabled = false
 	path, err := requests.NewDownloader(URL).Download()
 	if err != nil {
 		panic(err)
@@ -58,7 +58,7 @@ func TestAria2Download(t *testing.T) {
 	if err := configs.InitData(); err != nil {
 		t.Fatal(err)
 	}
-	configs.Configs.Aria2c.Enabled = true
+	configs.Configs.Settings.Aria2.Enabled = true
 	path, err := requests.NewDownloader(URL).Download()
 	if err != nil {
 		t.Fatal(err)
