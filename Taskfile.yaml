@@ -26,7 +26,7 @@ tasks:
     cmd: go build -o MCST ./cmd/MCST
 
   test:
-    desc: 测试
+    desc: 运行测试
     env:
       LC_ALL: C
     vars:
@@ -39,18 +39,8 @@ tasks:
     cmd: golangci-lint run --config ./.golangci.yaml {{.CLI_ARGS}} ./...
 
   fmt:
-    desc: 运行格式化
-    cmds:
-      - task: fmt:gofumpt
-      - task: fmt:prettier
-
-  fmt:gofumpt:
     desc: 使用 gofumpt 格式化代码
     cmd: gofumpt -w -l .
-
-  fmt:prettier:
-    desc: 使用 prettier 格式化代码
-    cmd: prettier -w --log-level=warn .
 
   ci:
     desc: 运行所有CI步骤
