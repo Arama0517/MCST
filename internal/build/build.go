@@ -39,30 +39,29 @@ var asciiArt string
 var Version goversion.Info
 
 func init() {
-	URL := url.URL{
-		Scheme: "https",
-		Host:   "github.com",
-		Path:   "/Arama0517/MCST",
-	}
-	Version = goversion.GetVersionInfo(
-		goversion.WithAppDetails("MCServerTool", "A command-line utility making Minecraft server creation quick and easy for beginners.", URL.String()),
-		goversion.WithASCIIName(asciiArt),
-		func(i *goversion.Info) {
-			if commit != "" {
-				i.GitCommit = commit
-			}
-			if treeState != "" {
-				i.GitTreeState = treeState
-			}
-			if date != "" {
-				i.BuildDate = date
-			}
-			if version != "" {
-				i.GitVersion = version
-			}
-			if builtBy != "" {
-				i.BuiltBy = builtBy
-			}
-		},
-	)
+	Version = goversion.GetVersionInfo(func(i *goversion.Info) {
+		i.Name = "Minecraft Server Tool"
+		i.Description = "A command-line utility making Minecraft server creation quick and easy for beginners."
+		i.URL = (&url.URL{
+			Scheme: "https",
+			Host:   "github.com",
+			Path:   "/Arama0517/MCST",
+		}).String()
+		i.ASCIIName = asciiArt
+		if commit != "" {
+			i.GitCommit = commit
+		}
+		if treeState != "" {
+			i.GitTreeState = treeState
+		}
+		if date != "" {
+			i.BuildDate = date
+		}
+		if version != "" {
+			i.GitVersion = version
+		}
+		if builtBy != "" {
+			i.BuiltBy = builtBy
+		}
+	})
 }

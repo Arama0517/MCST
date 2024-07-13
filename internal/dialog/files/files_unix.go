@@ -40,40 +40,49 @@ func (i item) Title() string       { return i.title }
 func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.title }
 
+type checkFunc func(path string) bool
+
 type model struct {
 	list         list.Model
 	choice       string
 	err          error
+	checkFunc    checkFunc
 	needFileName string
 	currentDir   string
 	files        map[string]os.FileInfo
 }
 
 func (m model) Init() tea.Cmd {
+	m.list.Title = fmt.Sprintf("%s\n请选择(指向)名为 '%s' 的文件", m.currentDir, m.needFileName)
+	m.Update(nil)
 	return nil
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	title := "%s\n请选择(指向)名为 '%s' 的文件"
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch keypress := msg.String(); keypress {
-		case "q", "ctrl+c":
+		switch msg.String() {
+		case "q", "ctrl+c", "ctrl+d":
 			return m, tea.Quit
-
 		case "enter":
 			if i, ok := m.list.SelectedItem().(item); ok {
-				if file, ok := m.files[i.title]; ok && file.IsDir() || i.title == ".." {
+				file, ok := m.files[i.title]
+				filePath := filepath.Join(m.currentDir, i.title)
+				switch {
+				case ok && file.IsDir() || i.title == "..":
 					m.currentDir = filepath.Join(m.currentDir, i.title)
-				}
-				if i.title == m.needFileName {
-					m.choice = filepath.Join(m.currentDir, i.title)
+					items, err := m.UpdateFiles()
+					if err != nil {
+						return m, func() tea.Msg { return err }
+					}
+					m.list.SetItems(items)
+				case file.Name() == m.needFileName && m.checkFunc(filePath):
+					m.choice = filePath
 					return m, tea.Quit
+				default:
+					title = "%s\n选择的文件不正确或无效, 请选择(指向)名为 '%s' 的文件"
 				}
-				items, err := m.UpdateFiles()
-				if err != nil {
-					return m, func() tea.Msg { return err }
-				}
-				m.list.SetItems(items)
 			}
 		}
 
@@ -86,9 +95,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tea.Quit
 	}
 
-	m.list.Title = fmt.Sprintf("当前路径: `%s`\n请选择名为 `%s` 的文件", m.currentDir, m.needFileName)
-
 	var cmd tea.Cmd
+	m.list.Title = fmt.Sprintf(title, m.currentDir, m.needFileName)
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
 }
@@ -147,12 +155,13 @@ func (m model) View() string {
 	return docStyle.Render(m.list.View())
 }
 
-func Run(fileName string) (string, error) {
+func Run(fileName string, checkFunc checkFunc) (string, error) {
 	userHomeDir, _ := os.UserHomeDir()
 	listModel := model{
 		needFileName: fileName,
 		files:        make(map[string]os.FileInfo),
 		currentDir:   userHomeDir,
+		checkFunc:    checkFunc,
 	}
 
 	items, err := listModel.UpdateFiles()

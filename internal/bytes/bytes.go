@@ -67,18 +67,3 @@ func ToBytes(byteStr string) (uint64, error) {
 		return 0, MCSTErrors.ErrInvalidUnit
 	}
 }
-
-func FromBytes(bytes uint64) (string, uint64) {
-	switch {
-	case bytes > TiB:
-		return "TiB", bytes
-	case bytes > GiB:
-		return "GiB", bytes
-	case bytes > MiB:
-		return "MiB", bytes
-	case bytes > KiB:
-		return "KiB", bytes
-	default:
-		return "Bytes", bytes
-	}
-}

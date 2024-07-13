@@ -31,7 +31,7 @@ func main() {
 		Use:   "choice",
 		Short: "测试选择文件",
 		RunE: func(*cobra.Command, []string) error {
-			path, err := files.Run(fileName)
+			path, err := files.Run(fileName, func(string) bool { return true })
 			if err != nil {
 				return err
 			}
