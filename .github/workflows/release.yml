@@ -2,13 +2,8 @@ name: release
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-    paths-ignore:
-      - '**/*.md'
-  schedule:
-    - cron: "0 0 * * 0"
+    tags:
+      - "v*"
 
 jobs:
   release:
