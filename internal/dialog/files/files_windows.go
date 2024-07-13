@@ -21,26 +21,36 @@
 package files
 
 import (
+	"github.com/apex/log"
 	"github.com/lxn/win"
 	"github.com/ncruces/zenity"
 )
 
 // Run 使用资源管理器原生API
-func Run(fileName string) (string, error) {
-	return zenity.SelectFile(
-		zenity.Title("请选择文件"),
-		zenity.Attach(win.GetForegroundWindow()),
-		zenity.FileFilters{
-			zenity.FileFilter{
-				Name:     "需要的文件",
-				Patterns: []string{fileName},
-				CaseFold: false,
+func Run(fileName string, checkFunc func(path string) bool) (string, error) {
+	for {
+		path, err := zenity.SelectFile(
+			zenity.Title("请选择文件"),
+			zenity.Attach(win.GetForegroundWindow()),
+			zenity.FileFilters{
+				zenity.FileFilter{
+					Name:     "需要的文件",
+					Patterns: []string{fileName},
+					CaseFold: false,
+				},
+				zenity.FileFilter{
+					Name:     "任意文件",
+					Patterns: []string{"*"},
+					CaseFold: false,
+				},
 			},
-			zenity.FileFilter{
-				Name:     "任意文件",
-				Patterns: []string{"*"},
-				CaseFold: false,
-			},
-		},
-	)
+		)
+		if err != nil {
+			return "", err
+		}
+		if checkFunc(path) {
+			return path, nil
+		}
+		log.Warnf("选择的文件不正确或无效, 请选择(指向)名为 '%s' 的文件", fileName)
+	}
 }
