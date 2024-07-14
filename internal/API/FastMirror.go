@@ -25,18 +25,17 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 
+	"github.com/Arama0517/MCST/internal/download"
 	"github.com/Arama0517/MCST/internal/requests"
 )
 
 func GetFastMirrorData() (map[string]FastMirrorData, error) {
-	var err error
-	resp, err := requests.Request(url.URL{
-		Scheme: "https",
-		Host:   "download.fastmirror.net",
-		Path:   "/api/v3",
-	}, http.MethodGet, nil, nil)
+	req, err := requests.NewRequest(http.MethodGet, "https://download.fastmirror.net/api/v3", nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -47,10 +46,10 @@ func GetFastMirrorData() (map[string]FastMirrorData, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := resp.Body.Close(); err != nil {
+	if err = resp.Body.Close(); err != nil {
 		return nil, err
 	}
-	if err := json.Unmarshal(body, &data); err != nil {
+	if err = json.Unmarshal(body, &data); err != nil {
 		return nil, err
 	}
 	result := map[string]FastMirrorData{}
@@ -60,13 +59,12 @@ func GetFastMirrorData() (map[string]FastMirrorData, error) {
 	return result, nil
 }
 
-func GetFastMirrorBuildsData(core string, minecraftVersion string) (map[string]FastMirrorBuilds, error) {
-	resp, err := requests.Request(url.URL{
-		Scheme:   "https",
-		Host:     "download.fastmirror.net",
-		Path:     "/api/v3/" + core + "/" + minecraftVersion,
-		RawQuery: "offset=0&limit=25",
-	}, http.MethodGet, nil, nil)
+func GetFastMirrorBuildsData(core, minecraftVersion string) (map[string]FastMirrorBuilds, error) {
+	req, err := requests.NewRequest(http.MethodGet, fmt.Sprintf("https://download.fastmirror.net/api/v3/%s/%s?offset=0&limit=25", core, minecraftVersion), nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +77,7 @@ func GetFastMirrorBuildsData(core string, minecraftVersion string) (map[string]F
 	if err != nil {
 		return nil, err
 	}
-	if err := resp.Body.Close(); err != nil {
+	if err = resp.Body.Close(); err != nil {
 		return nil, err
 	}
 	err = json.Unmarshal(body, &data)
@@ -94,12 +92,8 @@ func GetFastMirrorBuildsData(core string, minecraftVersion string) (map[string]F
 	return parseData, nil
 }
 
-func GetFastMirrorDownloader(core, minecraftVersion, buildVersion string) *requests.Downloader {
-	return requests.NewDownloader(url.URL{
-		Scheme: "https",
-		Host:   "download.fastmirror.net",
-		Path:   fmt.Sprintf("/download/%s/%s/%s", core, minecraftVersion, buildVersion),
-	})
+func GetFastMirrorDownloader(core, minecraftVersion, buildVersion string) *download.Downloader {
+	return download.NewDownloader(fmt.Sprintf("https://download.fastmirror.net/download/%s/%s/%s", core, minecraftVersion, buildVersion))
 }
 
 type FastMirrorData struct {

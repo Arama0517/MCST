@@ -29,8 +29,8 @@ import (
 var (
 	Configs         Config
 	DefaultSettings = Settings{
+		Downloader: 0,
 		Aria2: Aria2{
-			Enabled:                true,
 			RetryWait:              2,
 			Split:                  5,
 			MaxConnectionPerServer: 5,
@@ -70,8 +70,11 @@ type Server struct {
 	ServerArgs []string `yaml:"server_args"` // Minecraft服务器参数
 }
 
+type IDM struct {
+	RootDir string `yaml:"root_dir"`
+}
+
 type Aria2 struct {
-	Enabled                bool     `yaml:"enabled"`
 	RetryWait              int      `yaml:"retry_wait"`
 	Split                  int      `yaml:"split"`
 	MaxConnectionPerServer int      `yaml:"max_connection_per_server"`
@@ -80,7 +83,9 @@ type Aria2 struct {
 }
 
 type Settings struct {
+	Downloader     int    `yaml:"downloader"` // 0: 单线程下载, 1: 使用 Aria2 下载, 2: 使用 IDM 下载 (仅Windows)
 	Aria2          Aria2  `yaml:"aria2"`
+	IDM            IDM    `yaml:"idm"`
 	AutoAcceptEULA bool   `yaml:"auto_accept_eula"`
 	Language       string `yaml:"language"`
 }
@@ -101,26 +106,26 @@ func InitData() error {
 	DownloadsDir = filepath.Join(rootDir, "downloads")
 	configsPath = filepath.Join(rootDir, "configs.yaml")
 
-	if err := os.MkdirAll(rootDir, 0o755); err != nil {
+	if err = os.MkdirAll(rootDir, 0o755); err != nil {
 		return err
 	}
-	if err := os.MkdirAll(ServersDir, 0o755); err != nil {
+	if err = os.MkdirAll(ServersDir, 0o755); err != nil {
 		return err
 	}
-	if err := os.MkdirAll(DownloadsDir, 0o755); err != nil {
+	if err = os.MkdirAll(DownloadsDir, 0o755); err != nil {
 		return err
 	}
 
 	// 初始化
 
-	if _, err := os.Stat(configsPath); os.IsNotExist(err) {
+	if _, err = os.Stat(configsPath); os.IsNotExist(err) {
 		data, err := yaml.Marshal(Config{
 			Settings: DefaultSettings,
 		})
 		if err != nil {
 			return err
 		}
-		if err := os.WriteFile(configsPath, data, 0o644); err != nil {
+		if err = os.WriteFile(configsPath, data, 0o644); err != nil {
 			return err
 		}
 	} else if err != nil {

@@ -1,4 +1,5 @@
 #!/bin/sh
+
 #
 # Minecraft Server Tool(MCST) is a command-line utility making Minecraft server creation quick and easy for beginners.
 # Copyright (c) 2024-2024 Arama.

@@ -16,47 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package api_test
+package download_test
 
 import (
-	"encoding/json"
+	"os"
 	"testing"
 
-	api "github.com/Arama0517/MCST/internal/API"
-	"github.com/Arama0517/MCST/internal/configs"
+	"github.com/Arama0517/MCST/internal/download"
 )
 
-func TestFastMirror(t *testing.T) {
-	if err := configs.InitData(); err != nil {
-		t.Fatal(err)
-	}
-	data, err := api.GetFastMirrorData()
-	if err != nil {
-		t.Fatal(err)
-	}
-	jsonData, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(string(jsonData))
-}
+var URL = "https://dlied4.myapp.com/myapp/1104466820/cos.release-40109/10040714_com.tencent.tmgp.sgame_a2480356_8.2.1.9_F0BvnI.apk"
 
-func TestFastMirrorBuilds(t *testing.T) {
-	if err := configs.InitData(); err != nil {
-		t.Fatal(err)
-	}
-	data, err := api.GetFastMirrorData()
+func TestDownload(t *testing.T) {
+	path, err := download.NewDownloader(URL).Download()
 	if err != nil {
 		t.Fatal(err)
 	}
-	MinecraftVersion := data["Mohist"].MinecraftVersions[0]
-	builds, err := api.GetFastMirrorBuildsData("Mohist", MinecraftVersion)
-	if err != nil {
+	t.Log(path)
+	if err = os.Remove(path); err != nil {
 		t.Fatal(err)
 	}
-	jsonData, err := json.MarshalIndent(builds, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(string(jsonData))
 }

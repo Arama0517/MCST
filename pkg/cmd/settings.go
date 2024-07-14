@@ -55,24 +55,22 @@ func newSettingsCmd() *cobra.Command {
 			return configs.Configs.Save()
 		},
 	})
-
 	cmd.AddCommand(
 		&cobra.Command{
 			Use:   "aria2-enabled",
-			Short: locale.GetLocaleMessage("settings.aria2.enabled"),
+			Short: locale.GetLocaleMessage("settings.downloader"),
 			Args:  cobra.MaximumNArgs(1),
 			RunE: func(_ *cobra.Command, args []string) error {
 				fmt.Println(args)
 				if len(args) == 0 {
-					fmt.Println("a")
-					log.WithField("value", configs.Configs.Settings.Aria2.Enabled).Info("aria2.enabled")
+					log.WithField("value", configs.Configs.Settings.Downloader).Info("downloader")
 					return nil
 				}
-				value, err := strconv.ParseBool(args[0])
+				value, err := strconv.Atoi(args[0])
 				if err != nil {
 					return err
 				}
-				configs.Configs.Settings.Aria2.Enabled = value
+				configs.Configs.Settings.Downloader = value
 				return configs.Configs.Save()
 			},
 		},

@@ -20,7 +20,6 @@ package cmd
 
 import (
 	"fmt"
-	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -28,8 +27,8 @@ import (
 
 	api "github.com/Arama0517/MCST/internal/API"
 	"github.com/Arama0517/MCST/internal/configs"
+	"github.com/Arama0517/MCST/internal/download"
 	"github.com/Arama0517/MCST/internal/locale"
-	"github.com/Arama0517/MCST/internal/requests"
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )
@@ -114,18 +113,15 @@ func newRemoteCmd() *cobra.Command {
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(*cobra.Command, []string) error {
-			URL, err := url.Parse(URL)
-			if err != nil {
-				return err
-			}
-			path, err := requests.NewDownloader(*URL).Download()
+			downloader := download.NewDownloader(URL)
+			path, err := downloader.Download()
 			if err != nil {
 				return err
 			}
 			configs.Configs.Cores[len(configs.Configs.Cores)] = configs.Core{
 				ID:       len(configs.Configs.Cores),
-				URL:      URL.String(),
-				FileName: filepath.Base(path),
+				URL:      URL,
+				FileName: downloader.FileName,
 				FilePath: path,
 			}
 			return configs.Configs.Save()
@@ -161,7 +157,7 @@ func newFastMirrorCmd() *cobra.Command {
 			}
 			configs.Configs.Cores[len(configs.Configs.Cores)] = configs.Core{
 				ID:       len(configs.Configs.Cores),
-				URL:      downloader.URL.String(),
+				URL:      downloader.URL,
 				FileName: downloader.FileName,
 				FilePath: path,
 				ExtrasData: map[string]any{
@@ -264,18 +260,14 @@ func newPolarsCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			URL, err := url.Parse(polars[coreID].DownloadURL)
-			if err != nil {
-				return err
-			}
-			downloader := requests.NewDownloader(*URL)
+			downloader := download.NewDownloader(polars[coreID].DownloadURL)
 			path, err := downloader.Download()
 			if err != nil {
 				return err
 			}
 			configs.Configs.Cores[len(configs.Configs.Cores)] = configs.Core{
 				ID:       len(configs.Configs.Cores),
-				URL:      URL.String(),
+				URL:      polars[coreID].DownloadURL,
 				FileName: downloader.FileName,
 				FilePath: path,
 				ExtrasData: map[string]int{

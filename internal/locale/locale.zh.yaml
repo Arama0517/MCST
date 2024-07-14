@@ -135,8 +135,12 @@ list:
 settings:
   other: MCST 设置
 
-settings.aria2.enabled:
-  other: Aria2c 将用于下载文件
+settings.downloader:
+  other: |
+    下载引擎:
+    0: 默认的单线程下载(不推荐)
+    1: Aria2(推荐)
+    2: IDM(仅Windows)
 
 settings.aria2.retry-wait:
   other: 重试之间等待的秒数

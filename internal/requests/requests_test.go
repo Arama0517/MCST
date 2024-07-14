@@ -19,52 +19,21 @@
 package requests_test
 
 import (
-	"net/url"
-	"os"
+	"net/http"
 	"testing"
 
-	"github.com/Arama0517/MCST/internal/configs"
 	"github.com/Arama0517/MCST/internal/requests"
 )
 
-var URL = url.URL{ // https://ash-speed.hetzner.com/100MB.bin
-	Scheme: "https",
-	Host:   "ash-speed.hetzner.com",
-	Path:   "/100MB.bin",
-}
-
-func TestDownload(t *testing.T) {
-	if testing.Short() {
-		t.Skip("跳过下载")
-	}
-	if err := configs.InitData(); err != nil {
-		t.Fatal(err)
-	}
-	configs.Configs.Settings.Aria2.Enabled = false
-	path, err := requests.NewDownloader(URL).Download()
-	if err != nil {
-		panic(err)
-	}
-	t.Log(path)
-	if err := os.Remove(path); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func TestAria2Download(t *testing.T) {
-	if testing.Short() {
-		t.Skip("跳过下载")
-	}
-	if err := configs.InitData(); err != nil {
-		t.Fatal(err)
-	}
-	configs.Configs.Settings.Aria2.Enabled = true
-	path, err := requests.NewDownloader(URL).Download()
+func TestNewRequest(t *testing.T) {
+	req, err := requests.NewRequest(http.MethodGet, "https://example.com", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(path)
-	if err := os.Remove(path); err != nil {
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
 		t.Fatal(err)
 	}
+	defer func() { _ = resp.Body.Close() }()
+	t.Log(resp.Status)
 }

@@ -25,20 +25,20 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 
 	"github.com/Arama0517/MCST/internal/requests"
 )
 
 func GetPolarsData() (map[string]PolarsData, error) {
-	resp, err := requests.Request(url.URL{
-		Scheme: "https",
-		Host:   "mirror.polars.cc",
-		Path:   "/api/query/minecraft/core",
-	}, http.MethodGet, nil, nil)
+	req, err := requests.NewRequest(http.MethodGet, "https://mirror.polars.cc/api/query/minecraft/core", nil)
 	if err != nil {
 		return nil, err
 	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = resp.Body.Close() }()
 	var data []PolarsData
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -60,14 +60,15 @@ func GetPolarsData() (map[string]PolarsData, error) {
 }
 
 func GetPolarsCoresData(id int) (map[int]PolarsCores, error) {
-	resp, err := requests.Request(url.URL{
-		Scheme: "https",
-		Host:   "mirror.polars.cc",
-		Path:   fmt.Sprintf("/api/query/minecraft/core/%d", id),
-	}, http.MethodGet, nil, nil)
+	req, err := requests.NewRequest(http.MethodGet, fmt.Sprintf("https://mirror.polars.cc/api/query/minecraft/core/%d", id), nil)
 	if err != nil {
 		return nil, err
 	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = resp.Body.Close() }()
 	var data []PolarsCores
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

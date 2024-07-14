@@ -1,3 +1,5 @@
+//go:build unix
+
 /*
  * Minecraft Server Tool(MCST) is a command-line utility making Minecraft server creation quick and easy for beginners.
  * Copyright (c) 2024-2024 Arama.
@@ -16,42 +18,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package api_test
+package download
 
-import (
-	"encoding/json"
-	"testing"
+import "errors"
 
-	api "github.com/Arama0517/MCST/internal/API"
-	"github.com/Arama0517/MCST/internal/configs"
-)
-
-func TestPolars(t *testing.T) {
-	if err := configs.InitData(); err != nil {
-		t.Fatal(err)
-	}
-	data, err := api.GetPolarsData()
-	if err != nil {
-		t.Fatal(err)
-	}
-	jsonData, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(string(jsonData))
-}
-
-func TestPolarsCore(t *testing.T) {
-	if err := configs.InitData(); err != nil {
-		t.Fatal(err)
-	}
-	data, err := api.GetPolarsCoresData(16)
-	if err != nil {
-		t.Fatal(err)
-	}
-	jsonData, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		t.Error(err)
-	}
-	t.Log(string(jsonData))
+func (d *Downloader) idmDownload() (string, error) {
+	return "", errors.New("不支持非 Windows 系统")
 }

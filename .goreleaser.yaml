@@ -82,33 +82,28 @@ changelog:
       - Merge branch
       - go mod tidy
   groups:
-    - title: Dependency updates
-      regexp: '^.*?(.+)\(deps\)!?:.+$'
-      order: 300
     - title: "New Features"
       regexp: '^.*?feat(\(.+\))??!?:.+$'
       order: 100
-    - title: "Security updates"
-      regexp: '^.*?sec(\(.+\))??!?:.+$'
-      order: 150
     - title: "Bug fixes"
       regexp: '^.*?(fix|refactor)(\(.+\))??!?:.+$'
-      order: 200
+      order: 150
     - title: "Documentation updates"
-      regexp: ^.*?docs?(\(.+\))??!?:.+$
-      order: 400
+      regexp: "^.*?docs?(\(.+\))??!?:.+$"
+      order: 200
+    - title: "Dependency updates"
+      regexp: '^.*?(.+)\(deps\)!?:.+$'
+      order: 250
     - title: "Build process updates"
-      regexp: ^.*?(build|ci)(\(.+\))??!?:.+$
-      order: 400
-    - title: Other work
+      regexp: "^.*?(build|ci)(\(.+\))??!?:.+$"
+      order: 300
+    - title: "Other work"
       order: 9999
 
 release:
   name_template: "v{{ .Version }}"
   footer: |
     **Full Changelog**: https://github.com/Arama-Vanarana/MCST/compare/{{ .PreviousTag }}...{{ if .IsNightly }}nightly{{ else }}{{ .Tag }}{{ end }}
-  extra_files:
-    - glob: cosign.pub
 
 nfpms:
   - file_name_template: "{{ .ConventionalFileName }}"
@@ -158,9 +153,7 @@ brews:
     description: A command-line utility making Minecraft server creation quick and easy for beginners.
     license: GPL-v3
     dependencies:
-      - name: aria2
-      - name: osascript
-        os: mac
+      - name: aria2\
     repository:
       owner: Arama0517
       name: homebrew-tab
