@@ -48,7 +48,6 @@ builds:
 
 archives:
   - format: tar.gz
-    wrap_in_directory: true
     name_template: "{{ .ProjectName }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
     format_overrides:
       - goos: windows
@@ -82,22 +81,25 @@ changelog:
       - Merge branch
       - go mod tidy
   groups:
+    - title: Dependency updates
+      regexp: '^.*?(.+)\(deps\)!?:.+$'
+      order: 300
     - title: "New Features"
       regexp: '^.*?feat(\(.+\))??!?:.+$'
       order: 100
+    - title: "Security updates"
+      regexp: '^.*?sec(\(.+\))??!?:.+$'
+      order: 150
     - title: "Bug fixes"
       regexp: '^.*?(fix|refactor)(\(.+\))??!?:.+$'
-      order: 150
-    - title: "Documentation updates"
-      regexp: "^.*?docs?(\(.+\))??!?:.+$"
       order: 200
-    - title: "Dependency updates"
-      regexp: '^.*?(.+)\(deps\)!?:.+$'
-      order: 250
+    - title: "Documentation updates"
+      regexp: ^.*?docs?(\(.+\))??!?:.+$
+      order: 400
     - title: "Build process updates"
-      regexp: "^.*?(build|ci)(\(.+\))??!?:.+$"
-      order: 300
-    - title: "Other work"
+      regexp: ^.*?(build|ci)(\(.+\))??!?:.+$
+      order: 400
+    - title: Other work
       order: 9999
 
 release:
@@ -196,7 +198,7 @@ aurs:
       install -Dm755 "./MCST" "${pkgdir}/usr/bin/MCST"
 
       # license
-      install -Dm644 "./LICENSE.md" "${pkgdir}/usr/share/licenses/MCST/LICENSE"
+      install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/MCST/LICENSE"
 
       # completions
       mkdir -p "${pkgdir}/usr/share/bash-completion/completions/"

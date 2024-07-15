@@ -27,32 +27,32 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var (
-	Bundle    *i18n.Bundle
-	Localizer *i18n.Localizer
-)
-
 //go:embed locale.*.yaml
 var localeFS embed.FS
 
+var (
+	bundle    *i18n.Bundle
+	localizer *i18n.Localizer
+)
+
 func InitLocale() error {
-	Bundle = i18n.NewBundle(language.English)
-	Bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
+	bundle = i18n.NewBundle(language.English)
+	bundle.RegisterUnmarshalFunc("yaml", yaml.Unmarshal)
 	files, err := localeFS.ReadDir(".")
 	if err != nil {
 		return err
 	}
 	for _, f := range files {
-		if _, err = Bundle.LoadMessageFileFS(localeFS, f.Name()); err != nil {
+		if _, err = bundle.LoadMessageFileFS(localeFS, f.Name()); err != nil {
 			return err
 		}
 	}
-	Localizer = i18n.NewLocalizer(Bundle, configs.Configs.Settings.Language)
+	localizer = i18n.NewLocalizer(bundle, configs.Configs.Settings.Language)
 	return nil
 }
 
 func GetLocaleMessage(messageID string) string {
-	msg, err := Localizer.Localize(&i18n.LocalizeConfig{MessageID: messageID})
+	msg, err := localizer.Localize(&i18n.LocalizeConfig{MessageID: messageID})
 	if err != nil {
 		panic(err)
 	}

@@ -31,7 +31,6 @@ import (
 	"github.com/Arama0517/MCST/internal/build"
 	"github.com/Arama0517/MCST/internal/configs"
 	"github.com/Arama0517/MCST/internal/requests"
-	"github.com/apex/log"
 	"github.com/schollz/progressbar/v3"
 	"github.com/siku2/arigo"
 )
@@ -92,10 +91,7 @@ func (d *Downloader) Download() (string, error) {
 	case 1:
 		return d.aria2Download()
 	case 2:
-		if runtime.GOOS == "windows" {
-			return d.idmDownload()
-		}
-		log.Warn("非 Windows 系统暂不支持 IDM 下载方式")
+		return d.idmDownload()
 	}
 	return d.defaultDownload(filePath, resp)
 }

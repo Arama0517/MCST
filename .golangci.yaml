@@ -30,7 +30,7 @@ linters-settings:
   forbidigo:
     forbid:
       - 'ioutil\.*'
-      - 'http.NewRequest' # 用 requests.NewRequest 替代它
+      - "http.NewRequest" # 用 requests.NewRequest 替代它
   tagliatelle:
     case:
       use-field-name: false

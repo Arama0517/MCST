@@ -1,38 +1,38 @@
 root.short:
-  other: A command-line tool to quickly and easily create Minecraft servers for beginners.
+  other: A command-line utility making Minecraft server creation quick and easy for beginners.
 
 root.flags.debug:
   other: Debug mode (more logs)
 
-# Create Server Page
+# Create server page
 create.short:
-  other: Create Server
+  other: Create server
 create.long:
-  other: If you haven't downloaded any cores, please use 'MCST download' to download cores.
+  other: If you haven't downloaded any cores, please use 'MCST download' to download cores
 create.flags.name:
   other: Server name
 create.flags.xms:
-  other: Initial heap size for Java Virtual Machine (JVM)
+  other: Java Virtual Machine (JVM) initial heap memory
 create.flags.xmx:
-  other: Maximum heap size for Java Virtual Machine (JVM)
+  other: Java Virtual Machine (JVM) maximum heap memory
 create.flags.encoding:
   other: Output encoding
 create.flags.java:
   other: Path to the Java executable
 create.flags.jvm_args:
-  other: Additional arguments for the Java Virtual Machine (JVM)
+  other: Other Java Virtual Machine (JVM) parameters
 create.flags.server_args:
-  other: Minecraft server arguments
+  other: Minecraft server parameters
 create.flags.core:
   other: Core ID, use 'MCST download list' to view all core IDs
 create.flags.eula:
-  other: Whether to agree to the EULA <https://aka.ms/MinecraftEULA/>
+  other: Agree to EULA <https://aka.ms/MinecraftEULA/>
 
-# Download Core Page
+# Download core page
 download.short:
-  other: Download Core
+  other: Download core
 download.long:
-  other: Obtain cores from local, remote, FastMirror, or Polars mirror.
+  other: Get cores from local, remote, FastMirror, or Polars Mirror
 download.list:
   other: List all cores
 download.list.output.url:
@@ -44,35 +44,35 @@ download.list.output.filepath:
 download.local.short:
   other: Local
 download.local.long:
-  other: Obtain cores from local
+  other: Get cores from local
 download.local.flags.path:
-  other: File path of the core
+  other: Core file path
 download.remote.short:
   other: Remote
 download.remote.long:
-  other: Obtain cores from specified URL
+  other: Get cores from specified URL
 download.remote.flags.url:
-  other: Download URL of the core
+  other: Core download URL
 download.fastmirror.short:
   other: FastMirror <https://www.fastmirror.net/>
 download.fastmirror.long:
   other: |-
-    Obtain cores from FastMirror
-    Use 'MCST download fastmirror list' to get the information needed in the parameters
+    Get cores from FastMirror
+    Use 'MCST download fastmirror list' to get information needed for parameters
 download.fastmirror.flags.core:
-  other: 'Core category, e.g.: "Mohist"'
+  other: 'Core type, e.g., "Mohist"'
 download.fastmirror.flags.mc_version:
-  other: 'Minecraft version of the core, e.g.: "1.20.1"'
+  other: 'Minecraft version of the core, e.g., "1.20.1"'
 download.fastmirror.flags.build_version:
-  other: 'Build version of the core, e.g.: "build738"'
+  other: 'Build version of the core, e.g., "build738"'
 download.fastmirror.list.short:
   other: Get core information from FastMirror
 download.fastmirror.list.long:
   other: |-
-    When using this command, there are three cases:
-    1. Without any parameters: output the names of all cores
-    2. Only use '--core': output all supported Minecraft versions for the '--core' core
-    3. Use '--core' and '--mc_version': output all build versions of this version
+    There are three scenarios for using this command:
+    1. No parameters: Output the names of all cores
+    2. Only '--core': Output all Minecraft versions supported by the '--core' core
+    3. Use '--core' and '--mc_version': Output all build versions of this version
 download.fastmirror.list.output.recommend:
   other: Recommended
 download.fastmirror.list.output.tag:
@@ -87,8 +87,8 @@ download.polars.short:
   other: Polars Mirror <https://mirror.polars.cc/>
 download.polars.long:
   other: |-
-    Obtain cores from Polars Mirror
-    Use 'MCST download polars list' to get the information needed in the parameters
+    Get cores from Polars Mirror
+    Use 'MCST download polars list' to get information needed for parameters
 download.polars.flags.type_id:
   other: Core type ID
 download.polars.flags.core_id:
@@ -105,13 +105,13 @@ download.polars.list.short:
   other: Get core information from Polars Mirror
 download.polars.list.long:
   other: |-
-    When using this command, there are two cases:
-    1. Without any parameters: output all core type IDs
-    2. Use '--id': output all core IDs for this core (used for download)
+    There are two scenarios for using this command:
+    1. No parameters: Output all core type IDs
+    2. Use '--id': Output all core IDs for this core type (used for downloading)
 
-# Configure Server Page
+# Configure server page
 config.short:
-  other: Configure Server
+  other: Configure server
 config.long:
   other: If you haven't created a server, please use 'MCST create' to create a server
 config.flags.name:
@@ -119,53 +119,57 @@ config.flags.name:
 config.flags.delete:
   other: Delete server (irreversible)
 
-# Start Server Page
+# Start server page
 start.short:
-  other: Start Server
+  other: Start server
 start.long:
   other: If you haven't created a server, please use 'MCST create' to create a server
 start.flags.name:
   other: Server name
 
-# List Servers Page
+# List servers page
 list:
   other: List all server configurations
 
-# Settings Page
+# Settings page
 settings:
-  other: MCST Settings
+  other: MCST settings
+
+settings.language:
+  other: Language
 
 settings.downloader:
-  other: |
-    Download Engine:
-    0: Default single-threaded download (not recommended)
-    1: Aria2 (recommended)
-    2: IDM (Windows only)
+  other: Downloader
+
+settings.downloader.default:
+  other: Default single-threaded download (not recommended)
+
+settings.downloader.aria2:
+  other: >-
+    Aria2 (recommended, manual installation required: <https://aria2.github.io/>)
+
+settings.downloader.IDM:
+  other: >-
+    Internet Download Manager (IDM, manual installation required: <https://www.internetdownloadmanager.com/>)
+
+settings.aria2:
+  other: Aria2 related configuration
 
 settings.aria2.retry-wait:
   other: Seconds to wait between retries
 
 settings.aria2.split:
-  other: Number of connections used for download
+  other: Number of connections used for downloading
 
 settings.aria2.max-connection-per-server:
-  other: Maximum number of connections per server for each download
+  other: Maximum number of connections per server for downloading
 
 settings.auto-accept-eula:
   other: Automatically accept EULA <https://aka.ms/MinecraftEULA/>
 
-settings.language:
-  other: Language
-
 settings.reset:
   other: Reset settings
 
-errors.language:
-  other: >-
-    This language is not supported yet. Currently supported languages are:
-    en (English),
-    zh (Simplified Chinese)
-
-# Command Line Manual
+# Command line manual
 man:
   other: Generate MCST command line manual

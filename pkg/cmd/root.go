@@ -26,6 +26,7 @@ import (
 	"github.com/Arama0517/MCST/internal/configs"
 	MCSTErrors "github.com/Arama0517/MCST/internal/errors"
 	"github.com/Arama0517/MCST/internal/locale"
+	"github.com/Arama0517/MCST/pkg/cmd/settings"
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
 	"github.com/spf13/cobra"
@@ -48,7 +49,7 @@ func init() {
 func Execute(args []string) {
 	cmd := newRootCmd()
 	cmd.SetArgs(args)
-	if err := cmd.Execute(); err != nil {
+	if err := cmd.Execute(); err != nil && err.Error() != "interrupt" {
 		log.WithError(err).Error("出现错误!")
 		ExitFunc(MCSTErrors.RunFail)
 	}
@@ -82,7 +83,7 @@ func newRootCmd() *cobra.Command {
 		newConfigCmd(),
 		newStartCmd(),
 		newListCmd(),
-		newSettingsCmd(),
+		settings.New(),
 		newManCmd(),
 	)
 	return cmd

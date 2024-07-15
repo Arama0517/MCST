@@ -6,7 +6,7 @@ tasks:
     desc: 下载依赖
     cmds:
       - go mod tidy
- 
+
   run:
     desc: 运行
     env:
