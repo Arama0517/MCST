@@ -39,6 +39,8 @@ jobs:
         with:
           go-version-file: "go.mod"
       - uses: arduino/setup-task@v2
+        with:
+          repo-token: ${{ secrets.TASK_GITHUB_TOKEN }}
       - name: Setup dependencies
         run: task setup
       - name: Build
