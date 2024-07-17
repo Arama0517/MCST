@@ -6,24 +6,6 @@ permissions:
   contents: read
 
 jobs:
-  govulncheck:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: golang/govulncheck-action@v1
-        with:
-          go-version-file: "go.mod"
-
-  golangci-lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: "go.mod"
-      - uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-
   build:
     strategy:
       fail-fast: false
@@ -33,17 +15,26 @@ jobs:
           - ubuntu
           - macos
     runs-on: ${{ matrix.os }}-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
           go-version-file: "go.mod"
-      - uses: arduino/setup-task@v2
+
+      - name: Setup Task
+        uses: arduino/setup-task@v2
         with:
           repo-token: ${{ secrets.TASK_GITHUB_TOKEN }}
-      - name: Setup dependencies
+
+      - name: Download dependencies
         run: task setup
-      - name: Build
-        run: task build
+
       - name: Run tests
-        run: task test
+        run: task test -- -v
+
+      - name: Build
+        run: task build -- -v

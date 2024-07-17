@@ -5,7 +5,7 @@ tasks:
   setup:
     desc: 下载依赖
     cmds:
-      - go mod tidy
+      - go mod download
 
   run:
     desc: 运行
@@ -19,16 +19,20 @@ tasks:
 
   build:
     desc: 构建
+    env:
+      LC_ALL: C.UTF-8
+    vars:
+      PROGRAM: '{{default "MCST" .PROGRAM}}'
     sources:
       - ./**/*.go
     generates:
-      - ./MCST
-    cmd: go build -o MCST ./cmd/MCST
+      - "./{{ .PROGRAM }}"
+    cmd: go build -o {{ .PROGRAM }} {{ .CLI_ARGS }} ./cmd/{{ .PROGRAM }}
 
   test:
     desc: 运行测试
     env:
-      LC_ALL: C
+      LC_ALL: C.UTF-8
     vars:
       SOURCE_FILES: '{{default "./..." .SOURCE_FILES}}'
       TEST_PATTERN: '{{default "." .TEST_PATTERN}}'

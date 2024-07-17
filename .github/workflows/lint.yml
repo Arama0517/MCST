@@ -1,0 +1,33 @@
+name: Lint
+
+on:
+  push:
+    paths:
+      - "**.go"
+      - .golangci.yaml
+      - go.mod
+      - go.sum
+  pull_request:
+    paths:
+      - "**.go"
+      - .golangci.yaml
+      - go.mod
+      - go.sum
+
+jobs:
+  golangci-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
