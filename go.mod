@@ -6,7 +6,6 @@ toolchain go1.22.5
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
-	github.com/Navid2zp/idm v0.0.0-20200916131712-d97cdf3eaef2
 	github.com/apex/log v1.9.0
 	github.com/caarlos0/go-version v0.1.1
 	github.com/charmbracelet/lipgloss v0.12.1
@@ -31,10 +30,7 @@ require (
 	github.com/charmbracelet/x/ansi v0.1.4 // indirect
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
-	github.com/google/cabbie v1.0.2 // indirect
-	github.com/google/glazier v0.0.0-20211029225403-9f766cca891d // indirect
 	github.com/gorilla/websocket v1.4.1 // indirect
-	github.com/iamacarpet/go-win64api v0.0.0-20240507095429-873e84e85847 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
@@ -49,7 +45,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/scjalliance/comshim v0.0.0-20190308082608-cf06d2532c4e // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
