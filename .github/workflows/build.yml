@@ -34,7 +34,7 @@ jobs:
         run: task setup
 
       - name: Run tests
-        run: task test
+        run: task test -- --short -v
 
       - name: Build
         run: task build -- -v

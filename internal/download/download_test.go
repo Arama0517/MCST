@@ -35,6 +35,9 @@ func init() {
 }
 
 func TestDefaultDownload(t *testing.T) {
+	if testing.Short() {
+		return
+	}
 	configs.Configs.Settings.Downloader = 0
 	path, err := download.NewDownloader(URL).Download()
 	if err != nil {
@@ -47,6 +50,9 @@ func TestDefaultDownload(t *testing.T) {
 }
 
 func TestAria2Download(t *testing.T) {
+	if testing.Short() {
+		return
+	}
 	configs.Configs.Settings.Downloader = 1
 	configs.Configs.Settings.Aria2.MaxConnectionPerServer = 16
 	configs.Configs.Settings.Aria2.Split = 32
