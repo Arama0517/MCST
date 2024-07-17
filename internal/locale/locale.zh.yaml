@@ -148,10 +148,6 @@ settings.downloader.aria2:
   other: >-
     Aria2(推荐, 需手动安装: <https://aria2.github.io/>)
 
-settings.downloader.IDM:
-  other: >- 
-    Internet Download Manager(IDM, 需手动安装: <https://www.internetdownloadmanager.com/>)
-
 settings.aria2:
   other: Aria2的相关配置
 

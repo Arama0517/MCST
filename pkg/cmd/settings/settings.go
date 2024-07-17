@@ -20,7 +20,7 @@ package settings
 
 import (
 	"errors"
-	"runtime"
+	"fmt"
 	"strconv"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -44,7 +44,6 @@ var (
 var (
 	downloaderDefault string
 	downloaderAria2   string
-	downloaderIDM     string
 )
 
 var (
@@ -71,15 +70,14 @@ func New() *cobra.Command {
 
 			downloaderDefault = locale.GetLocaleMessage("settings.downloader.default")
 			downloaderAria2 = locale.GetLocaleMessage("settings.downloader.aria2")
-			downloaderIDM = locale.GetLocaleMessage("settings.downloader.IDM")
 
 			aria2RetryWait = locale.GetLocaleMessage("settings.aria2.retry-wait")
 			aria2Split = locale.GetLocaleMessage("settings.aria2.split")
 			aria2MaxConnectionPerServer = locale.GetLocaleMessage("settings.aria2.max-connection-per-server")
 		},
 		RunE: func(*cobra.Command, []string) error {
-			var result string
-			prompt := &survey.Select{
+			result := ""
+			if err := survey.AskOne(&survey.Select{
 				Message: "请选择你要设置的选项:",
 				Options: []string{
 					language,
@@ -87,29 +85,20 @@ func New() *cobra.Command {
 					aria2,
 					autoAcceptEULA,
 				},
-			}
-			if err := survey.AskOne(prompt, &result); err != nil {
+			}, &result); err != nil {
 				return err
 			}
 			switch result {
 			case language:
-				if err := caseLanguage(); err != nil {
-					return err
-				}
+				return caseLanguage()
 			case downloader:
-				if err := caseDownloader(); err != nil {
-					return err
-				}
+				return caseDownloader()
 			case aria2:
-				if err := caseAria2(); err != nil {
-					return err
-				}
+				return caseAria2()
 			case autoAcceptEULA:
-				if err := caseAutoAcceptEULA(); err != nil {
-					return err
-				}
+				return caseAutoAcceptEULA()
 			}
-			return configs.Configs.Save()
+			return nil
 		},
 	}
 	return cmd
@@ -117,14 +106,13 @@ func New() *cobra.Command {
 
 func caseLanguage() error {
 	result := ""
-	prompt := &survey.Select{
-		Message: "请选择要设置的语言:",
+	if err := survey.AskOne(&survey.Select{
+		Message: "请选择你要使用的语言",
 		Options: []string{
 			languageCN,
 			languageEN,
 		},
-	}
-	if err := survey.AskOne(prompt, &result); err != nil {
+	}, &result); err != nil {
 		return err
 	}
 	switch result {
@@ -133,21 +121,17 @@ func caseLanguage() error {
 	case languageEN:
 		configs.Configs.Settings.Language = "en"
 	}
-	return nil
+	return configs.Configs.Save()
 }
 
 func caseDownloader() error {
 	result := ""
-	options := []string{
-		downloaderDefault,
-		downloaderAria2,
-	}
-	if runtime.GOOS == "windows" {
-		options = append(options, downloaderIDM)
-	}
 	prompt := &survey.Select{
-		Message: "请选择要使用的下载器:",
-		Options: options,
+		Message: "请选择要使用的下载器",
+		Options: []string{
+			downloaderDefault,
+			downloaderAria2,
+		},
 	}
 	if err := survey.AskOne(prompt, &result); err != nil {
 		return err
@@ -157,10 +141,8 @@ func caseDownloader() error {
 		configs.Configs.Settings.Downloader = 0
 	case downloaderAria2:
 		configs.Configs.Settings.Downloader = 1
-	case downloaderIDM:
-		configs.Configs.Settings.Downloader = 2
 	}
-	return nil
+	return configs.Configs.Save()
 }
 
 func aria2Validator(ans any) error {
@@ -168,30 +150,31 @@ func aria2Validator(ans any) error {
 	if !ok {
 		return errors.New("无效")
 	}
-	_, err := strconv.Atoi(str)
-	return err
+	intAns, err := strconv.Atoi(str)
+	if err != nil {
+		return err
+	}
+	if intAns <= 0 {
+		return fmt.Errorf("值不可小于等于0")
+	}
+	return nil
 }
 
 func caseAria2() error {
-	var result string
-	prompt := &survey.Select{
-		Message: "请选择一个Aria2配置项:",
+	result := ""
+	if err := survey.AskOne(&survey.Select{
+		Message: "请选择一个Aria2配置项",
 		Options: []string{
 			aria2RetryWait,
 			aria2Split,
 			aria2MaxConnectionPerServer,
 		},
-	}
-	if err := survey.AskOne(prompt, &result); err != nil {
+	}, &result); err != nil {
 		return err
 	}
-
 	switch result {
 	case aria2RetryWait:
-		prompt := &survey.Input{
-			Message: "请输入 '--retry-wait' 的值",
-		}
-		if err := survey.AskOne(prompt, &result, survey.WithValidator(aria2Validator)); err != nil {
+		if err := survey.AskOne(&survey.Input{Message: "请输入值:"}, &result, survey.WithValidator(aria2Validator)); err != nil {
 			return err
 		}
 		result, err := strconv.Atoi(result)
@@ -200,10 +183,7 @@ func caseAria2() error {
 		}
 		configs.Configs.Settings.Aria2.RetryWait = result
 	case aria2Split:
-		prompt := &survey.Input{
-			Message: "请输入 '--split' 的值",
-		}
-		if err := survey.AskOne(prompt, &result, survey.WithValidator(aria2Validator)); err != nil {
+		if err := survey.AskOne(&survey.Input{Message: "请输入值:"}, &result, survey.WithValidator(aria2Validator)); err != nil {
 			return err
 		}
 		result, err := strconv.Atoi(result)
@@ -212,10 +192,19 @@ func caseAria2() error {
 		}
 		configs.Configs.Settings.Aria2.Split = result
 	case aria2MaxConnectionPerServer:
-		prompt := &survey.Input{
-			Message: "请输入 '--max-connection-per-server' 的值",
-		}
-		if err := survey.AskOne(prompt, &result, survey.WithValidator(aria2Validator)); err != nil {
+		if err := survey.AskOne(&survey.Input{Message: "请输入值:"}, &result, survey.WithValidator(func(ans any) error {
+			if err := aria2Validator(ans); err != nil {
+				return err
+			}
+			intAns, err := strconv.Atoi(ans.(string))
+			if err != nil {
+				return err
+			}
+			if intAns > 16 {
+				return fmt.Errorf("此参数最大值为16")
+			}
+			return nil
+		})); err != nil {
 			return err
 		}
 		result, err := strconv.Atoi(result)
@@ -224,7 +213,7 @@ func caseAria2() error {
 		}
 		configs.Configs.Settings.Aria2.MaxConnectionPerServer = result
 	}
-	return nil
+	return configs.Configs.Save()
 }
 
 func caseAutoAcceptEULA() error {
@@ -236,5 +225,5 @@ func caseAutoAcceptEULA() error {
 		return err
 	}
 	configs.Configs.Settings.AutoAcceptEULA = result
-	return nil
+	return configs.Configs.Save()
 }

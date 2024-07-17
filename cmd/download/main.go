@@ -1,5 +1,3 @@
-//go:build windows
-
 /*
  * Minecraft Server Tool(MCST) is a command-line utility making Minecraft server creation quick and easy for beginners.
  * Copyright (c) 2024-2024 Arama.
@@ -18,26 +16,38 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package download
+package main
 
 import (
-	"time"
+	"os"
 
 	"github.com/Arama0517/MCST/internal/configs"
-	"github.com/Navid2zp/idm"
+	"github.com/Arama0517/MCST/internal/download"
+	"github.com/apex/log"
+	"github.com/apex/log/handlers/cli"
+	"github.com/spf13/cobra"
 )
 
-func (d *Downloader) idmDownload() (string, error) {
-	downloader, err := idm.NewDownload(d.URL)
-	if err != nil {
-		return "", err
+func main() {
+	cmd := &cobra.Command{
+		Use:                   "download [url]",
+		Args:                  cobra.ExactArgs(1),
+		DisableFlagsInUseLine: true,
+		PersistentPreRunE: func(*cobra.Command, []string) error {
+			log.SetHandler(cli.Default)
+			return configs.InitData()
+		},
+		RunE: func(_ *cobra.Command, args []string) error {
+			path, err := download.NewDownloader(args[0]).Download()
+			if err != nil {
+				return err
+			}
+			log.Info(path)
+			return nil
+		},
 	}
-	downloader.SetFilePath(configs.DownloadsDir)
-	if err = downloader.Start(); err != nil {
-		return "", err
+	if err := cmd.Execute(); err != nil {
+		log.WithError(err).Fatal("下载失败")
+		os.Exit(1)
 	}
-	if err = downloader.VerifyDownload(time.Second * 10); err != nil {
-		return "", err
-	}
-	return downloader.GetFullPath()
 }

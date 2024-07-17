@@ -23,16 +23,13 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"runtime"
 	"time"
 
-	"github.com/Arama0517/MCST/internal/build"
 	"github.com/Arama0517/MCST/internal/configs"
 	"github.com/Arama0517/MCST/internal/requests"
+	"github.com/apex/log"
 	"github.com/schollz/progressbar/v3"
-	"github.com/siku2/arigo"
 )
 
 type Downloader struct {
@@ -42,36 +39,11 @@ type Downloader struct {
 }
 
 func NewDownloader(url string) *Downloader {
-	return &Downloader{
-		URL: url,
-		bar: progressbar.NewOptions64(
-			100,
-			progressbar.OptionSetDescription("[cyan]下载中...[reset]"),
-			progressbar.OptionEnableColorCodes(true),
-			progressbar.OptionFullWidth(),
-			progressbar.OptionSetRenderBlankState(true),
-			progressbar.OptionSetTheme(progressbar.Theme{
-				Saucer:        "[green]=[reset]",
-				SaucerHead:    "[green]>[reset]",
-				SaucerPadding: " ",
-				BarStart:      "[black][[reset]",
-				BarEnd:        "[black]][reset]",
-			}),
-			progressbar.OptionSetWriter(os.Stderr),
-			progressbar.OptionShowBytes(true),
-			progressbar.OptionShowCount(),
-			progressbar.OptionSpinnerType(14),
-			progressbar.OptionThrottle(50*time.Millisecond),
-			progressbar.OptionOnCompletion(func() {
-				_, err := fmt.Fprint(os.Stderr, "\n")
-				if err != nil {
-					return
-				}
-			})),
-	}
+	return &Downloader{URL: url}
 }
 
 func (d *Downloader) Download() (string, error) {
+	// 请求服务器
 	req, err := requests.NewRequest(http.MethodGet, d.URL, nil)
 	if err != nil {
 		return "", err
@@ -81,23 +53,56 @@ func (d *Downloader) Download() (string, error) {
 		return "", err
 	}
 	defer func() { _ = resp.Body.Close() }()
+
+	// 获取文件名
 	d.FileName = resp.Header.Get("Content-Disposition")
 	if d.FileName == "" {
-		d.FileName = filepath.Base(resp.Request.URL.Path)
+		d.FileName = filepath.Base(req.URL.Path)
 	}
+
+	// 检测是否已经存在
 	filePath := filepath.Join(configs.DownloadsDir, d.FileName)
+	if _, err = os.Stat(filePath); err == nil {
+		log.Info("检测到文件已存在, 已跳过下载")
+		return filePath, nil
+	}
+
+	// 设置下载进度条
+	d.bar = progressbar.NewOptions64(
+		resp.ContentLength,
+		progressbar.OptionSetDescription("[cyan]下载中...[reset]"),
+		progressbar.OptionEnableColorCodes(true),
+		progressbar.OptionFullWidth(),
+		progressbar.OptionSetRenderBlankState(true),
+		progressbar.OptionSetTheme(progressbar.Theme{
+			Saucer:        "[green]=[reset]",
+			SaucerHead:    "[green]>[reset]",
+			SaucerPadding: " ",
+			BarStart:      "[black][[reset]",
+			BarEnd:        "[black]][reset]",
+		}),
+		progressbar.OptionSetWriter(os.Stderr),
+		progressbar.OptionShowBytes(true),
+		progressbar.OptionShowCount(),
+		progressbar.OptionSpinnerType(14),
+		progressbar.OptionThrottle(50*time.Millisecond),
+		progressbar.OptionOnCompletion(func() {
+			if _, err = fmt.Fprint(os.Stderr, "\n"); err != nil {
+				return
+			}
+		}))
+
+	// 下载
 	switch configs.Configs.Settings.Downloader {
 	default:
+		return d.defaultDownload(filePath, resp)
 	case 1:
 		return d.aria2Download()
-	case 2:
-		return d.idmDownload()
 	}
-	return d.defaultDownload(filePath, resp)
 }
 
+// defaultDownload 单线程下载
 func (d *Downloader) defaultDownload(filePath string, resp *http.Response) (string, error) {
-	d.bar.ChangeMax64(resp.ContentLength)
 	file, err := os.Create(filePath)
 	if err != nil {
 		return "", err
@@ -108,74 +113,4 @@ func (d *Downloader) defaultDownload(filePath string, resp *http.Response) (stri
 		return "", err
 	}
 	return filePath, nil
-}
-
-func (d *Downloader) aria2Download() (string, error) {
-	aria2Name := "aria2c"
-	if runtime.GOOS == "windows" {
-		aria2Name += ".exe"
-	}
-	cmd := exec.Command(aria2Name)
-	cmd.Args = append(cmd.Args, configs.Configs.Settings.Aria2.Options...)
-	cmd.Args = append(cmd.Args,
-		"--dir="+configs.DownloadsDir,
-		fmt.Sprintf("--user-agent=MCST/%s", build.Version.GitVersion),
-		"--allow-overwrite=true",
-		"--auto-file-renaming=false",
-		fmt.Sprintf("--retry-wait=%d", configs.Configs.Settings.Aria2.RetryWait),
-		fmt.Sprintf("--split=%d", configs.Configs.Settings.Aria2.Split),
-		fmt.Sprintf("--max-connection-per-server=%d", configs.Configs.Settings.Aria2.MaxConnectionPerServer),
-		fmt.Sprintf("--min-split-size=%s", configs.Configs.Settings.Aria2.MinSplitSize),
-		"--enable-rpc",
-		"--rpc-listen-all",
-		"--rpc-listen-port=6800",
-		"--rpc-secret=MCST",
-		"--quiet",
-		"--no-conf=true",
-		"--follow-metalink=true",
-		"--metalink-preferred-protocol=https",
-		"--min-tls-version=TLSv1.2",
-		fmt.Sprintf("--stop-with-process=%d", os.Getpid()),
-		"--continue",
-		"--summary-interval=0",
-		"--auto-save-interval=1",
-	)
-	if err := cmd.Start(); err != nil {
-		return "", err
-	}
-
-	time.Sleep(500 * time.Millisecond)
-	client, err := arigo.Dial("ws://127.0.0.1:6800", "MCST")
-	if err != nil {
-		return "", err
-	}
-	gid, err := client.AddURI(arigo.URIs(d.URL), nil)
-	if err != nil {
-		return "", err
-	}
-
-	time.Sleep(500 * time.Millisecond)
-	status, err := gid.TellStatus("totalLength")
-	if err != nil {
-		return "", err
-	}
-	d.bar.ChangeMax64(int64(status.TotalLength))
-
-	for {
-		status, err = gid.TellStatus("status", "completedLength", "connections")
-		if err != nil {
-			return "", err
-		}
-		if status.Status == "complete" {
-			files, err := gid.GetFiles()
-			if err != nil {
-				return "", err
-			}
-			return files[0].Path, nil
-		}
-		if err = d.bar.Set64(int64(status.CompletedLength)); err != nil {
-			return "", err
-		}
-		time.Sleep(50 * time.Millisecond)
-	}
 }
