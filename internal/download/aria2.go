@@ -19,10 +19,12 @@
 package download
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/Arama0517/MCST/internal/build"
@@ -35,6 +37,7 @@ const StatusComplete arigo.DownloadStatus = "complete"
 
 // aria2Download Aria2 下载
 func (d *Downloader) aria2Download() (string, error) {
+	// 启动Aria2
 	aria2Name := "aria2c"
 	if runtime.GOOS == "windows" {
 		aria2Name += ".exe"
@@ -43,8 +46,6 @@ func (d *Downloader) aria2Download() (string, error) {
 	cmd.Args = append(cmd.Args, configs.Configs.Settings.Aria2.Options...)
 	cmd.Args = append(cmd.Args,
 		fmt.Sprintf("--dir=%s", configs.DownloadsDir),
-		"--log=a.log",
-		"--log-level=info",
 		fmt.Sprintf("--user-agent=MCST/%s", build.Version.GitVersion),
 		"--allow-overwrite=true",
 		"--auto-file-renaming=false",
@@ -56,7 +57,7 @@ func (d *Downloader) aria2Download() (string, error) {
 		"--rpc-listen-all",
 		"--rpc-listen-port=6800",
 		"--rpc-secret=MCST",
-		"--quiet",
+		"--console-log-level=notice",
 		"--no-conf=true",
 		"--follow-metalink=true",
 		"--metalink-preferred-protocol=https",
@@ -66,20 +67,36 @@ func (d *Downloader) aria2Download() (string, error) {
 		"--summary-interval=0",
 		"--auto-save-interval=1",
 	)
-	if err := cmd.Start(); err != nil {
-		return "", err
-	}
-
-	time.Sleep(500 * time.Millisecond)
-	client, err := arigo.Dial("ws://127.0.0.1:6800/jsonrpc", "MCST")
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		return "", err
 	}
+	if err = cmd.Start(); err != nil {
+		return "", err
+	}
+
+	// 从控制台日志检测JSONRPC是否启动, 如果启动了就继续
+	scanner := bufio.NewScanner(stdout)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.Contains(line, "IPv4 RPC") {
+			break
+		}
+	}
+
+	// 连接Aria2
+	client, err := arigo.Dial("ws://localhost:6800/jsonrpc", "MCST")
+	if err != nil {
+		return "", err
+	}
+
+	// 获取GID
 	gid, err := client.AddURI(arigo.URIs(d.URL), nil)
 	if err != nil {
 		return "", err
 	}
 
+	// 更新进度条
 	for {
 		status, err := gid.TellStatus("status", "completedLength", "connections")
 		if err != nil {
