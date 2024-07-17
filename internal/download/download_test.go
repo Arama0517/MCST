@@ -22,12 +22,32 @@ import (
 	"os"
 	"testing"
 
+	"github.com/Arama0517/MCST/internal/configs"
 	"github.com/Arama0517/MCST/internal/download"
 )
 
 var URL = "https://dlied4.myapp.com/myapp/1104466820/cos.release-40109/10040714_com.tencent.tmgp.sgame_a2480356_8.2.1.9_F0BvnI.apk"
 
-func TestDownload(t *testing.T) {
+func init() {
+	if err := configs.InitData(); err != nil {
+		panic(err)
+	}
+}
+
+func TestDefaultDownload(t *testing.T) {
+	configs.Configs.Settings.Downloader = 0
+	path, err := download.NewDownloader(URL).Download()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(path)
+	if err = os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestAria2Download(t *testing.T) {
+	configs.Configs.Settings.Downloader = 1
 	path, err := download.NewDownloader(URL).Download()
 	if err != nil {
 		t.Fatal(err)
