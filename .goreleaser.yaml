@@ -155,7 +155,7 @@ brews:
     description: A command-line utility making Minecraft server creation quick and easy for beginners.
     license: GPL-v3
     dependencies:
-      - name: aria2\
+      - name: aria2
     repository:
       owner: Arama0517
       name: homebrew-tab

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package cmd
+package create
 
 import (
 	"fmt"
@@ -46,7 +46,7 @@ type createCmdFlags struct {
 	eula       bool
 }
 
-func newCreateCmd() *cobra.Command {
+func New() *cobra.Command {
 	flags := createCmdFlags{}
 	cmd := &cobra.Command{
 		Use:               "create",

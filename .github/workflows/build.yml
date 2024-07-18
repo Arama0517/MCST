@@ -34,7 +34,7 @@ jobs:
         run: task setup
 
       - name: Run tests
-        run: task test -- --short -v
+        run: task test -- --short -v # 跳过下载测试
 
       - name: Build
         run: task build -- -v

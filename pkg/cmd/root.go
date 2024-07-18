@@ -26,6 +26,7 @@ import (
 	"github.com/Arama0517/MCST/internal/configs"
 	MCSTErrors "github.com/Arama0517/MCST/internal/errors"
 	"github.com/Arama0517/MCST/internal/locale"
+	"github.com/Arama0517/MCST/pkg/cmd/create"
 	"github.com/Arama0517/MCST/pkg/cmd/settings"
 	"github.com/apex/log"
 	"github.com/apex/log/handlers/cli"
@@ -78,7 +79,7 @@ func newRootCmd() *cobra.Command {
 	cmd.SetVersionTemplate("{{.Version}}")
 	cmd.PersistentFlags().BoolVar(&debug, "debug", false, locale.GetLocaleMessage("root.flags.debug"))
 	cmd.AddCommand(
-		newCreateCmd(),
+		create.New(),
 		newDownloadCmd(),
 		newConfigCmd(),
 		newStartCmd(),

@@ -20,3 +20,13 @@ updates:
       include: scope
     schedule:
       interval: daily
+
+  - package-ecosystem: devcontainers
+    directory: /
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+      include: scope
+    schedule:
+      interval: daily
