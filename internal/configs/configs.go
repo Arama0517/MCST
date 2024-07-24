@@ -29,7 +29,6 @@ import (
 var (
 	Configs         Config
 	DefaultSettings = Settings{
-		Downloader: 0,
 		Aria2: Aria2{
 			RetryWait:              2,
 			Split:                  5,
@@ -75,6 +74,7 @@ type IDM struct {
 }
 
 type Aria2 struct {
+	Enable                 bool     `yaml:"enable"`
 	RetryWait              int      `yaml:"retry_wait"`
 	Split                  int      `yaml:"split"`
 	MaxConnectionPerServer int      `yaml:"max_connection_per_server"`
@@ -83,7 +83,6 @@ type Aria2 struct {
 }
 
 type Settings struct {
-	Downloader     int    `yaml:"downloader"` // 0: 单线程下载, 1: 使用 Aria2 下载, 2: 使用 IDM 下载 (仅Windows)
 	Aria2          Aria2  `yaml:"aria2"`
 	IDM            IDM    `yaml:"idm"`
 	AutoAcceptEULA bool   `yaml:"auto_accept_eula"`

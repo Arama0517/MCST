@@ -20,208 +20,184 @@ package settings
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/Arama0517/MCST/internal/configs"
 	"github.com/Arama0517/MCST/internal/locale"
 	"github.com/spf13/cobra"
-)
-
-var (
-	language       string
-	downloader     string
-	aria2          string
-	autoAcceptEULA string
-)
-
-var (
-	languageCN string
-	languageEN string
-)
-
-var (
-	downloaderDefault string
-	downloaderAria2   string
-)
-
-var (
-	aria2RetryWait              string
-	aria2Split                  string
-	aria2MaxConnectionPerServer string
+	"golang.org/x/text/language"
 )
 
 func New() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:           "settings",
-		Short:         locale.GetLocaleMessage("settings"),
-		SilenceUsage:  true,
+		Short:         locale.GetLocaleMessage("settings.short"),
+		Long:          locale.GetLocaleMessage("settings.long"),
 		SilenceErrors: true,
+		SilenceUsage:  true,
 		Args:          cobra.NoArgs,
-		PersistentPreRun: func(*cobra.Command, []string) {
-			language = locale.GetLocaleMessage("settings.language")
-			downloader = locale.GetLocaleMessage("settings.downloader")
-			aria2 = locale.GetLocaleMessage("settings.aria2")
-			autoAcceptEULA = locale.GetLocaleMessage("settings.auto-accept-eula")
-
-			languageCN = "简体中文"
-			languageEN = "English"
-
-			downloaderDefault = locale.GetLocaleMessage("settings.downloader.default")
-			downloaderAria2 = locale.GetLocaleMessage("settings.downloader.aria2")
-
-			aria2RetryWait = locale.GetLocaleMessage("settings.aria2.retry-wait")
-			aria2Split = locale.GetLocaleMessage("settings.aria2.split")
-			aria2MaxConnectionPerServer = locale.GetLocaleMessage("settings.aria2.max-connection-per-server")
-		},
 		RunE: func(*cobra.Command, []string) error {
 			result := ""
 			if err := survey.AskOne(&survey.Select{
-				Message: "请选择你要设置的选项:",
+				Message: "请选择一个要更改的设置",
 				Options: []string{
-					language,
-					downloader,
-					aria2,
-					autoAcceptEULA,
+					"Language",
+					"Aria2",
+					"Auto accept EULA",
+				},
+				Description: func(value string, _ int) string {
+					switch value {
+					case "Language":
+						return locale.GetLocaleMessage("settings.language")
+					case "Aria2":
+						return locale.GetLocaleMessage("settings.aria2")
+					case "Auto accept EULA":
+						return locale.GetLocaleMessage("settings.auto_accept_eula")
+					default:
+						return ""
+					}
 				},
 			}, &result); err != nil {
 				return err
 			}
 			switch result {
-			case language:
+			case "Language":
 				return caseLanguage()
-			case downloader:
-				return caseDownloader()
-			case aria2:
+			case "Aria2":
 				return caseAria2()
-			case autoAcceptEULA:
+			case "Auto accept EULA":
 				return caseAutoAcceptEULA()
 			}
 			return nil
 		},
 	}
+	cmd.AddCommand(&cobra.Command{
+		Use:   "reset",
+		Short: locale.GetLocaleMessage("settings.reset.short"),
+		RunE: func(*cobra.Command, []string) error {
+			configs.Configs.Settings = configs.DefaultSettings
+			return configs.Configs.Save()
+		},
+	})
 	return cmd
 }
 
+var (
+	Chinese = language.Chinese.String()
+	English = language.English.String()
+)
+
 func caseLanguage() error {
-	result := ""
+	var result string
 	if err := survey.AskOne(&survey.Select{
-		Message: "请选择你要使用的语言",
+		Message: "请选择一种语言",
 		Options: []string{
-			languageCN,
-			languageEN,
+			Chinese,
+			English,
+		},
+		Description: func(value string, _ int) string {
+			switch value {
+			case Chinese:
+				return "简体中文"
+			case English:
+				return "English"
+			default:
+				return ""
+			}
 		},
 	}, &result); err != nil {
 		return err
 	}
 	switch result {
-	case languageCN:
-		configs.Configs.Settings.Language = "zh"
-	case languageEN:
-		configs.Configs.Settings.Language = "en"
+	case Chinese:
+		configs.Configs.Settings.Language = Chinese
+	case English:
+		configs.Configs.Settings.Language = English
 	}
 	return configs.Configs.Save()
 }
 
-func caseDownloader() error {
-	result := ""
-	prompt := &survey.Select{
-		Message: "请选择要使用的下载器",
-		Options: []string{
-			downloaderDefault,
-			downloaderAria2,
-		},
-	}
-	if err := survey.AskOne(prompt, &result); err != nil {
-		return err
-	}
-	switch result {
-	case downloaderDefault:
-		configs.Configs.Settings.Downloader = 0
-	case downloaderAria2:
-		configs.Configs.Settings.Downloader = 1
-	}
-	return configs.Configs.Save()
-}
-
-func aria2Validator(ans any) error {
-	str, ok := ans.(string)
+func aria2IntValidator(ans any) error {
+	result, ok := ans.(string)
 	if !ok {
-		return errors.New("无效")
+		return errors.New("invalid answer type")
 	}
-	intAns, err := strconv.Atoi(str)
+	value, err := strconv.Atoi(result)
 	if err != nil {
 		return err
 	}
-	if intAns <= 0 {
-		return fmt.Errorf("值不可小于等于0")
+	if value <= 0 {
+		return errors.New("invalid answer value")
 	}
 	return nil
 }
 
 func caseAria2() error {
-	result := ""
+	var result string
 	if err := survey.AskOne(&survey.Select{
-		Message: "请选择一个Aria2配置项",
+		Message: "请选择一个Aria2的配置项",
 		Options: []string{
-			aria2RetryWait,
-			aria2Split,
-			aria2MaxConnectionPerServer,
+			"enabled",
+			"retry-wait",
+			"split",
+			"max-connection-per-server",
+		},
+		Description: func(value string, _ int) string {
+			switch value {
+			case "enabled":
+				return locale.GetLocaleMessage("settings.aria2.enabled")
+			case "retry-wait":
+				return locale.GetLocaleMessage("settings.aria2.retry_wait")
+			case "split":
+				return locale.GetLocaleMessage("settings.aria2.split")
+			case "max-connection-per-server":
+				return locale.GetLocaleMessage("settings.aria2.max_connection_per_server")
+			default:
+				return ""
+			}
 		},
 	}, &result); err != nil {
 		return err
 	}
 	switch result {
-	case aria2RetryWait:
-		if err := survey.AskOne(&survey.Input{Message: "请输入值:"}, &result, survey.WithValidator(aria2Validator)); err != nil {
+	case "enabled":
+		enabled := false
+		if err := survey.AskOne(&survey.Confirm{Message: "是否启用Aria2"}, &enabled); err != nil {
 			return err
 		}
-		result, err := strconv.Atoi(result)
-		if err != nil {
+		configs.Configs.Settings.Aria2.Enable = enabled
+	case "retry-wait":
+		if err := survey.AskOne(
+			&survey.Input{Message: "请输入参数的值"}, &result,
+			survey.WithValidator(aria2IntValidator)); err != nil {
 			return err
 		}
-		configs.Configs.Settings.Aria2.RetryWait = result
-	case aria2Split:
-		if err := survey.AskOne(&survey.Input{Message: "请输入值:"}, &result, survey.WithValidator(aria2Validator)); err != nil {
+		retryWait, _ := strconv.Atoi(result)
+		configs.Configs.Settings.Aria2.RetryWait = retryWait
+	case "split":
+		if err := survey.AskOne(
+			&survey.Input{Message: "请输入参数的值"}, &result,
+			survey.WithValidator(aria2IntValidator)); err != nil {
 			return err
 		}
-		result, err := strconv.Atoi(result)
-		if err != nil {
+		split, _ := strconv.Atoi(result)
+		configs.Configs.Settings.Aria2.Split = split
+	case "max-connection-per-server":
+		if err := survey.AskOne(
+			&survey.Input{Message: "请输入参数的值"}, &result,
+			survey.WithValidator(aria2IntValidator)); err != nil {
 			return err
 		}
-		configs.Configs.Settings.Aria2.Split = result
-	case aria2MaxConnectionPerServer:
-		if err := survey.AskOne(&survey.Input{Message: "请输入值:"}, &result, survey.WithValidator(func(ans any) error {
-			if err := aria2Validator(ans); err != nil {
-				return err
-			}
-			intAns, err := strconv.Atoi(ans.(string))
-			if err != nil {
-				return err
-			}
-			if intAns > 16 {
-				return fmt.Errorf("此参数最大值为16")
-			}
-			return nil
-		})); err != nil {
-			return err
-		}
-		result, err := strconv.Atoi(result)
-		if err != nil {
-			return err
-		}
-		configs.Configs.Settings.Aria2.MaxConnectionPerServer = result
+		maxConnectionPerServer, _ := strconv.Atoi(result)
+		configs.Configs.Settings.Aria2.MaxConnectionPerServer = maxConnectionPerServer
 	}
 	return configs.Configs.Save()
 }
 
 func caseAutoAcceptEULA() error {
 	result := false
-	prompt := &survey.Confirm{
-		Message: "是否启用自动同意EULA?",
-	}
-	if err := survey.AskOne(prompt, &result); err != nil {
+	if err := survey.AskOne(&survey.Confirm{Message: "是否启用自动同意EULA?"}, &result); err != nil {
 		return err
 	}
 	configs.Configs.Settings.AutoAcceptEULA = result

@@ -9,6 +9,7 @@ require (
 	github.com/apex/log v1.9.0
 	github.com/caarlos0/go-version v0.1.1
 	github.com/charmbracelet/lipgloss v0.12.1
+	github.com/go-cmd/cmd v1.4.3
 	github.com/muesli/mango-cobra v1.2.0
 	github.com/muesli/roff v0.1.0
 	github.com/muesli/termenv v0.15.2

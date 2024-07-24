@@ -20,19 +20,18 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 	"path/filepath"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/Arama0517/MCST/internal/configs"
-	MCSTErrors "github.com/Arama0517/MCST/internal/errors"
 	"github.com/Arama0517/MCST/internal/locale"
+	"github.com/apex/log"
+	"github.com/go-cmd/cmd"
 	"github.com/spf13/cobra"
 )
 
 func newStartCmd() *cobra.Command {
-	var name string
-	cmd := &cobra.Command{
+	return &cobra.Command{
 		Use:               "start",
 		Short:             locale.GetLocaleMessage("start.short"),
 		Long:              locale.GetLocaleMessage("start.long"),
@@ -41,26 +40,48 @@ func newStartCmd() *cobra.Command {
 		Args:              cobra.NoArgs,
 		ValidArgsFunction: cobra.NoFileCompletions,
 		RunE: func(*cobra.Command, []string) error {
-			config, exists := configs.Configs.Servers[name]
-			if !exists {
-				return MCSTErrors.ErrServerNotFound
+			serverName := ""
+			var serverNames []string
+			for _, server := range configs.Configs.Servers {
+				serverNames = append(serverNames, server.Name)
 			}
-			cmd := exec.Command(config.Java.Path)
-			cmd.Dir = filepath.Join(configs.ServersDir, config.Name)
-			cmd.Args = append(cmd.Args,
+			if err := survey.AskOne(&survey.Select{
+				Message: "请选择一个服务器",
+				Options: serverNames,
+			}, &serverName); err != nil {
+				return err
+			}
+			config := configs.Configs.Servers[serverName]
+
+			javaCmd := cmd.NewCmd(config.Java.Path)
+			javaCmd.Dir = filepath.Join(configs.ServersDir, config.Name)
+			javaCmd.Args = append(javaCmd.Args,
 				fmt.Sprintf("-Xms%d", config.Java.MinMemory),
 				fmt.Sprintf("-Xmx%d", config.Java.MaxMemory),
 				fmt.Sprintf("-Dfile.encoding=%s", config.Java.Encoding))
-			cmd.Args = append(cmd.Args, config.Java.Args...)
-			cmd.Args = append(cmd.Args, "-jar", "server.jar")
-			cmd.Args = append(cmd.Args, config.ServerArgs...)
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-			cmd.Stdin = os.Stdin
-			return cmd.Run()
+			javaCmd.Args = append(javaCmd.Args, config.Java.Args...)
+			javaCmd.Args = append(javaCmd.Args, "-jar", "server.jar")
+			javaCmd.Args = append(javaCmd.Args, config.ServerArgs...)
+			stdout := make(chan string, 1)
+			stderr := make(chan string, 1)
+			javaCmd.Stdout = stdout
+			javaCmd.Stderr = stderr
+			statusChan := javaCmd.Start()
+
+			for {
+				select {
+				case finalStatus := <-statusChan:
+					if finalStatus.Exit != 0 {
+						log.WithField("错误代码", finalStatus.Exit).Error("服务器进程未正常退出")
+						ExitFunc(finalStatus.Exit)
+					}
+					return nil
+				case str := <-stdout:
+					log.Info(str)
+				case str := <-stderr:
+					log.Error(str)
+				}
+			}
 		},
 	}
-	cmd.Flags().StringVarP(&name, "name", "n", "", locale.GetLocaleMessage("start.flags.name"))
-	_ = cmd.MarkFlagRequired("name")
-	return cmd
 }
