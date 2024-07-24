@@ -132,39 +132,38 @@ list:
   other: 列出所有服务器的配置
 
 # 设置页面
-settings:
-  other: MCST 设置
+settings.short:
+  other: 设置
+
+settings.long:
+  other: 更改 MCST 的各项设置
 
 settings.language:
-  other: 语言
-
-settings.downloader:
-  other: 下载器
-
-settings.downloader.default:
-  other: 默认的单线程下载(不推荐)
-
-settings.downloader.aria2:
-  other: >-
-    Aria2(推荐, 需手动安装: <https://aria2.github.io/>)
+  other: >- 
+    语言, 当前支持:
+    English(英语)
+    简体中文
 
 settings.aria2:
-  other: Aria2的相关配置
+  other: Aria2的各项设置
 
-settings.aria2.retry-wait:
-  other: 重试之间等待的秒数
+settings.aria2.enabled:
+  other: 启用Aria2(如果已安装)
+
+settings.aria2.retry_wait:
+  other: '--retry-wait' 参数
 
 settings.aria2.split:
-  other: 下载使用的连接数
+  other: '--split' 参数
 
-settings.aria2.max-connection-per-server:
-  other: 每次下载一个服务器的最大连接数
+settings.aria2.max_connection_per_server:
+  other: '--max-connection-per-server' 参数
 
-settings.auto-accept-eula:
-  other: 自动同意EULA <https://aka.ms/MinecraftEULA/>
+settings.auto_accept_eula:
+  other: 自动同意EULA协议 <https://aka.ms/MinecraftEULA/>
 
-settings.reset:
-  other: 重置设置
+settings.reset.short:
+  other: 重置为默认设置
 
 # 命令行手册
 man:

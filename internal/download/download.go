@@ -93,12 +93,10 @@ func (d *Downloader) Download() (string, error) {
 		}))
 
 	// 下载
-	switch configs.Configs.Settings.Downloader {
-	default:
-		return d.defaultDownload(filePath, resp)
-	case 1:
+	if configs.Configs.Settings.Aria2.Enable {
 		return d.aria2Download()
 	}
+	return d.defaultDownload(filePath, resp)
 }
 
 // defaultDownload 单线程下载

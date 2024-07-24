@@ -19,32 +19,24 @@
 package download
 
 import (
-	"bufio"
 	"fmt"
 	"os"
-	"os/exec"
-	"runtime"
 	"strings"
 	"time"
 
 	"github.com/Arama0517/MCST/internal/build"
 	"github.com/Arama0517/MCST/internal/configs"
+	"github.com/go-cmd/cmd"
 	"github.com/siku2/arigo"
 )
 
-// StatusComplete 修复 [arigo.StatusCompleted]
 const StatusComplete arigo.DownloadStatus = "complete"
 
-// aria2Download Aria2 下载
 func (d *Downloader) aria2Download() (string, error) {
 	// 启动Aria2
-	aria2Name := "aria2c"
-	if runtime.GOOS == "windows" {
-		aria2Name += ".exe"
-	}
-	cmd := exec.Command(aria2Name)
-	cmd.Args = append(cmd.Args, configs.Configs.Settings.Aria2.Options...)
-	cmd.Args = append(cmd.Args,
+	aria2Cmd := cmd.NewCmd("aria2c")
+	aria2Cmd.Args = append(aria2Cmd.Args, configs.Configs.Settings.Aria2.Options...)
+	aria2Cmd.Args = append(aria2Cmd.Args,
 		fmt.Sprintf("--dir=%s", configs.DownloadsDir),
 		fmt.Sprintf("--user-agent=MCST/%s", build.Version.GitVersion),
 		"--allow-overwrite=true",
@@ -67,19 +59,13 @@ func (d *Downloader) aria2Download() (string, error) {
 		"--summary-interval=0",
 		"--auto-save-interval=1",
 	)
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		return "", err
-	}
-	if err = cmd.Start(); err != nil {
-		return "", err
-	}
+	aria2Cmd.Start()
 
-	// 从控制台日志检测JSONRPC是否启动, 如果启动了就继续
-	scanner := bufio.NewScanner(stdout)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.Contains(line, "IPv4 RPC") {
+	// 检测是否启动JSONRPC
+	for {
+		status := aria2Cmd.Status()
+		n := len(status.Stdout)
+		if strings.Contains(status.Stdout[n-1], "IPV4 RPC") {
 			break
 		}
 	}
